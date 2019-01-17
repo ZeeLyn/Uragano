@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyModel;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceInvoker;
 using Uragano.DynamicProxy;
-using Uragano.DynamicProxy.Interceptor;
+using Uragano.Remoting;
 
 namespace Uragano.Core
 {
@@ -19,6 +19,11 @@ namespace Uragano.Core
 			serviceCollection.AddSingleton<IInvokerFactory, InvokerFactory>();
 			serviceCollection.AddSingleton<IProxyGenerator, ProxyGenerator>();
 			serviceCollection.AddSingleton<IProxyGenerateFactory, ProxyGenerateFactory>();
+
+			#region server
+			serviceCollection.AddSingleton<IBootstrap, ServerBootstrap>();
+			#endregion
+
 			RegisterServiceAndInterceptor(serviceCollection);
 			return serviceCollection;
 		}

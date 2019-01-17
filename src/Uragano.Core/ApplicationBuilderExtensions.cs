@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Uragano.Abstractions;
+using Uragano.Remoting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Uragano.Core
 {
@@ -7,8 +10,15 @@ namespace Uragano.Core
 	{
 		public static IApplicationBuilder UseUraganoServer(this IApplicationBuilder applicationBuilder)
 		{
-			var serviceBuilder = (IServiceBuilder)applicationBuilder.ApplicationServices.GetService(typeof(IServiceBuilder));
+			var serviceBuilder = applicationBuilder.ApplicationServices.GetService<IServiceBuilder>();
 			serviceBuilder.BuildServer();
+
+			var bootstrap = applicationBuilder.ApplicationServices.GetService<IBootstrap>();
+
+			var applicationLifetime = applicationBuilder.ApplicationServices.GetService<IApplicationLifetime>();
+			applicationLifetime.ApplicationStopping.Register(async () => { await bootstrap.StopAsync(); });
+			bootstrap.StartAsync("192.168.1.129", 5001).GetAwaiter().GetResult();
+
 			return applicationBuilder;
 		}
 	}
