@@ -3,6 +3,7 @@
 namespace Sample.Service.Interfaces
 {
 
+	[ServiceName("server1")]
 	[ServiceRoute("hello")]
 	public interface IHelloService : IService
 	{

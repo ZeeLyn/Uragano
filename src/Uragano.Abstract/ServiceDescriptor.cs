@@ -14,5 +14,7 @@ namespace Uragano.Abstractions
 		public IMethodInvoker MethodInvoker { get; set; }
 
 		public IEnumerable<Type> Interceptors { get; set; }
+
+		public string ServiceName { get; set; }
 	}
 }
