@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Sample.Service.Interfaces;
 using Uragano.Abstractions;
-using Uragano.DynamicProxy;
+using Uragano.Abstractions.Remoting;
+using Uragano.Remoting;
 
 namespace Sample.WebApi.Controllers
 {
@@ -12,11 +10,13 @@ namespace Sample.WebApi.Controllers
 	[ApiController]
 	public class ValuesController : ControllerBase
 	{
+		private IClientFactory ClientFactory { get; }
 		private IServiceProxy ServiceProxy { get; }
 
-		public ValuesController(IServiceProxy serviceProxy)
+		public ValuesController(IServiceProxy serviceProxy, IClientFactory clientFactory)
 		{
 			ServiceProxy = serviceProxy;
+			ClientFactory = clientFactory;
 		}
 
 		// GET api/values
@@ -25,6 +25,9 @@ namespace Sample.WebApi.Controllers
 		{
 			var proxy = ServiceProxy.GetService<IHelloService>("");
 			return Ok(proxy.SayHello("owen"));
+			//var c = ClientFactory.CreateClient("192.168.1.129", 5001);
+			//c.SendAsync(new InvokeMessage { Message = Guid.NewGuid().ToString() });
+			//return Ok("OK");
 		}
 
 		// GET api/values/5

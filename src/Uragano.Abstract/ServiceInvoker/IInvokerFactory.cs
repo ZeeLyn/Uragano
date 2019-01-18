@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Uragano.Abstract;
 
 namespace Uragano.Abstractions.ServiceInvoker
 {

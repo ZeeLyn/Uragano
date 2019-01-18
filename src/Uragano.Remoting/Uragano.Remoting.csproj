@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Uragano.Abstract\Uragano.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Uragano.Codec.MessagePack\Uragano.Codec.MessagePack.csproj" />
   </ItemGroup>
 
 </Project>

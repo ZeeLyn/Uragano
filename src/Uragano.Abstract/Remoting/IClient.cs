@@ -1,12 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace Uragano.Remoting
+namespace Uragano.Abstractions.Remoting
 {
+
+
 	public interface IClient : IDisposable
 	{
 		Task<ResultMessage> SendAsync(InvokeMessage message);
+
+
+
 	}
 }

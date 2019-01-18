@@ -4,8 +4,10 @@ using System.Text;
 
 namespace Uragano.Remoting
 {
-	public interface IClientFactory
+	public class TransportContext
 	{
-		IClient CreateClient(string host, int port);
+		public string Host { get; set; }
+
+		public int Port { get; set; }
 	}
 }

@@ -9,6 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Uragano.Abstractions;
+using Uragano.Codec.MessagePack;
 using Uragano.Core;
 
 namespace Sample.Server
@@ -27,6 +29,8 @@ namespace Sample.Server
 		{
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddUraganoServer();
+			services.AddScoped<TestLib>();
+			services.UseMessagePackCodec();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

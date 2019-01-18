@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Uragano.Abstract;
 using Uragano.Abstractions;
+using Uragano.Codec.MessagePack;
 using Uragano.Core;
 using Uragano.DynamicProxy.Interceptor;
 
@@ -24,8 +24,9 @@ namespace Sample.WebApi
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-			services.AddUraganoServer();
+			services.AddUraganoClient();
 			services.AddScoped<TestLib>();
+			services.UseMessagePackCodec();
 			//services.AddScoped<IInterceptor, Test1Interceptor>();
 			//services.AddScoped<IInterceptor, Test2Interceptor>();
 			//AutofacContainer.Populate(services);
@@ -41,8 +42,9 @@ namespace Sample.WebApi
 				app.UseDeveloperExceptionPage();
 			}
 
-			app.UseUraganoServer();
+
 			app.UseMvc();
+			app.UseUraganoClient();
 		}
 	}
 }

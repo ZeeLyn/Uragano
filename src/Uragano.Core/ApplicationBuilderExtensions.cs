@@ -21,5 +21,19 @@ namespace Uragano.Core
 
 			return applicationBuilder;
 		}
+
+		public static IApplicationBuilder UseUraganoClient(this IApplicationBuilder applicationBuilder)
+		{
+			var serviceBuilder = applicationBuilder.ApplicationServices.GetService<IServiceBuilder>();
+			serviceBuilder.BuildServer();
+
+			//var bootstrap = applicationBuilder.ApplicationServices.GetService<IBootstrap>();
+
+			//var applicationLifetime = applicationBuilder.ApplicationServices.GetService<IApplicationLifetime>();
+			//applicationLifetime.ApplicationStopping.Register(async () => { await bootstrap.StopAsync(); });
+			//bootstrap.StartAsync("192.168.1.129", 5001).GetAwaiter().GetResult();
+
+			return applicationBuilder;
+		}
 	}
 }

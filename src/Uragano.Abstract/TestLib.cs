@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Uragano.Abstract
+namespace Uragano.Abstractions
 {
 	public class TestLib : IDisposable
 	{

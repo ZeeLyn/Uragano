@@ -1,7 +1,7 @@
-﻿using Uragano.Abstract;
-using Uragano.Core;
+﻿using Sample.Service.Interfaces;
+using Uragano.Abstractions;
 
-namespace Sample.WebApi
+namespace Sample.Server
 {
 
 	public class HelloService : IHelloService

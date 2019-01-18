@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Uragano.Abstractions;
 using Uragano.Abstractions.Exceptions;
 using Uragano.Abstractions.ServiceInvoker;
 
-
-
-namespace Uragano.Core
+namespace Uragano.DynamicProxy
 {
 	public class InvokerFactory : IInvokerFactory
 	{

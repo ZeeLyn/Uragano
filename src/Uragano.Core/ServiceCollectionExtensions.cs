@@ -4,6 +4,7 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyModel;
 using Uragano.Abstractions;
+using Uragano.Abstractions.Remoting;
 using Uragano.Abstractions.ServiceInvoker;
 using Uragano.DynamicProxy;
 using Uragano.Remoting;
@@ -24,11 +25,29 @@ namespace Uragano.Core
 			serviceCollection.AddSingleton<IBootstrap, ServerBootstrap>();
 			#endregion
 
+			RegisterServiceAndInterceptor(serviceCollection, true);
+			return serviceCollection;
+		}
+
+		public static IServiceCollection AddUraganoClient(this IServiceCollection serviceCollection)
+		{
+			serviceCollection.AddSingleton<IServiceProxy, ServiceProxy>();
+			serviceCollection.AddSingleton<IServiceBuilder, ServiceBuilder>();
+			serviceCollection.AddSingleton<IInvokerFactory, InvokerFactory>();
+			serviceCollection.AddSingleton<IProxyGenerator, ProxyGenerator>();
+			serviceCollection.AddSingleton<IProxyGenerateFactory, ProxyGenerateFactory>();
+
+			serviceCollection.AddSingleton<IClientFactory, ClientFactory>();
+
+			#region client
+			serviceCollection.AddSingleton<IBootstrap, ClientBootstrap>();
+			#endregion
+
 			RegisterServiceAndInterceptor(serviceCollection);
 			return serviceCollection;
 		}
 
-		private static void RegisterServiceAndInterceptor(IServiceCollection serviceCollection)
+		private static void RegisterServiceAndInterceptor(IServiceCollection serviceCollection, bool isServer = false)
 		{
 			var ignoreAssemblyFix = new[]
 			{
@@ -48,9 +67,12 @@ namespace Uragano.Core
 				Interface = @interface,
 				Implementation = types.FirstOrDefault(p => p.IsClass && p.IsPublic && !p.IsAbstract && @interface.IsAssignableFrom(p))
 			});
-			foreach (var service in services)
+			if (isServer)
 			{
-				serviceCollection.AddTransient(service.Interface, service.Implementation);
+				foreach (var service in services)
+				{
+					serviceCollection.AddTransient(service.Interface, service.Implementation);
+				}
 			}
 
 			var interceptors = types.FindAll(t => typeof(IInterceptor).IsAssignableFrom(t));

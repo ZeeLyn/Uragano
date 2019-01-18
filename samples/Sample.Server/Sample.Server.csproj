@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <UserSecretsId>a309b84e-3fcf-40ea-a807-a76a4def865a</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +13,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Uragano.Core\Uragano.Core.csproj" />
+    <ProjectReference Include="..\..\Uragano.Codec.MessagePack\Uragano.Codec.MessagePack.csproj" />
+    <ProjectReference Include="..\Sample.Service.Interfaces\Sample.Service.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

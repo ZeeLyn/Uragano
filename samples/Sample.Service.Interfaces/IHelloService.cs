@@ -1,15 +1,12 @@
 ﻿using Uragano.Abstractions;
 
-
-namespace Sample.WebApi
+namespace Sample.Service.Interfaces
 {
-	[MyInterceptor3]
-	[MyInterceptor4]
+
 	[ServiceRoute("hello")]
 	public interface IHelloService : IService
 	{
-		[MyInterceptor1]
-		[MyInterceptor2]
+
 		[ServiceRoute("say")]
 		string SayHello(string name);
 	}

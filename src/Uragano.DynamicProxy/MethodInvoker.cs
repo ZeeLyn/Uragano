@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Uragano.Abstractions.ServiceInvoker;
 
-namespace Uragano.Core
+namespace Uragano.DynamicProxy
 {
 	public class MethodInvoker : IMethodInvoker
 	{

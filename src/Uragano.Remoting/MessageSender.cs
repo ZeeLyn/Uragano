@@ -4,7 +4,11 @@ using System.Text;
 
 namespace Uragano.Remoting
 {
-	public class MessageSender
+	public interface IMessageSender
+	{
+	}
+
+	public class MessageSender : IMessageSender
 	{
 	}
 }
