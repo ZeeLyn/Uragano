@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Uragano.DynamicProxy
+namespace Uragano.Abstractions
 {
 	public interface IProxyGenerateFactory
 	{

@@ -2,12 +2,14 @@
 
 namespace Uragano.Abstractions
 {
-	[AttributeUsage(AttributeTargets.Interface | AttributeTargets.Method)]
+	[AttributeUsage(AttributeTargets.Interface)]
 	public class ServiceNameAttribute : Attribute
 	{
-		public ServiceNameAttribute(string name)
+		public ServiceNameAttribute(string serviceName)
 		{
-			Name = name;
+			if (string.IsNullOrWhiteSpace(serviceName))
+				throw new ArgumentNullException(nameof(serviceName));
+			Name = serviceName;
 		}
 
 		public string Name { get; set; }

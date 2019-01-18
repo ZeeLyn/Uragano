@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using DotNetty.Buffers;
@@ -15,31 +18,27 @@ namespace Uragano.Remoting
 	{
 
 		private IInvokerFactory InvokerFactory { get; }
-		private IServiceProvider ServiceProvider { get; }
+		private IProxyGenerateFactory ProxyGenerateFactory { get; }
 
-		public ServerMessageHandler(IInvokerFactory invokerFactory, IServiceProvider serviceProvider)
+		public ServerMessageHandler(IInvokerFactory invokerFactory, IProxyGenerateFactory proxyGenerateFactory)
 		{
 			InvokerFactory = invokerFactory;
-			ServiceProvider = serviceProvider;
+			ProxyGenerateFactory = proxyGenerateFactory;
 		}
 
 		public override void ChannelRead(IChannelHandlerContext context, object message)
 		{
-			var tranMsg = message as TransportMessage<InvokeMessage>;
+			if (!(message is TransportMessage<InvokeMessage> transportMessage))
+				throw new ArgumentNullException(nameof(message));
 			try
 			{
-				var service = InvokerFactory.Get(tranMsg.Content.Route);
-				object result;
-				using (var scope = ServiceProvider.CreateScope())
-				{
-					result = service.MethodInvoker.Invoke(
-						scope.ServiceProvider.GetService(service.MethodInfo.DeclaringType),
-						tranMsg.Content.Args);
-				}
+				var service = InvokerFactory.Get(transportMessage.Content.Route);
+				var proxyInstance = ProxyGenerateFactory.CreateLocalProxy(service.MethodInfo.DeclaringType);
+				var result = service.MethodInfo.Invoke(proxyInstance, transportMessage.Content.Args);
 
 				context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
 				{
-					Id = tranMsg.Id,
+					Id = transportMessage.Id,
 					Content = new ResultMessage(result)
 				}).Wait();
 			}
@@ -47,7 +46,7 @@ namespace Uragano.Remoting
 			{
 				context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
 				{
-					Id = tranMsg.Id,
+					Id = transportMessage.Id,
 					Content = new ResultMessage(e.Message) { Status = RemotingStatus.Error }
 				}).Wait();
 			}
@@ -60,7 +59,6 @@ namespace Uragano.Remoting
 
 		public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
 		{
-			Console.Write("出现错误：" + exception.Message);
 			context.CloseAsync().Wait();
 		}
 	}

@@ -58,7 +58,12 @@ namespace Uragano.Remoting
 				return _clients.GetOrAdd(key, new Lazy<IClient>(() =>
 				{
 					var bootstrap = Bootstrap;
-					var channel = bootstrap.ConnectAsync(IPAddress.Parse(host), port).GetAwaiter().GetResult();
+					EndPoint endPoint;
+					if (IPAddress.TryParse(host, out var ip))
+						endPoint = new IPEndPoint(ip, port);
+					else
+						endPoint = new DnsEndPoint(host, port);
+					var channel = bootstrap.ConnectAsync(endPoint).GetAwaiter().GetResult();
 					channel.GetAttribute(TransportContextAttributeKey).Set(new TransportContext
 					{
 						Host = host,

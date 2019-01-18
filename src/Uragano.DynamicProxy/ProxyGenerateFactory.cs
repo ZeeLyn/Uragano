@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using Uragano.Abstractions;
 
 namespace Uragano.DynamicProxy
 {

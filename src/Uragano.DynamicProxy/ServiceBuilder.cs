@@ -4,9 +4,8 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyModel;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceInvoker;
-using Uragano.DynamicProxy;
 
-namespace Uragano.Core
+namespace Uragano.DynamicProxy
 {
 	public class ServiceBuilder : IServiceBuilder
 	{
@@ -46,8 +45,13 @@ namespace Uragano.Core
 
 			foreach (var service in services)
 			{
+				var serviceNameAttr = service.Interface.GetCustomAttribute<ServiceNameAttribute>();
+				if (serviceNameAttr == null)
+					throw new InvalidOperationException($"Interface {service.Interface.FullName} must add a custom attribute ServiceNameAttribute.");
+
 				ServiceProxyFactory.CreateLocalProxy(service.Interface);
 				var routeAttr = service.Interface.GetCustomAttribute<ServiceRouteAttribute>();
+
 				var route = routeAttr == null ? $"{service.Interface.Namespace}/{service.Interface.Name}" : routeAttr.Route;
 				var methods = service.Interface.GetMethods();
 				var interfaceInterceptors = service.Interface.GetCustomAttributes(true).Where(p => p is IInterceptor)
@@ -60,7 +64,7 @@ namespace Uragano.Core
 						.Where(p => p is IInterceptor).Select(p => p.GetType()).ToList();
 					interceptors.AddRange(interfaceInterceptors);
 					interceptors.Reverse();
-					InvokerFactory.Create(route, method, interceptors);
+					InvokerFactory.Create(serviceNameAttr.Name, route, method, interceptors);
 				}
 			}
 		}

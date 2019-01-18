@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using Uragano.Codec.MessagePack;
 
@@ -8,19 +9,19 @@ namespace Sample.Console
 	{
 		static void Main(string[] args)
 		{
-			var result = new A
+			///var ip = new IPEndPoint();
+			//var r = IPAddress.Parse("localhost");
+			try
 			{
-				Data = new B
-				{
-					Name = "OWEN",
-					Age = 10
-				}
-			};
-			var bytes = SerializerHelper.Serialize(result);
+				var dns = new DnsEndPoint("localhost", 80);
+				System.Console.WriteLine(dns);
+			}
+			catch (Exception e)
+			{
+				var r = e;
+			}
 
-			var r = SerializerHelper.Deserialize<A>(bytes);
-
-			System.Console.WriteLine(r);
+			System.Console.ReadKey();
 		}
 	}
 
