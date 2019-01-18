@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Uragano.Abstractions.Remoting
+namespace Uragano.Remoting
 {
 	public interface IClientFactory : IDisposable
 	{

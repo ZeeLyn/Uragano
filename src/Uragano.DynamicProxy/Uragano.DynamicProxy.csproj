@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Uragano.Abstract\Uragano.Abstractions.csproj" />
+    <ProjectReference Include="..\Uragano.Remoting\Uragano.Remoting.csproj" />
   </ItemGroup>
 
 </Project>

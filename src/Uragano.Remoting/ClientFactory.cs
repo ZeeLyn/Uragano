@@ -10,7 +10,7 @@ using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using DotNetty.Transport.Libuv;
-using Uragano.Abstractions.Remoting;
+using Uragano.Abstractions;
 using Uragano.Codec.MessagePack;
 
 namespace Uragano.Remoting

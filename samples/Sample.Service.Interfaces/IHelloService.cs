@@ -8,6 +8,6 @@ namespace Sample.Service.Interfaces
 	{
 
 		[ServiceRoute("say")]
-		string SayHello(string name);
+		ResultModel SayHello(string name);
 	}
 }

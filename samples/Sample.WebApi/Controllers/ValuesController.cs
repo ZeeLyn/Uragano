@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Sample.Service.Interfaces;
 using Uragano.Abstractions;
-using Uragano.Abstractions.Remoting;
 using Uragano.Remoting;
 
 namespace Sample.WebApi.Controllers

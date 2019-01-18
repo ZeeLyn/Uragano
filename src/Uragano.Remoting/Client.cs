@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using DotNetty.Transport.Channels;
-using Uragano.Abstractions.Remoting;
+using Uragano.Abstractions;
 
 namespace Uragano.Remoting
 {
@@ -22,7 +22,7 @@ namespace Uragano.Remoting
 			{
 				if (_resultCallbackTask.TryGetValue(message.Id, out var task))
 				{
-					task.SetResult((ResultMessage)message.Content);
+					task.SetResult(message.Content);
 				}
 				await Task.CompletedTask;
 			};

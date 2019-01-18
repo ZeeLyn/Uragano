@@ -7,7 +7,6 @@ using DotNetty.Handlers.Logging;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using DotNetty.Transport.Libuv;
-using Uragano.Abstractions.Remoting;
 using Uragano.Abstractions.ServiceInvoker;
 using Uragano.Codec.MessagePack;
 

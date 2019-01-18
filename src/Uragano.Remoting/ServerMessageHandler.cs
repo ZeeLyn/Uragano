@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using DotNetty.Buffers;
 using DotNetty.Transport.Channels;
 using Uragano.Abstractions.ServiceInvoker;
-using Uragano.Abstractions.Remoting;
 using Microsoft.Extensions.DependencyInjection;
+using Uragano.Abstractions;
 
 namespace Uragano.Remoting
 {
@@ -36,10 +36,7 @@ namespace Uragano.Remoting
 			context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
 			{
 				Id = tranMsg.Id,
-				Content = new ResultMessage
-				{
-					Result = result
-				}
+				Content = new ResultMessage(result)
 			}).Wait();
 
 		}

@@ -1,8 +1,9 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
-using Uragano.Abstractions.Remoting;
 using Uragano.Abstractions.ServiceInvoker;
+using Uragano.Codec.MessagePack;
+using Uragano.Remoting;
 
 namespace Uragano.DynamicProxy
 {
@@ -19,8 +20,7 @@ namespace Uragano.DynamicProxy
 				Args = args,
 				Route = service.Route
 			}).GetAwaiter().GetResult();
-
-			return result.Result;
+			return SerializerHelper.Deserialize(SerializerHelper.Serialize(result.Result), targetMethod.ReturnType);
 		}
 	}
 }

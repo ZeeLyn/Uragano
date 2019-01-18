@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Uragano.Abstractions.Remoting;
+using Uragano.Abstractions;
 
 namespace Uragano.Remoting
 {

@@ -14,10 +14,10 @@ namespace Sample.Server
 		}
 
 
-		public string SayHello(string name)
+		public ResultModel SayHello(string name)
 		{
 			TestLib.Exec();
-			return "Hello " + name;
+			return new ResultModel { Message = "Hello " + name };
 		}
 	}
 }

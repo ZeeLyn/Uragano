@@ -2,7 +2,7 @@
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
-using Uragano.Abstractions.Remoting;
+using Uragano.Abstractions;
 
 namespace Uragano.Codec.MessagePack
 {

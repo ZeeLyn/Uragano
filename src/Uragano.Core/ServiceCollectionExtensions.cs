@@ -4,7 +4,6 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyModel;
 using Uragano.Abstractions;
-using Uragano.Abstractions.Remoting;
 using Uragano.Abstractions.ServiceInvoker;
 using Uragano.DynamicProxy;
 using Uragano.Remoting;
@@ -39,9 +38,7 @@ namespace Uragano.Core
 
 			serviceCollection.AddSingleton<IClientFactory, ClientFactory>();
 
-			#region client
-			serviceCollection.AddSingleton<IBootstrap, ClientBootstrap>();
-			#endregion
+
 
 			RegisterServiceAndInterceptor(serviceCollection);
 			return serviceCollection;

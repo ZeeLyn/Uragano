@@ -1,4 +1,4 @@
-﻿namespace Uragano.Abstractions.Remoting
+﻿namespace Uragano.Remoting
 {
 	public class InvokeMessage
 	{
