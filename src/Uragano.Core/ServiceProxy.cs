@@ -12,7 +12,7 @@ namespace Uragano.Core
 			ServiceProxyFactory = serviceProxyFactory;
 		}
 
-		public TService GetService<TService>(string serviceName) where TService : IService
+		public TService GetService<TService>() where TService : IService
 		{
 			return (TService)ServiceProxyFactory.CreateRemoteProxy(typeof(TService));
 		}

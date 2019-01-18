@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceInvoker;
@@ -20,6 +21,8 @@ namespace Uragano.DynamicProxy
 				Args = args,
 				Route = service.Route
 			}).GetAwaiter().GetResult();
+			if (result.Result == null || targetMethod.ReturnType == typeof(void) || targetMethod.ReturnType == typeof(Task))
+				return null;
 			return SerializerHelper.Deserialize(SerializerHelper.Serialize(result.Result), targetMethod.ReturnType);
 		}
 	}

@@ -12,15 +12,14 @@ namespace Uragano.Remoting
 		[Key(0)]
 		public object Result { get; }
 
-		[Key(1)]
-		public string Type { get; set; }
 
-		[Key(2)] public RemoteStatus Status { get; set; } = RemoteStatus.Ok;
+		[Key(1)] public RemotingStatus Status { get; set; } = RemotingStatus.Ok;
 	}
 
-	public enum RemoteStatus
+	public enum RemotingStatus
 	{
 		Ok = 200,
+		NotFound = 404,
 		Error = 500
 	}
 }

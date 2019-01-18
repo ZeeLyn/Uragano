@@ -26,19 +26,31 @@ namespace Uragano.Remoting
 		public override void ChannelRead(IChannelHandlerContext context, object message)
 		{
 			var tranMsg = message as TransportMessage<InvokeMessage>;
-			var service = InvokerFactory.Get(tranMsg.Content.Route);
-			object result;
-			using (var scope = ServiceProvider.CreateScope())
+			try
 			{
-				result = service.MethodInvoker.Invoke(scope.ServiceProvider.GetService(service.MethodInfo.DeclaringType),
-				   tranMsg.Content.Args);
-			}
-			context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
-			{
-				Id = tranMsg.Id,
-				Content = new ResultMessage(result)
-			}).Wait();
+				var service = InvokerFactory.Get(tranMsg.Content.Route);
+				object result;
+				using (var scope = ServiceProvider.CreateScope())
+				{
+					result = service.MethodInvoker.Invoke(
+						scope.ServiceProvider.GetService(service.MethodInfo.DeclaringType),
+						tranMsg.Content.Args);
+				}
 
+				context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
+				{
+					Id = tranMsg.Id,
+					Content = new ResultMessage(result)
+				}).Wait();
+			}
+			catch (Exception e)
+			{
+				context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
+				{
+					Id = tranMsg.Id,
+					Content = new ResultMessage(e.Message) { Status = RemotingStatus.Error }
+				}).Wait();
+			}
 		}
 
 		public override void ChannelReadComplete(IChannelHandlerContext context)

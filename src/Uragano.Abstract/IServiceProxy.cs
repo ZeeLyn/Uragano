@@ -2,6 +2,6 @@
 {
 	public interface IServiceProxy
 	{
-		TService GetService<TService>(string serviceName) where TService : IService;
+		TService GetService<TService>() where TService : IService;
 	}
 }

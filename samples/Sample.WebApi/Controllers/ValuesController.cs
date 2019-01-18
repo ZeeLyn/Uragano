@@ -22,11 +22,8 @@ namespace Sample.WebApi.Controllers
 		[HttpGet]
 		public IActionResult Get()
 		{
-			var proxy = ServiceProxy.GetService<IHelloService>("");
+			var proxy = ServiceProxy.GetService<IHelloService>();
 			return Ok(proxy.SayHello("owen"));
-			//var c = ClientFactory.CreateClient("192.168.1.129", 5001);
-			//c.SendAsync(new InvokeMessage { Message = Guid.NewGuid().ToString() });
-			//return Ok("OK");
 		}
 
 		// GET api/values/5
