@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace Uragano.Consul
 			Logger = logger;
 		}
 
-		public async Task<bool> RegisterService(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, IServiceRegisterConfiguration serviceRegisterConfiguration, CancellationToken cancellationToken)
+		public async Task<bool> RegisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, IServiceRegisterConfiguration serviceRegisterConfiguration, CancellationToken cancellationToken)
 		{
 			if (!(serviceDiscoveryClientConfiguration is ConsulClientConfigure client))
 				return false;
@@ -67,6 +68,84 @@ namespace Uragano.Consul
 				}
 				Logger.LogInformation("---------------> Consul service registration completed");
 				return result.StatusCode != HttpStatusCode.OK;
+			}
+		}
+
+		public async Task<bool> DeregisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceId, CancellationToken cancellationToken = default)
+		{
+			if (!(serviceDiscoveryClientConfiguration is ConsulClientConfigure client))
+				throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
+			if (string.IsNullOrWhiteSpace(serviceId))
+				throw new ArgumentNullException(nameof(serviceId));
+
+			using (var consul = new ConsulClient(conf =>
+			{
+				conf.Address = client.Address;
+				conf.Datacenter = client.Datacenter;
+				conf.Token = client.Token;
+				conf.WaitTime = client.WaitTime;
+			}))
+			{
+				var result = await consul.Agent.ServiceDeregister(serviceId, cancellationToken);
+				if (result.StatusCode != HttpStatusCode.OK)
+				{
+					Logger.LogError("--------------->  Deregistration service failed:{0}", result.StatusCode);
+					throw new ConsulRequestException("Deregistration service failed.", result.StatusCode);
+				}
+
+				return result.StatusCode == HttpStatusCode.OK;
+			}
+		}
+
+		public async Task<List<ServiceDiscoveryInfo>> QueryServiceAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName,
+			ServiceStatus serviceStatus = ServiceStatus.Alive, CancellationToken cancellationToken = default)
+		{
+			if (!(serviceDiscoveryClientConfiguration is ConsulClientConfigure client))
+				throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
+			if (string.IsNullOrWhiteSpace(serviceName))
+				throw new ArgumentNullException(nameof(serviceName));
+			using (var consul = new ConsulClient(conf =>
+			{
+				conf.Address = client.Address;
+				conf.Datacenter = client.Datacenter;
+				conf.Token = client.Token;
+				conf.WaitTime = client.WaitTime;
+			}))
+			{
+				try
+				{
+					QueryResult<ServiceEntry[]> result;
+					switch (serviceStatus)
+					{
+						case ServiceStatus.Alive:
+							result = await consul.Health.Service(serviceName, "", true, cancellationToken);
+							break;
+						case ServiceStatus.All:
+							result = await consul.Health.Service(serviceName, "", false, cancellationToken);
+							break;
+						default:
+							result = await consul.Health.Service(serviceName, cancellationToken);
+							break;
+					}
+					if (result.StatusCode != HttpStatusCode.OK)
+					{
+						Logger.LogError("Get the health service error:{0}", result.StatusCode);
+					}
+
+					return result.Response.Select(p => new ServiceDiscoveryInfo
+					{
+						ServiceId = p.Service.ID,
+						Address = p.Service.Address,
+						Port = p.Service.Port,
+						Meta = p.Service.Meta,
+						Alive = p.Checks.All(s => s.Status.Equals(HealthStatus.Passing))
+					}).ToList();
+				}
+				catch (Exception ex)
+				{
+					Logger.LogError("Get the health service error:{0}\n{1}", ex.Message, ex.StackTrace);
+					throw;
+				}
 			}
 		}
 	}

@@ -3,6 +3,8 @@ using Uragano.Abstractions;
 using Uragano.Remoting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
+using Uragano.Abstractions.ServiceDiscovery;
+using System;
 
 namespace Uragano.Core
 {
@@ -12,12 +14,21 @@ namespace Uragano.Core
 		{
 			var serviceBuilder = applicationBuilder.ApplicationServices.GetService<IServiceBuilder>();
 			serviceBuilder.BuildServer();
-
 			var bootstrap = applicationBuilder.ApplicationServices.GetService<IBootstrap>();
-
 			var applicationLifetime = applicationBuilder.ApplicationServices.GetService<IApplicationLifetime>();
+			var uraganoSettings = applicationBuilder.ApplicationServices.GetService<UraganoSettings>();
+
 			applicationLifetime.ApplicationStopping.Register(async () => { await bootstrap.StopAsync(); });
 			bootstrap.StartAsync().GetAwaiter().GetResult();
+
+			if (uraganoSettings.ServiceRegisterConfiguration != null)
+			{
+				if (uraganoSettings.ServiceDiscoveryClientConfiguration == null)
+					throw new ArgumentNullException(nameof(uraganoSettings.ServiceDiscoveryClientConfiguration));
+
+				var discovery = applicationBuilder.ApplicationServices.GetService<IServiceDiscovery>();
+				discovery.RegisterAsync(uraganoSettings.ServiceDiscoveryClientConfiguration, uraganoSettings.ServiceRegisterConfiguration);
+			}
 
 			return applicationBuilder;
 		}
