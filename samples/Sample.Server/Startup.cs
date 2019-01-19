@@ -33,7 +33,11 @@ namespace Sample.Server
 			services.AddUragano(config =>
 			{
 				config.AddServer("127.0.0.1", 5001);
-				config.AddConsul(new ConsulClientConfigure("http://192.168.1.142:8500"));
+				config.AddConsul(new ConsulClientConfigure("http://192.168.1.142:8500"), new ConsulRegisterServiceConfiguration
+				{
+					ServiceId = ""
+
+				});
 			});
 
 			services.AddScoped<TestLib>();

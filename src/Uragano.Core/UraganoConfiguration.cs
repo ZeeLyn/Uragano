@@ -46,15 +46,18 @@ namespace Uragano.Core
 
 		public void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration) where TServiceDiscovery : IServiceDiscovery
 		{
-			UraganoSettings.ServiceDiscoveryClientConfiguration = serviceDiscoveryClientConfiguration;
+			UraganoSettings.ServiceDiscoveryClientConfiguration = serviceDiscoveryClientConfiguration ?? throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
 			ServiceCollection.AddSingleton(typeof(IServiceDiscovery), typeof(TServiceDiscovery));
 		}
 
 		public void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration,
 			IServiceRegisterConfiguration serviceRegisterConfiguration) where TServiceDiscovery : IServiceDiscovery
 		{
-			UraganoSettings.ServiceDiscoveryClientConfiguration = serviceDiscoveryClientConfiguration;
-			UraganoSettings.ServiceRegisterConfiguration = serviceRegisterConfiguration;
+			UraganoSettings.ServiceDiscoveryClientConfiguration = serviceDiscoveryClientConfiguration ?? throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
+			UraganoSettings.ServiceRegisterConfiguration = serviceRegisterConfiguration ?? throw new ArgumentNullException(nameof(serviceRegisterConfiguration));
+			if (string.IsNullOrWhiteSpace(serviceRegisterConfiguration.ServiceId))
+				throw new ArgumentNullException(nameof(serviceRegisterConfiguration.ServiceId));
+
 			ServiceCollection.AddSingleton(typeof(IServiceDiscovery), typeof(TServiceDiscovery));
 		}
 

@@ -49,7 +49,7 @@ namespace Uragano.Consul
 				{
 					Address = UraganoSettings.ServerSettings.IP.ToString(),
 					Port = UraganoSettings.ServerSettings.Port,
-					ID = string.IsNullOrWhiteSpace(service.ServiceId) ? $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}" : service.ServiceId,
+					ID = service.ServiceId,
 					Name = string.IsNullOrWhiteSpace(service.ServiceName) ? $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}" : service.ServiceName,
 					EnableTagOverride = service.EnableTagOverride,
 					Meta = service.Meta,
