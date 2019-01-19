@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Uragano.Abstractions.ServiceDiscovery
+﻿namespace Uragano.Abstractions.ServiceDiscovery
 {
 	public interface IServiceRegisterConfiguration
 	{
+		string ServiceId { get; set; }
 		int? Weight { get; set; }
 	}
 }

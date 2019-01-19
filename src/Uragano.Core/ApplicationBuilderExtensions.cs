@@ -10,7 +10,7 @@ namespace Uragano.Core
 {
 	public static class ApplicationBuilderExtensions
 	{
-		public static IApplicationBuilder UseUraganoServer(this IApplicationBuilder applicationBuilder)
+		public static IApplicationBuilder UseUragano(this IApplicationBuilder applicationBuilder)
 		{
 			var serviceBuilder = applicationBuilder.ApplicationServices.GetService<IServiceBuilder>();
 			serviceBuilder.BuildServer();
@@ -18,16 +18,25 @@ namespace Uragano.Core
 			var applicationLifetime = applicationBuilder.ApplicationServices.GetService<IApplicationLifetime>();
 			var uraganoSettings = applicationBuilder.ApplicationServices.GetService<UraganoSettings>();
 
-			applicationLifetime.ApplicationStopping.Register(async () => { await bootstrap.StopAsync(); });
-			bootstrap.StartAsync().GetAwaiter().GetResult();
-
-			if (uraganoSettings.ServiceRegisterConfiguration != null)
+			//Start server and register service
+			if (uraganoSettings.ServerSettings != null)
 			{
-				if (uraganoSettings.ServiceDiscoveryClientConfiguration == null)
-					throw new ArgumentNullException(nameof(uraganoSettings.ServiceDiscoveryClientConfiguration));
-
 				var discovery = applicationBuilder.ApplicationServices.GetService<IServiceDiscovery>();
-				discovery.RegisterAsync(uraganoSettings.ServiceDiscoveryClientConfiguration, uraganoSettings.ServiceRegisterConfiguration);
+				applicationLifetime.ApplicationStopping.Register(async () =>
+				{
+					await discovery.DeregisterAsync(uraganoSettings.ServiceDiscoveryClientConfiguration, uraganoSettings.ServiceRegisterConfiguration.ServiceId);
+					await bootstrap.StopAsync();
+				});
+				bootstrap.StartAsync().GetAwaiter().GetResult();
+
+				//Register service to consul
+				if (uraganoSettings.ServiceRegisterConfiguration != null)
+				{
+					if (uraganoSettings.ServiceDiscoveryClientConfiguration == null)
+						throw new ArgumentNullException(nameof(uraganoSettings.ServiceDiscoveryClientConfiguration));
+
+					discovery.RegisterAsync(uraganoSettings.ServiceDiscoveryClientConfiguration, uraganoSettings.ServiceRegisterConfiguration).GetAwaiter().GetResult();
+				}
 			}
 
 			return applicationBuilder;
