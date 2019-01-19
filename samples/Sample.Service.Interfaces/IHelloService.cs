@@ -1,4 +1,5 @@
-﻿using Uragano.Abstractions;
+﻿using System.Threading.Tasks;
+using Uragano.Abstractions;
 
 namespace Sample.Service.Interfaces
 {
@@ -9,6 +10,6 @@ namespace Sample.Service.Interfaces
 	{
 
 		[ServiceRoute("say")]
-		ResultModel SayHello(string name);
+		Task<ResultModel> SayHello(string name);
 	}
 }

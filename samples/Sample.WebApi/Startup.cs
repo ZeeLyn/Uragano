@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
 using Uragano.Codec.MessagePack;
 using Uragano.Core;
-using Uragano.DynamicProxy.Interceptor;
 
 namespace Sample.WebApi
 {
@@ -24,6 +23,11 @@ namespace Sample.WebApi
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+			services.AddUragano(config =>
+			{
+				//config.AddServer("127.0.0.1", 5001);
+
+			});
 			services.AddUraganoClient();
 			services.AddScoped<TestLib>();
 			services.UseMessagePackCodec();

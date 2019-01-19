@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Sample.Service.Interfaces;
 using Uragano.Abstractions;
 using Uragano.Remoting;
@@ -20,10 +22,16 @@ namespace Sample.WebApi.Controllers
 
 		// GET api/values
 		[HttpGet]
-		public IActionResult Get()
+		public async Task<IActionResult> Get()
 		{
 			var proxy = ServiceProxy.GetService<IHelloService>();
-			return Ok(proxy.SayHello("owen"));
+			var id = Guid.NewGuid().ToString();
+			var r = await proxy.SayHello(id);
+			return Ok(new
+			{
+				Send = id,
+				Rece = r.Message
+			});
 		}
 
 		// GET api/values/5

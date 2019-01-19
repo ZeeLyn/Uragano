@@ -5,7 +5,7 @@ namespace Uragano.Remoting
 	public interface IBootstrap
 	{
 
-		Task StartAsync(string host, int port);
+		Task StartAsync();
 
 		Task StopAsync();
 	}

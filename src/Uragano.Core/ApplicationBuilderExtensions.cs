@@ -17,7 +17,7 @@ namespace Uragano.Core
 
 			var applicationLifetime = applicationBuilder.ApplicationServices.GetService<IApplicationLifetime>();
 			applicationLifetime.ApplicationStopping.Register(async () => { await bootstrap.StopAsync(); });
-			bootstrap.StartAsync("127.0.0.1", 5001).GetAwaiter().GetResult();
+			bootstrap.StartAsync().GetAwaiter().GetResult();
 
 			return applicationBuilder;
 		}

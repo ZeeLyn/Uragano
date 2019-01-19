@@ -4,6 +4,6 @@
 	{
 		public string Id { get; set; }
 
-		public T Content { get; set; }
+		public T Body { get; set; }
 	}
 }

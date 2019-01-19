@@ -32,14 +32,14 @@ namespace Uragano.Remoting
 				throw new ArgumentNullException(nameof(message));
 			try
 			{
-				var service = InvokerFactory.Get(transportMessage.Content.Route);
+				var service = InvokerFactory.Get(transportMessage.Body.Route);
 				var proxyInstance = ProxyGenerateFactory.CreateLocalProxy(service.MethodInfo.DeclaringType);
-				var result = service.MethodInfo.Invoke(proxyInstance, transportMessage.Content.Args);
+				var result = service.MethodInfo.Invoke(proxyInstance, transportMessage.Body.Args);
 
 				context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
 				{
 					Id = transportMessage.Id,
-					Content = new ResultMessage(result)
+					Body = new ResultMessage(result)
 				}).Wait();
 			}
 			catch (Exception e)
@@ -47,7 +47,7 @@ namespace Uragano.Remoting
 				context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
 				{
 					Id = transportMessage.Id,
-					Content = new ResultMessage(e.Message) { Status = RemotingStatus.Error }
+					Body = new ResultMessage(e.Message) { Status = RemotingStatus.Error }
 				}).Wait();
 			}
 		}

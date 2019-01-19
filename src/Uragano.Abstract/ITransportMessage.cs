@@ -4,6 +4,6 @@
 	{
 		string Id { get; set; }
 
-		T Content { get; set; }
+		T Body { get; set; }
 	}
 }

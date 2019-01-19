@@ -1,4 +1,5 @@
-﻿using Sample.Service.Interfaces;
+﻿using System.Threading.Tasks;
+using Sample.Service.Interfaces;
 using Uragano.Abstractions;
 
 namespace Sample.Server
@@ -14,10 +15,10 @@ namespace Sample.Server
 		}
 
 
-		public ResultModel SayHello(string name)
+		public async Task<ResultModel> SayHello(string name)
 		{
 			TestLib.Exec();
-			return new ResultModel { Message = "Hello " + name };
+			return await Task.FromResult(new ResultModel { Message = name });
 		}
 	}
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Handlers.Logging;
+using DotNetty.Handlers.Tls;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using DotNetty.Transport.Libuv;
@@ -21,23 +22,26 @@ namespace Uragano.Remoting
 
 		private IInvokerFactory InvokerFactory { get; }
 
+		private ServerSettings ServerSettings { get; }
+
 		private IServiceProvider ServiceProvider { get; }
 
-		public ServerBootstrap(IInvokerFactory invokerFactory, IServiceProvider serviceProvider, IProxyGenerateFactory proxyGenerateFactory)
+		public ServerBootstrap(IInvokerFactory invokerFactory, IServiceProvider serviceProvider, IProxyGenerateFactory proxyGenerateFactory, UraganoSettings uraganoSettings)
 		{
 
 			InvokerFactory = invokerFactory;
 			ServiceProvider = serviceProvider;
 			ProxyGenerateFactory = proxyGenerateFactory;
+			ServerSettings = uraganoSettings.ServerSettings;
 		}
 
-		public async Task StartAsync(string host, int port)
+		public async Task StartAsync()
 		{
-			var Libuv = false;
+
 			IEventLoopGroup bossGroup;
 			IEventLoopGroup workerGroup;
 			var bootstrap = new DotNetty.Transport.Bootstrapping.ServerBootstrap();
-			if (Libuv)
+			if (ServerSettings.Libuv)
 			{
 				var dispatcher = new DispatcherEventLoopGroup();
 				bossGroup = dispatcher;
@@ -58,6 +62,10 @@ namespace Uragano.Remoting
 				.ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
 				{
 					var pipeline = channel.Pipeline;
+					if (ServerSettings.X509Certificate2 != null)
+					{
+						pipeline.AddLast(TlsHandler.Server(ServerSettings.X509Certificate2));
+					}
 					pipeline.AddLast(new LoggingHandler("SRV-CONN"));
 					pipeline.AddLast(new LengthFieldPrepender(2));
 					pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 2, 0, 2));
@@ -66,12 +74,7 @@ namespace Uragano.Remoting
 					pipeline.AddLast(new ServerMessageHandler(InvokerFactory, ProxyGenerateFactory));
 				}));
 
-			EndPoint endPoint;
-			if (IPAddress.TryParse(host, out var ip))
-				endPoint = new IPEndPoint(ip, port);
-			else
-				endPoint = new DnsEndPoint(host, port);
-			Channel = await bootstrap.BindAsync(endPoint);
+			Channel = await bootstrap.BindAsync(new IPEndPoint(ServerSettings.IP, ServerSettings.Port));
 		}
 
 

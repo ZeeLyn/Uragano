@@ -12,6 +12,22 @@ namespace Uragano.Core
 {
 	public static class ServiceCollectionExtensions
 	{
+		public static IServiceCollection AddUragano(this IServiceCollection serviceCollection, Action<IUraganoConfiguration> configuration)
+		{
+			#region register base service
+			serviceCollection.AddSingleton<IServiceProxy, ServiceProxy>();
+			serviceCollection.AddSingleton<IServiceBuilder, ServiceBuilder>();
+			serviceCollection.AddSingleton<IInvokerFactory, InvokerFactory>();
+			serviceCollection.AddSingleton<IProxyGenerator, ProxyGenerator>();
+			serviceCollection.AddSingleton<IProxyGenerateFactory, ProxyGenerateFactory>();
+			#endregion
+
+			var config = new UraganoConfiguration { ServiceCollection = serviceCollection };
+			configuration(config);
+			serviceCollection.AddSingleton(config.UraganoSettings);
+			return serviceCollection;
+		}
+
 		public static IServiceCollection AddUraganoServer(this IServiceCollection serviceCollection)
 		{
 			serviceCollection.AddSingleton<IServiceProxy, ServiceProxy>();

@@ -29,18 +29,34 @@ namespace Uragano.Remoting
 
 		public ClientFactory()
 		{
+			IEventLoopGroup group;
 
-			Bootstrap = CreateBootstrap();
-			Bootstrap.Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
+			Bootstrap = new Bootstrap();
+			if (false)
 			{
-				var pipeline = channel.Pipeline;
-				pipeline.AddLast(new LoggingHandler("SRV-CONN"));
-				pipeline.AddLast(new LengthFieldPrepender(2));
-				pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 2, 0, 2));
-				pipeline.AddLast(new MessageDecoder<ResultMessage>());
-				pipeline.AddLast(new MessageEncoder<InvokeMessage>());
-				pipeline.AddLast(new ClientMessageHandler(this));
-			}));
+				group = new EventLoopGroup();
+				Bootstrap.Channel<TcpChannel>();
+			}
+			else
+			{
+				group = new MultithreadEventLoopGroup();
+				Bootstrap.Channel<TcpSocketChannel>();
+			}
+
+			Bootstrap
+				.Group(group)
+				.Option(ChannelOption.TcpNodelay, true)
+				.Option(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
+				.Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
+				{
+					var pipeline = channel.Pipeline;
+					pipeline.AddLast(new LoggingHandler("SRV-CONN"));
+					pipeline.AddLast(new LengthFieldPrepender(2));
+					pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 2, 0, 2));
+					pipeline.AddLast(new MessageDecoder<ResultMessage>());
+					pipeline.AddLast(new MessageEncoder<InvokeMessage>());
+					pipeline.AddLast(new ClientMessageHandler(this));
+				}));
 		}
 
 		public void RemoveClient(string host, int port)
@@ -79,30 +95,6 @@ namespace Uragano.Remoting
 				_clients.TryRemove(key, out _);
 				throw;
 			}
-		}
-
-		public static Bootstrap CreateBootstrap()
-		{
-			IEventLoopGroup group;
-
-			var bootstrap = new Bootstrap();
-			if (false)
-			{
-				group = new EventLoopGroup();
-				bootstrap.Channel<TcpChannel>();
-			}
-			else
-			{
-				group = new MultithreadEventLoopGroup();
-				bootstrap.Channel<TcpSocketChannel>();
-			}
-			bootstrap
-				.Group(group)
-				.Option(ChannelOption.TcpNodelay, true)
-				.Option(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
-				;
-
-			return bootstrap;
 		}
 
 
