@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Uragano.Abstractions;
 using Uragano.Codec.MessagePack;
+using Uragano.Consul;
 using Uragano.Core;
 
 namespace Sample.Server
@@ -31,8 +33,10 @@ namespace Sample.Server
 			services.AddUragano(config =>
 			{
 				config.AddServer("127.0.0.1", 5001);
+				config.AddConsul(new ConsulClientConfigure("http://192.168.1.142:8500"));
 
 			});
+
 			services.AddScoped<TestLib>();
 			services.UseMessagePackCodec();
 		}

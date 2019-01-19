@@ -6,6 +6,7 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyModel;
 using Uragano.Abstractions;
+using Uragano.Abstractions.ServiceDiscovery;
 using Uragano.Remoting;
 
 namespace Uragano.Core
@@ -42,6 +43,21 @@ namespace Uragano.Core
 			}
 			AddServices();
 		}
+
+		public void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration) where TServiceDiscovery : IServiceDiscovery
+		{
+			UraganoSettings.ServiceDiscoveryClientConfiguration = serviceDiscoveryClientConfiguration;
+			ServiceCollection.AddSingleton(typeof(IServiceDiscovery), typeof(TServiceDiscovery));
+		}
+
+		public void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration,
+			IServiceRegisterConfiguration serviceRegisterConfiguration) where TServiceDiscovery : IServiceDiscovery
+		{
+			UraganoSettings.ServiceDiscoveryClientConfiguration = serviceDiscoveryClientConfiguration;
+			UraganoSettings.ServiceRegisterConfiguration = serviceRegisterConfiguration;
+			ServiceCollection.AddSingleton(typeof(IServiceDiscovery), typeof(TServiceDiscovery));
+		}
+
 
 		public void AddClient()
 		{

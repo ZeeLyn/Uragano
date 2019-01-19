@@ -1,0 +1,73 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
+using Consul;
+using Microsoft.Extensions.Logging;
+using Uragano.Abstractions;
+using Uragano.Abstractions.ServiceDiscovery;
+
+namespace Uragano.Consul
+{
+	public class ConsulServiceDiscovery : IServiceDiscovery
+	{
+		private ILogger Logger { get; }
+		private UraganoSettings UraganoSettings { get; }
+
+		public ConsulServiceDiscovery(UraganoSettings uraganoSettings, ILogger<ConsulServiceDiscovery> logger)
+		{
+			UraganoSettings = uraganoSettings;
+			Logger = logger;
+		}
+
+		public async Task<bool> RegisterService(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, IServiceRegisterConfiguration serviceRegisterConfiguration, CancellationToken cancellationToken)
+		{
+			if (!(serviceDiscoveryClientConfiguration is ConsulClientConfigure client))
+				return false;
+			if (!(serviceRegisterConfiguration is ConsulRegisterServiceConfiguration service))
+				throw new ArgumentNullException(nameof(UraganoSettings.ServiceRegisterConfiguration));
+
+			using (var consul = new ConsulClient(conf =>
+			{
+				conf.Address = client.Address;
+				conf.Datacenter = client.Datacenter;
+				conf.Token = client.Token;
+				conf.WaitTime = client.WaitTime;
+			}))
+			{
+				if (service.Weight.HasValue)
+				{
+					if (service.Meta == null)
+						service.Meta = new Dictionary<string, string>();
+					service.Meta.Add("X-Weight", service.Weight.ToString());
+				}
+
+				//Register service to consul agent 
+				var result = await consul.Agent.ServiceRegister(new AgentServiceRegistration
+				{
+					Address = UraganoSettings.ServerSettings.IP.ToString(),
+					Port = UraganoSettings.ServerSettings.Port,
+					ID = string.IsNullOrWhiteSpace(service.ServiceId) ? $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}" : service.ServiceId,
+					Name = string.IsNullOrWhiteSpace(service.ServiceName) ? $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}" : service.ServiceName,
+					EnableTagOverride = service.EnableTagOverride,
+					Meta = service.Meta,
+					Tags = service.Tags,
+					Check = new AgentServiceCheck
+					{
+						DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(20),
+						Timeout = TimeSpan.FromSeconds(3),
+						Interval = service.HealthCheckInterval
+					}
+				}, cancellationToken);
+				if (result.StatusCode != HttpStatusCode.OK)
+				{
+					Logger.LogError("--------------->  Registration service failed:{0}", result.StatusCode);
+					throw new ConsulRequestException("Registration service failed.", result.StatusCode);
+				}
+				Logger.LogInformation("---------------> Consul service registration completed");
+				return result.StatusCode != HttpStatusCode.OK;
+			}
+		}
+	}
+}
