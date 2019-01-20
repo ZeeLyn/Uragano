@@ -45,7 +45,7 @@ namespace Uragano.DynamicProxy
 
 			foreach (var service in services)
 			{
-				var serviceNameAttr = service.Interface.GetCustomAttribute<ServiceNameAttribute>();
+				var serviceNameAttr = service.Interface.GetCustomAttribute<ServiceDiscoveryNameAttribute>();
 				if (serviceNameAttr == null)
 					throw new InvalidOperationException($"Interface {service.Interface.FullName} must add a custom attribute ServiceNameAttribute.");
 

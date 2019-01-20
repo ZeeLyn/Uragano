@@ -5,8 +5,4 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Uragano.Codec.MessagePack\Uragano.Codec.MessagePack.csproj" />
-  </ItemGroup>
-
 </Project>

@@ -3,9 +3,9 @@
 namespace Uragano.Abstractions
 {
 	[AttributeUsage(AttributeTargets.Interface)]
-	public class ServiceNameAttribute : Attribute
+	public class ServiceDiscoveryNameAttribute : Attribute
 	{
-		public ServiceNameAttribute(string serviceName)
+		public ServiceDiscoveryNameAttribute(string serviceName)
 		{
 			if (string.IsNullOrWhiteSpace(serviceName))
 				throw new ArgumentNullException(nameof(serviceName));
