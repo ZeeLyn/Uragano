@@ -17,7 +17,5 @@ namespace Uragano.Consul
 		public string[] Tags { get; set; }
 
 		public TimeSpan HealthCheckInterval { get; set; } = TimeSpan.FromSeconds(10);
-
-		public int? Weight { get; set; }
 	}
 }

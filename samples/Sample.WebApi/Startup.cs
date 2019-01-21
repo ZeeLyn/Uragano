@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
 using Uragano.Codec.MessagePack;
+using Uragano.Consul;
 using Uragano.Core;
 
 namespace Sample.WebApi
@@ -25,17 +26,11 @@ namespace Sample.WebApi
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddUragano(config =>
 			{
-				//config.AddServer("127.0.0.1", 5001);
-
+				config.AddConsul(new ConsulClientConfigure("http://192.168.1.142:8500"));
+				config.AddClient(("TestServer", "", ""));
+				config.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));
 			});
-			services.AddUraganoClient();
 			services.AddScoped<TestLib>();
-			services.UseMessagePackCodec();
-			//services.AddScoped<IInterceptor, Test1Interceptor>();
-			//services.AddScoped<IInterceptor, Test2Interceptor>();
-			//AutofacContainer.Populate(services);
-			//AutofacContainer.Build();
-			//return new AutofacServiceProvider(AutofacContainer.GetContainer());
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,9 +41,8 @@ namespace Sample.WebApi
 				app.UseDeveloperExceptionPage();
 			}
 
-
 			app.UseMvc();
-			app.UseUraganoClient();
+			app.UseUragano();
 		}
 	}
 }

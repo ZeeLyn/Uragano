@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using Uragano.Abstractions.ServiceDiscovery;
 
@@ -11,6 +12,8 @@ namespace Uragano.Abstractions
 		public IServiceDiscoveryClientConfiguration ServiceDiscoveryClientConfiguration { get; set; }
 
 		public IServiceRegisterConfiguration ServiceRegisterConfiguration { get; set; }
+
+		public Dictionary<string, X509Certificate2> ClientInvokeServices { get; set; }
 	}
 
 	public class ServerSettings
@@ -21,6 +24,6 @@ namespace Uragano.Abstractions
 
 		public X509Certificate2 X509Certificate2 { get; set; }
 
-		public bool Libuv { get; set; }
+		public int? Weight { get; set; }
 	}
 }

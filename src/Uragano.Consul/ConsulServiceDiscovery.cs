@@ -22,7 +22,7 @@ namespace Uragano.Consul
 			Logger = logger;
 		}
 
-		public async Task<bool> RegisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, IServiceRegisterConfiguration serviceRegisterConfiguration, CancellationToken cancellationToken)
+		public async Task<bool> RegisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, IServiceRegisterConfiguration serviceRegisterConfiguration, int? weight = default, CancellationToken cancellationToken = default)
 		{
 			if (!(serviceDiscoveryClientConfiguration is ConsulClientConfigure client))
 				return false;
@@ -37,11 +37,11 @@ namespace Uragano.Consul
 				conf.WaitTime = client.WaitTime;
 			}))
 			{
-				if (service.Weight.HasValue)
+				if (weight.HasValue)
 				{
 					if (service.Meta == null)
 						service.Meta = new Dictionary<string, string>();
-					service.Meta.Add("X-Weight", service.Weight.ToString());
+					service.Meta.Add("X-Weight", weight.ToString());
 				}
 
 				//Register service to consul agent 
@@ -56,6 +56,7 @@ namespace Uragano.Consul
 					Tags = service.Tags,
 					Check = new AgentServiceCheck
 					{
+						TCP = $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}",
 						DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(20),
 						Timeout = TimeSpan.FromSeconds(3),
 						Interval = service.HealthCheckInterval

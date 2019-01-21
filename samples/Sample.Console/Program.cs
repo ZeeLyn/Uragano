@@ -9,17 +9,8 @@ namespace Sample.Console
 	{
 		static void Main(string[] args)
 		{
-			///var ip = new IPEndPoint();
-			//var r = IPAddress.Parse("localhost");
-			try
-			{
-				var dns = new DnsEndPoint("localhost", 80);
-				System.Console.WriteLine(dns);
-			}
-			catch (Exception e)
-			{
-				var r = e;
-			}
+			var ip = new IPEndPoint(IPAddress.Parse("192.168.1.129"), 111);
+			System.Console.WriteLine(ip.Address.ToString());
 
 			System.Console.ReadKey();
 		}

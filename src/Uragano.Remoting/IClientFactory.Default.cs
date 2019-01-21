@@ -5,7 +5,6 @@ using System.Net;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Common.Utilities;
-using DotNetty.Handlers.Logging;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
@@ -17,10 +16,9 @@ namespace Uragano.Remoting
 {
 	public class ClientFactory : IClientFactory
 	{
-
 		private Bootstrap Bootstrap { get; }
 
-		private readonly ConcurrentDictionary<string, Lazy<IClient>> _clients = new ConcurrentDictionary<string, Lazy<IClient>>();
+		private readonly ConcurrentDictionary<(string, int), Lazy<IClient>> _clients = new ConcurrentDictionary<(string, int), Lazy<IClient>>();
 
 		private static readonly AttributeKey<TransportContext> TransportContextAttributeKey = AttributeKey<TransportContext>.ValueOf(typeof(ClientFactory), nameof(TransportContext));
 
@@ -32,7 +30,7 @@ namespace Uragano.Remoting
 			IEventLoopGroup group;
 
 			Bootstrap = new Bootstrap();
-			if (false)
+			if (UraganoOptions.DotNetty_Enable_Libuv.Value)
 			{
 				group = new EventLoopGroup();
 				Bootstrap.Channel<TcpChannel>();
@@ -47,12 +45,13 @@ namespace Uragano.Remoting
 				.Group(group)
 				.Option(ChannelOption.TcpNodelay, true)
 				.Option(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
-				.Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
+				.Option(ChannelOption.ConnectTimeout, UraganoOptions.DotNetty_Connect_Timeout.Value)
+				.Handler(new ActionChannelInitializer<IChannel>(channel =>
 				{
 					var pipeline = channel.Pipeline;
-					pipeline.AddLast(new LoggingHandler("SRV-CONN"));
-					pipeline.AddLast(new LengthFieldPrepender(2));
-					pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 2, 0, 2));
+					//pipeline.AddLast(new LoggingHandler("SRV-CONN"));
+					pipeline.AddLast(new LengthFieldPrepender(4));
+					pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
 					pipeline.AddLast(new MessageDecoder<ResultMessage>());
 					pipeline.AddLast(new MessageEncoder<InvokeMessage>());
 					pipeline.AddLast(new ClientMessageHandler(this));
@@ -61,34 +60,34 @@ namespace Uragano.Remoting
 
 		public void RemoveClient(string host, int port)
 		{
-			if (!_clients.TryRemove($"{host}:{port}", out var client)) return;
+			if (!_clients.TryRemove((host, port), out var client)) return;
 			if (client.IsValueCreated)
 				client.Value.Dispose();
 		}
 
 		public IClient CreateClient(string host, int port)
 		{
-			var key = $"{host}:{port}";
+			var key = (host, port);
 			try
 			{
 				return _clients.GetOrAdd(key, new Lazy<IClient>(() =>
-				{
-					var bootstrap = Bootstrap;
-					EndPoint endPoint;
-					if (IPAddress.TryParse(host, out var ip))
-						endPoint = new IPEndPoint(ip, port);
-					else
-						endPoint = new DnsEndPoint(host, port);
-					var channel = bootstrap.ConnectAsync(endPoint).GetAwaiter().GetResult();
-					channel.GetAttribute(TransportContextAttributeKey).Set(new TransportContext
-					{
-						Host = host,
-						Port = port
-					});
-					var listener = new MessageListener();
-					channel.GetAttribute(MessageListenerAttributeKey).Set(listener);
-					return new Client(channel, listener);
-				})).Value;
+				 {
+					 var bootstrap = Bootstrap;
+					 EndPoint endPoint;
+					 if (IPAddress.TryParse(host, out var ip))
+						 endPoint = new IPEndPoint(ip, port);
+					 else
+						 endPoint = new DnsEndPoint(host, port);
+					 var channel = bootstrap.ConnectAsync(endPoint).GetAwaiter().GetResult();
+					 channel.GetAttribute(TransportContextAttributeKey).Set(new TransportContext
+					 {
+						 Host = host,
+						 Port = port
+					 });
+					 var listener = new MessageListener();
+					 channel.GetAttribute(MessageListenerAttributeKey).Set(listener);
+					 return new Client(channel, listener);
+				 })).Value;
 			}
 			catch
 			{

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Uragano.Abstractions.ServiceDiscovery
 {
@@ -14,5 +12,12 @@ namespace Uragano.Abstractions.ServiceDiscovery
 		public IDictionary<string, string> Meta { get; set; }
 
 		public bool Alive { get; set; }
+	}
+
+	public class ServiceNodeInfo : ServiceDiscoveryInfo
+	{
+		public int Weight { get; set; }
+
+		public int CurrentWeight { get; set; }
 	}
 }

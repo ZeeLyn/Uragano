@@ -21,9 +21,9 @@ namespace Uragano.DynamicProxy
 			ServiceProvider = serviceProvider;
 		}
 
-		public void BuildServer()
+		public void BuildService()
 		{
-			ContainerManager.Init(ServiceProvider);
+
 			var ignoreAssemblyFix = new[]
 			{
 				"Microsoft", "System", "Consul", "Polly", "Newtonsoft.Json", "MessagePack", "Google.Protobuf",
@@ -56,6 +56,7 @@ namespace Uragano.DynamicProxy
 				var methods = service.Interface.GetMethods();
 				var interfaceInterceptors = service.Interface.GetCustomAttributes(true).Where(p => p is IInterceptor)
 					.Select(p => p.GetType()).ToList();
+
 				foreach (var method in methods)
 				{
 					var idAttr = method.GetCustomAttribute<ServiceRouteAttribute>();

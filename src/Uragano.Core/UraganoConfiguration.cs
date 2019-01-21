@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyModel;
 using Uragano.Abstractions;
@@ -13,43 +14,56 @@ namespace Uragano.Core
 {
 	public class UraganoConfiguration : IUraganoConfiguration
 	{
-		internal IServiceCollection ServiceCollection { get; set; }
+		internal IServiceCollection ServiceCollection { get; }
 
 		internal UraganoSettings UraganoSettings { get; set; } = new UraganoSettings();
 
-		internal bool IsServer { get; set; }
-
-		public void AddServer(string ip, int port, bool libuv = false)
+		public UraganoConfiguration(IServiceCollection serviceCollection)
 		{
-			AddServer(ip, port, "", "", libuv);
+			ServiceCollection = serviceCollection;
 		}
 
-		public void AddServer(string ip, int port, string certificateUrl, string certificatePwd, bool libuv = false)
+		public void AddServer(string ip, int port, int? weight = default)
 		{
-			IsServer = true;
+			AddServer(ip, port, "", "", weight);
+		}
+
+		public void AddServer(string ip, int port, string certificateUrl, string certificatePwd, int? weight = default)
+		{
 			ServiceCollection.AddSingleton<IBootstrap, ServerBootstrap>();
 			UraganoSettings.ServerSettings = new ServerSettings
 			{
 				IP = IPAddress.Parse(ip),
 				Port = port,
-				Libuv = libuv
+				Weight = weight
 			};
 			if (!string.IsNullOrWhiteSpace(certificateUrl))
 			{
 				if (!File.Exists(certificateUrl))
 					throw new FileNotFoundException($"Certificate file {certificateUrl} not found.");
 				UraganoSettings.ServerSettings.X509Certificate2 =
-					new System.Security.Cryptography.X509Certificates.X509Certificate2(certificateUrl, certificateUrl);
+					new X509Certificate2(certificateUrl, certificateUrl);
 			}
-			AddServices();
+			RegisterServicesAndInterceptors();
 		}
 
+		/// <summary>
+		/// For client
+		/// </summary>
+		/// <typeparam name="TServiceDiscovery"></typeparam>
+		/// <param name="serviceDiscoveryClientConfiguration"></param>
 		public void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration) where TServiceDiscovery : IServiceDiscovery
 		{
 			UraganoSettings.ServiceDiscoveryClientConfiguration = serviceDiscoveryClientConfiguration ?? throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
 			ServiceCollection.AddSingleton(typeof(IServiceDiscovery), typeof(TServiceDiscovery));
 		}
 
+		/// <summary>
+		/// For server
+		/// </summary>
+		/// <typeparam name="TServiceDiscovery"></typeparam>
+		/// <param name="serviceDiscoveryClientConfiguration"></param>
+		/// <param name="serviceRegisterConfiguration"></param>
 		public void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration,
 			IServiceRegisterConfiguration serviceRegisterConfiguration) where TServiceDiscovery : IServiceDiscovery
 		{
@@ -61,14 +75,45 @@ namespace Uragano.Core
 			ServiceCollection.AddSingleton(typeof(IServiceDiscovery), typeof(TServiceDiscovery));
 		}
 
-
-		public void AddClient()
+		public void AddClient(string serviceName, string certificateUrl = "", string certificatePassword = "")
 		{
-			AddServices();
+			Console.WriteLine("exec addclient ------------------->");
+			if (UraganoSettings.ClientInvokeServices == null)
+				UraganoSettings.ClientInvokeServices =
+					new System.Collections.Generic.Dictionary<string,
+						X509Certificate2>();
+			X509Certificate2 cert = null;
+			if (!string.IsNullOrWhiteSpace(certificateUrl))
+			{
+				if (!File.Exists(certificateUrl))
+					throw new FileNotFoundException($"Certificate file {certificateUrl} not found.");
+				cert = new X509Certificate2(certificateUrl, certificatePassword);
+			}
+
+			UraganoSettings.ClientInvokeServices[serviceName] = cert;
+
+			if (ServiceCollection.All(p => p.ServiceType != typeof(IServiceStatusManageFactory)))
+			{
+				ServiceCollection.AddSingleton<IServiceStatusManageFactory, ServiceStatusManageFactory>();
+				ServiceCollection.AddSingleton<IClientFactory, ClientFactory>();
+			}
+		}
+
+		public void AddClient(params (string SeriviceName, string CertificateUrl, string CertificatePassword)[] dependentServices)
+		{
+			foreach (var service in dependentServices)
+			{
+				AddClient(service.SeriviceName, service.CertificateUrl, service.CertificatePassword);
+			}
+		}
+
+		public void Option<T>(UraganoOption<T> option, T value)
+		{
+			UraganoOptions.SetOption(option, value);
 		}
 
 
-		private void AddServices()
+		private void RegisterServicesAndInterceptors()
 		{
 			var ignoreAssemblyFix = new[]
 			{
@@ -88,13 +133,13 @@ namespace Uragano.Core
 				Interface = @interface,
 				Implementation = types.FirstOrDefault(p => p.IsClass && p.IsPublic && !p.IsAbstract && @interface.IsAssignableFrom(p))
 			});
-			if (IsServer)
+
+
+			foreach (var service in services)
 			{
-				foreach (var service in services)
-				{
-					ServiceCollection.AddTransient(service.Interface, service.Implementation);
-				}
+				ServiceCollection.AddTransient(service.Interface, service.Implementation);
 			}
+
 
 			var interceptors = types.FindAll(t => typeof(IInterceptor).IsAssignableFrom(t));
 			foreach (var interceptor in interceptors)

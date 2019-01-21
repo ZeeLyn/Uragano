@@ -3,7 +3,6 @@ using System.Net;
 using System.Threading.Tasks;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
-using DotNetty.Handlers.Logging;
 using DotNetty.Handlers.Tls;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
@@ -41,7 +40,7 @@ namespace Uragano.Remoting
 			IEventLoopGroup bossGroup;
 			IEventLoopGroup workerGroup;
 			var bootstrap = new DotNetty.Transport.Bootstrapping.ServerBootstrap();
-			if (ServerSettings.Libuv)
+			if (UraganoOptions.DotNetty_Enable_Libuv.Value)
 			{
 				var dispatcher = new DispatcherEventLoopGroup();
 				bossGroup = dispatcher;
@@ -57,18 +56,19 @@ namespace Uragano.Remoting
 
 			bootstrap
 				.Group(bossGroup, workerGroup)
-				.Option(ChannelOption.SoBacklog, 100)
+				.Option(ChannelOption.SoBacklog, UraganoOptions.Server_DotNetty_Channel_SoBacklog.Value)
 				.ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
-				.ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
+				.ChildOption(ChannelOption.ConnectTimeout, UraganoOptions.DotNetty_Connect_Timeout.Value)
+				.ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
 				{
 					var pipeline = channel.Pipeline;
 					if (ServerSettings.X509Certificate2 != null)
 					{
 						pipeline.AddLast(TlsHandler.Server(ServerSettings.X509Certificate2));
 					}
-					pipeline.AddLast(new LoggingHandler("SRV-CONN"));
-					pipeline.AddLast(new LengthFieldPrepender(2));
-					pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 2, 0, 2));
+					//pipeline.AddLast(new LoggingHandler("SRV-CONN"));
+					pipeline.AddLast(new LengthFieldPrepender(4));
+					pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
 					pipeline.AddLast(new MessageDecoder<InvokeMessage>());
 					pipeline.AddLast(new MessageEncoder<ResultMessage>());
 					pipeline.AddLast(new ServerMessageHandler(InvokerFactory, ProxyGenerateFactory));

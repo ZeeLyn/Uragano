@@ -28,12 +28,12 @@ namespace Uragano.DynamicProxy
 				Interceptors = interceptorTypes,
 				ServiceName = serviceName
 			});
-			MethodMapRoute.TryAdd(methodInfo, route);
+			MethodMapRoute.TryAdd(methodInfo, route.ToLower());
 		}
 
 		public ServiceDescriptor Get(string route)
 		{
-			if (ServiceInvokers.TryGetValue(route, out var value))
+			if (ServiceInvokers.TryGetValue(route.ToLower(), out var value))
 				return value;
 			throw new NotFoundRouteException(route);
 		}
