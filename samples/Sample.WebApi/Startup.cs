@@ -42,7 +42,7 @@ namespace Sample.WebApi
 			}
 
 			app.UseMvc();
-			app.UseUragano();
+			//app.UseUragano();
 		}
 	}
 }

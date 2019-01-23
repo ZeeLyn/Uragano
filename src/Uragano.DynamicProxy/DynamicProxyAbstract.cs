@@ -9,22 +9,22 @@ namespace Uragano.DynamicProxy
 	{
 
 
-		protected void Invoke(Dictionary<string, object> args, string route)
+		protected void Invoke(object[] args, string route)
 		{
 
 		}
 
-		protected T Invoke<T>(Dictionary<string, object> args, string route)
+		protected T Invoke<T>(object[] args, string route)
 		{
 			return default;
 		}
 
-		protected async Task InvokeAsync(Dictionary<string, object> args, string route)
+		protected async Task InvokeAsync(object[] args, string route)
 		{
 
 		}
 
-		protected async Task<T> InvokeAsync<T>(Dictionary<string, object> args, string route)
+		protected async Task<T> InvokeAsync<T>(object[] args, string route)
 		{
 			return default;
 		}

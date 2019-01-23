@@ -12,12 +12,21 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.DependencyModel;
+using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 
 namespace Uragano.DynamicProxy
 {
 	public class ProxyGenerator : IProxyGenerator
 	{
+
+		private ILogger Logger { get; }
+
+		public ProxyGenerator(ILogger<ProxyGenerator> logger)
+		{
+			Logger = logger;
+		}
+
 		public object Create<TProxy>(Type type) where TProxy : DispatchProxy
 		{
 			var callExpression = Expression.Call(typeof(DispatchProxy), nameof(DispatchProxy.Create), new[] { type, typeof(TProxy) });
@@ -26,6 +35,9 @@ namespace Uragano.DynamicProxy
 
 		public object GenerateProxy(IEnumerable<Type> interfaces)
 		{
+			if (interfaces.Any(p => !p.IsInterface && !typeof(IService).IsAssignableFrom(p)))
+				throw new ArgumentException("The proxy object must be an interface and inherit IService.", nameof(interfaces));
+
 			var assemblies = DependencyContext.Default.RuntimeLibraries.SelectMany(i => i.GetDefaultAssemblyNames(DependencyContext.Default).Select(z => Assembly.Load(new AssemblyName(z.Name)))).Where(i => i.IsDynamic == false);
 
 			var types = assemblies.Select(p => p.GetType());
@@ -37,7 +49,7 @@ namespace Uragano.DynamicProxy
 
 			var trees = interfaces.Select(GenerateProxyTree).ToList();
 			var text = trees.First().GetText();
-			File.WriteAllText(@"F:\Github\Uragano\src\Uragano.DynamicProxy\Imp.cs", text.ToString());
+			File.WriteAllText(@"E:\GitHub\Uragano\src\Uragano.DynamicProxy\Imp.cs", text.ToString());
 			using (var stream = CompilationUtilitys.CompileClientProxy(trees,
 				assemblies.Select(x => MetadataReference.CreateFromFile(x.Location))
 					.Concat(new[]
@@ -85,13 +97,13 @@ namespace Uragano.DynamicProxy
 		/// <returns></returns>
 		private SyntaxList<MemberDeclarationSyntax> GenerateNamespace(Type type)
 		{
-			var namespaceDeclaration = SyntaxFactory.NamespaceDeclaration(GenerateQualifiedNameSyntax("Uragano.DynamicProxy.Imp"));
+			var namespaceDeclaration = SyntaxFactory.NamespaceDeclaration(GenerateQualifiedNameSyntax("Uragano.DynamicProxy.UraganoProxy"));
 			return GenerateClass(namespaceDeclaration, type);
 		}
 
 		private SyntaxList<MemberDeclarationSyntax> GenerateClass(NamespaceDeclarationSyntax namespaceDeclaration, Type type)
 		{
-			var className = type.Name.TrimStart('I') + "_Proxy";
+			var className = type.Name.TrimStart('I') + "UraganoProxy";
 
 			// base class
 			var baseList = SyntaxFactory.BaseList(SyntaxFactory.SeparatedList<BaseTypeSyntax>(new SyntaxNodeOrToken[]{
@@ -122,7 +134,7 @@ namespace Uragano.DynamicProxy
 			var methodAttr = methodInfo.GetCustomAttribute<ServiceRouteAttribute>();
 			var serviceRoute = $"{routePrefix}/{(methodAttr == null ? methodInfo.Name : methodAttr.Route)}";
 			var returnDeclaration = GenerateType(methodInfo.ReturnType);
-			var args = new List<SyntaxNodeOrToken>();
+
 			var argDeclarations = new List<SyntaxNodeOrToken>();
 			foreach (var arg in methodInfo.GetParameters())
 			{
@@ -133,23 +145,10 @@ namespace Uragano.DynamicProxy
 
 				argDeclarations.Add(SyntaxFactory.Token(SyntaxKind.CommaToken));
 
-				//args.Add(SyntaxFactory.IdentifierName(arg.Name));
-				args.Add(SyntaxFactory.InitializerExpression(
-					SyntaxKind.ComplexElementInitializerExpression,
-					SyntaxFactory.SeparatedList<ExpressionSyntax>(
-						new SyntaxNodeOrToken[]{
-							SyntaxFactory.LiteralExpression(
-								SyntaxKind.StringLiteralExpression,
-								SyntaxFactory.Literal(arg.Name)),
-							SyntaxFactory.Token(SyntaxKind.CommaToken),
-							SyntaxFactory.IdentifierName(arg.Name)})));
-				//args.Add(SyntaxFactory.InitializerExpression());
-				args.Add(SyntaxFactory.Token(SyntaxKind.CommaToken));
 			}
 
-			if (args.Any())
+			if (argDeclarations.Any())
 			{
-				args.RemoveAt(args.Count - 1);
 				argDeclarations.RemoveAt(argDeclarations.Count - 1);
 			}
 
@@ -167,7 +166,7 @@ namespace Uragano.DynamicProxy
 					.MethodDeclaration(returnDeclaration, SyntaxFactory.Identifier(methodInfo.Name));
 			}
 
-			if (methodInfo.ReturnType.BaseType == typeof(Task))
+			if (methodInfo.ReturnType.Namespace == typeof(Task).Namespace)
 			{
 				methodDeclaration = methodDeclaration.WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword),
 					SyntaxFactory.Token(SyntaxKind.AsyncKeyword)));
@@ -181,83 +180,35 @@ namespace Uragano.DynamicProxy
 				SyntaxFactory.ParameterList(SyntaxFactory.SeparatedList<ParameterSyntax>(argDeclarations)));
 
 
-			ExpressionSyntax expressionSyntax = null;
-			StatementSyntax statementSyntax = null;
 
+			string methodBody = null;
+			var argNames = string.Join(",", methodInfo.GetParameters().Select(p => p.Name));
 			//Sync method
-			if (methodInfo.ReturnType.BaseType != typeof(Task))
+			if (methodInfo.ReturnType.Namespace != typeof(Task).Namespace)
 			{
 				if (methodInfo.ReturnType == typeof(void))
 				{
-					expressionSyntax = SyntaxFactory.IdentifierName("Invoke");
+					methodBody = $"Invoke(new object[]{{{argNames}}},\"{serviceRoute}\");";
 
 				}
 				else
 				{
-					expressionSyntax = SyntaxFactory.GenericName(SyntaxFactory.Identifier("Invoke"))
-						.WithTypeArgumentList(((GenericNameSyntax)returnDeclaration).TypeArgumentList);
+					methodBody = $"return Invoke<{methodInfo.ReturnType.Namespace}.{methodInfo.ReturnType.Name}>(new object[]{{{argNames}}},\"{serviceRoute}\");";
 				}
 			}
 			else //Async method
 			{
 				if (methodInfo.ReturnType == typeof(Task))
 				{
-					expressionSyntax = SyntaxFactory.GenericName(SyntaxFactory.Identifier("InvokeAsync"));
+					methodBody = $"await InvokeAsync(new object[]{{{argNames}}},\"{serviceRoute}\");";
 				}
 				else
 				{
-					expressionSyntax = SyntaxFactory.GenericName(SyntaxFactory.Identifier("InvokeAsync"))
-						.WithTypeArgumentList(((GenericNameSyntax)returnDeclaration).TypeArgumentList);
+					methodBody = $"return await InvokeAsync<{methodInfo.ReturnType.GetGenericArguments().First().Namespace}.{methodInfo.ReturnType.GetGenericArguments().First().Name}>(new object[]{{{argNames}}},\"{serviceRoute}\");";
 				}
 			}
 
-
-			var invocationExpression = SyntaxFactory.InvocationExpression(expressionSyntax).WithArgumentList(SyntaxFactory.ArgumentList(
-				SyntaxFactory.SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]
-				{
-					//SyntaxFactory.Argument(SyntaxFactory.ArrayCreationExpression(SyntaxFactory.ArrayType(SyntaxFactory.IdentifierName("System.Object[]"))).WithInitializer(SyntaxFactory.InitializerExpression(SyntaxKind.ArrayInitializerExpression,SyntaxFactory.SeparatedList<ExpressionSyntax>(args)))),
-					//SyntaxFactory.Argument(SyntaxFactory.ArrayCreationExpression( SyntaxFactory.ArrayType(SyntaxFactory.IdentifierName("System.Object[]")),express)),
-					SyntaxFactory.Argument(
-						SyntaxFactory.ObjectCreationExpression(
-								SyntaxFactory.GenericName(
-										SyntaxFactory.Identifier("Dictionary"))
-									.WithTypeArgumentList(
-										SyntaxFactory.TypeArgumentList(
-											SyntaxFactory.SeparatedList<TypeSyntax>(
-												new SyntaxNodeOrToken[]
-												{
-													SyntaxFactory.PredefinedType(
-														SyntaxFactory.Token(SyntaxKind.StringKeyword)),
-													SyntaxFactory.Token(SyntaxKind.CommaToken),
-													SyntaxFactory.PredefinedType(
-														SyntaxFactory.Token(SyntaxKind.ObjectKeyword))
-												}))))
-							.WithInitializer(
-								SyntaxFactory.InitializerExpression(
-									SyntaxKind.CollectionInitializerExpression,
-									SyntaxFactory.SeparatedList<ExpressionSyntax>(
-										args)))),
-					SyntaxFactory.Token(SyntaxKind.CommaToken),
-					SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,SyntaxFactory.Literal(serviceRoute)))
-
-				})));
-			if (methodInfo.ReturnType.BaseType != typeof(Task))
-			{
-				expressionSyntax = SyntaxFactory.InvocationExpression(invocationExpression);
-			}
-			else
-			{
-				expressionSyntax = SyntaxFactory.AwaitExpression(invocationExpression);
-			}
-
-
-			//has return values
-			if (methodInfo.ReturnType != typeof(Task) && methodInfo.ReturnType != typeof(void))
-				statementSyntax = SyntaxFactory.ReturnStatement(expressionSyntax);
-			else
-				statementSyntax = SyntaxFactory.ExpressionStatement(expressionSyntax);
-
-			return methodDeclaration.WithBody(SyntaxFactory.Block(SyntaxFactory.SingletonList(statementSyntax)));
+			return methodDeclaration.WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(methodBody)));
 		}
 
 		private ConstructorDeclarationSyntax GenerateConstructorDeclaration(string className)
@@ -329,5 +280,44 @@ namespace Uragano.DynamicProxy
 			return left;
 		}
 		#endregion
+
+
+		private MemoryStream CompileClientProxy(IEnumerable<SyntaxTree> trees, IEnumerable<MetadataReference> references)
+		{
+
+			var assemblys = new[]
+			{
+				"System.Runtime",
+				"mscorlib",
+				"System.Threading.Tasks",
+				"System.Collections"
+			};
+			references = assemblys.Select(i => MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName(i)).Location)).Concat(references);
+
+			references = references.Concat(new[]
+			{
+				MetadataReference.CreateFromFile(typeof(Task).GetTypeInfo().Assembly.Location),
+				MetadataReference.CreateFromFile(typeof(DynamicProxyAbstract).GetTypeInfo().Assembly.Location)
+			});
+			return Compile("Uragano.DynamicProxy.UraganoProxy", trees, references);
+		}
+
+
+		private MemoryStream Compile(string assemblyName, IEnumerable<SyntaxTree> trees, IEnumerable<MetadataReference> references)
+		{
+			var compilation = CSharpCompilation.Create(assemblyName, trees, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+			var stream = new MemoryStream();
+			var result = compilation.Emit(stream);
+			if (!result.Success)
+			{
+				foreach (var message in result.Diagnostics.Select(i => i.ToString()))
+				{
+					Logger.LogError(message);
+				}
+				return null;
+			}
+			stream.Seek(0, SeekOrigin.Begin);
+			return stream;
+		}
 	}
 }

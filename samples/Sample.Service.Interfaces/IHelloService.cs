@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Uragano.Abstractions;
 
 namespace Sample.Service.Interfaces
@@ -12,6 +13,10 @@ namespace Sample.Service.Interfaces
 		[ServiceRoute("say")]
 		Task<ResultModel> SayHello(string name, int age);
 
+		Task SayHello();
+
 		void SayHello(string name);
+
+		int SayHello(string name, List<string> list);
 	}
 }
