@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Sample.Service.Interfaces;
 using Uragano.Abstractions;
+using Uragano.DynamicProxy;
 using Uragano.Remoting;
 
 namespace Sample.WebApi.Controllers
@@ -14,24 +15,29 @@ namespace Sample.WebApi.Controllers
 		private IClientFactory ClientFactory { get; }
 		private IServiceProxy ServiceProxy { get; }
 
-		public ValuesController(IServiceProxy serviceProxy, IClientFactory clientFactory)
+		private IProxyGenerator ProxyGenerator { get; }
+
+		public ValuesController(IServiceProxy serviceProxy, IClientFactory clientFactory, IProxyGenerator proxyGenerator)
 		{
 			ServiceProxy = serviceProxy;
 			ClientFactory = clientFactory;
+			ProxyGenerator = proxyGenerator;
 		}
 
 		// GET api/values
 		[HttpGet]
 		public async Task<IActionResult> Get()
 		{
-			var proxy = ServiceProxy.GetService<IHelloService>();
-			var id = Guid.NewGuid().ToString();
-			var r = await proxy.SayHello(id);
-			return Ok(new
-			{
-				Send = id,
-				Rece = r.Message
-			});
+			//var proxy = ServiceProxy.GetService<IHelloService>();
+			//var id = Guid.NewGuid().ToString();
+			//var r = await proxy.SayHello(id);
+			//return Ok(new
+			//{
+			//	Send = id,
+			//	Rece = r.Message
+			//});
+			ProxyGenerator.GenerateProxy(new[] { typeof(IHelloService) });
+			return Ok();
 		}
 
 		// GET api/values/5

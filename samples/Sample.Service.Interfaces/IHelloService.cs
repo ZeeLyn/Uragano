@@ -10,6 +10,8 @@ namespace Sample.Service.Interfaces
 	{
 
 		[ServiceRoute("say")]
-		Task<ResultModel> SayHello(string name);
+		Task<ResultModel> SayHello(string name, int age);
+
+		void SayHello(string name);
 	}
 }
