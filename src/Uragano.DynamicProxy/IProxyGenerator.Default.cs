@@ -251,6 +251,7 @@ namespace Uragano.DynamicProxy
 			}
 
 
+			//has return values
 			if (methodInfo.ReturnType != typeof(Task) && methodInfo.ReturnType != typeof(void))
 				statementSyntax = SyntaxFactory.ReturnStatement(expressionSyntax);
 			else
