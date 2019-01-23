@@ -8,6 +8,6 @@ namespace Uragano.DynamicProxy
 	{
 		object Create<TProxy>(Type type) where TProxy : DispatchProxy;
 
-		object GenerateProxy(IEnumerable<Type> interfaces);
+		List<Type> GenerateProxy(IEnumerable<Type> interfaces);
 	}
 }

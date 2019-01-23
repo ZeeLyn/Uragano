@@ -6,8 +6,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading.Tasks;
-using MessagePack;
-using MessagePack.Resolvers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -33,12 +31,12 @@ namespace Uragano.DynamicProxy
 			return Expression.Lambda<Func<object>>(callExpression).Compile()();
 		}
 
-		public object GenerateProxy(IEnumerable<Type> interfaces)
+		public List<Type> GenerateProxy(IEnumerable<Type> interfaces)
 		{
 			if (interfaces.Any(p => !p.IsInterface && !typeof(IService).IsAssignableFrom(p)))
 				throw new ArgumentException("The proxy object must be an interface and inherit IService.", nameof(interfaces));
 
-			var assemblies = DependencyContext.Default.RuntimeLibraries.SelectMany(i => i.GetDefaultAssemblyNames(DependencyContext.Default).Select(z => Assembly.Load(new AssemblyName(z.Name)))).Where(i => i.IsDynamic == false);
+			var assemblies = DependencyContext.Default.RuntimeLibraries.SelectMany(i => i.GetDefaultAssemblyNames(DependencyContext.Default).Select(z => Assembly.Load(new AssemblyName(z.Name)))).Where(i => !i.IsDynamic);
 
 			var types = assemblies.Select(p => p.GetType());
 			types = types.Except(interfaces);
@@ -58,19 +56,7 @@ namespace Uragano.DynamicProxy
 					})))
 			{
 				var assembly = AssemblyLoadContext.Default.LoadFromStream(stream);
-				byte[] bytes = new byte[stream.Length];
-
-				stream.Read(bytes, 0, bytes.Length);
-
-				// 设置当前流的位置为流的开始 
-
-				stream.Seek(0, SeekOrigin.Begin);
-				using (var fs = new FileStream("E://proxy.dll", FileMode.Create))
-				{
-					fs.Write(bytes, 0, bytes.Length);
-					fs.Flush();
-				}
-				return assembly.GetExportedTypes();
+				return assembly.GetExportedTypes().ToList();
 			}
 		}
 
