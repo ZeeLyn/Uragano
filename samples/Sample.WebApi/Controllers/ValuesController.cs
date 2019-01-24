@@ -17,16 +17,19 @@ namespace Sample.WebApi.Controllers
 
 		private IProxyGenerator ProxyGenerator { get; }
 
-		public ValuesController(IServiceProxy serviceProxy, IClientFactory clientFactory, IProxyGenerator proxyGenerator)
+		private IHelloService HelloService { get; }
+
+		public ValuesController(IServiceProxy serviceProxy, IClientFactory clientFactory, IProxyGenerator proxyGenerator, IHelloService helloService)
 		{
 			ServiceProxy = serviceProxy;
 			ClientFactory = clientFactory;
 			ProxyGenerator = proxyGenerator;
+			HelloService = helloService;
 		}
 
 		// GET api/values
 		[HttpGet]
-		public async Task<IActionResult> Get()
+		public IActionResult Get()
 		{
 			//var proxy = ServiceProxy.GetService<IHelloService>();
 			//var id = Guid.NewGuid().ToString();
@@ -36,8 +39,8 @@ namespace Sample.WebApi.Controllers
 			//	Send = id,
 			//	Rece = r.Message
 			//});
-			ProxyGenerator.GenerateProxy(new[] { typeof(IHelloService) });
-			return Ok();
+			//ProxyGenerator.GenerateProxy(new[] { typeof(IHelloService) });
+			return Ok(HelloService.SayHelloVoid(Guid.NewGuid().ToString()));
 		}
 
 		// GET api/values/5

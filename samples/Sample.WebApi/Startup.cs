@@ -8,6 +8,7 @@ using Uragano.Abstractions;
 using Uragano.Codec.MessagePack;
 using Uragano.Consul;
 using Uragano.Core;
+using Uragano.DynamicProxy;
 
 namespace Sample.WebApi
 {
@@ -31,6 +32,7 @@ namespace Sample.WebApi
 				config.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));
 			});
 			services.AddScoped<TestLib>();
+			services.AddSingleton<RemotingInvoke>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -42,7 +44,7 @@ namespace Sample.WebApi
 			}
 
 			app.UseMvc();
-			//app.UseUragano();
+			app.UseUragano();
 		}
 	}
 }

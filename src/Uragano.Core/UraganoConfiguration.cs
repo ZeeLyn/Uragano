@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyModel;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceDiscovery;
+using Uragano.DynamicProxy;
 using Uragano.Remoting;
 
 namespace Uragano.Core
@@ -96,6 +97,7 @@ namespace Uragano.Core
 			{
 				ServiceCollection.AddSingleton<IServiceStatusManageFactory, ServiceStatusManageFactory>();
 				ServiceCollection.AddSingleton<IClientFactory, ClientFactory>();
+				RegisterProxy();
 			}
 		}
 
@@ -145,6 +147,29 @@ namespace Uragano.Core
 			foreach (var interceptor in interceptors)
 			{
 				ServiceCollection.AddScoped(interceptor);
+			}
+		}
+
+		private void RegisterProxy()
+		{
+			var ignoreAssemblyFix = new[]
+			{
+				"Microsoft", "System", "Consul", "Polly", "Newtonsoft.Json", "MessagePack", "Google.Protobuf",
+				"Remotion.Linq", "SOS.NETCore", "WindowsBase", "mscorlib", "netstandard", "Uragano"
+			};
+
+			var assemblies = DependencyContext.Default.RuntimeLibraries.SelectMany(i =>
+				i.GetDefaultAssemblyNames(DependencyContext.Default)
+					.Where(p => !ignoreAssemblyFix.Any(ignore =>
+						p.Name.StartsWith(ignore, StringComparison.CurrentCultureIgnoreCase)))
+					.Select(z => Assembly.Load(new AssemblyName(z.Name)))).Where(p => !p.IsDynamic).ToList();
+
+			var types = assemblies.SelectMany(p => p.GetExportedTypes()).ToList();
+			var services = types.Where(t => t.IsInterface && typeof(IService).IsAssignableFrom(t)).ToList();
+			var proxies = ProxyGenerator.GenerateProxy(services);
+			foreach (var service in services)
+			{
+				ServiceCollection.AddSingleton(service, proxies.FirstOrDefault(p => service.IsAssignableFrom(p)));
 			}
 		}
 	}

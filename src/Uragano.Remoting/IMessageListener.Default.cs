@@ -7,6 +7,7 @@ namespace Uragano.Remoting
 	public class MessageListener : IMessageListener
 	{
 		public event ReceiveMessageHandler OnReceived;
+
 		public async Task Received(IMessageSender sender, TransportMessage<ResultMessage> message)
 		{
 			if (OnReceived == null)

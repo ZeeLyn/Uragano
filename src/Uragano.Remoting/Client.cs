@@ -18,15 +18,19 @@ namespace Uragano.Remoting
 		{
 			Channel = channel;
 			MessageListener = messageListener;
-			MessageListener.OnReceived += async (sender, message) =>
-			{
-				if (_resultCallbackTask.TryGetValue(message.Id, out var task))
-				{
-					task.SetResult(message.Body);
-				}
-				await Task.CompletedTask;
-			};
+			MessageListener.OnReceived += MessageListener_OnReceived;
 
+		}
+
+		private Task MessageListener_OnReceived(IMessageSender sender, TransportMessage<ResultMessage> message)
+		{
+			if (_resultCallbackTask.TryGetValue(message.Id, out var task))
+			{
+				task.SetResult(message.Body);
+			}
+			else
+				Console.WriteLine("not found");
+			return Task.CompletedTask;
 		}
 
 		public async Task<ResultMessage> SendAsync(InvokeMessage message)
@@ -36,7 +40,7 @@ namespace Uragano.Remoting
 				Id = Guid.NewGuid().ToString(),
 				Body = message
 			};
-			var task = new TaskCompletionSource<ResultMessage>();
+			var task = new TaskCompletionSource<ResultMessage>(TaskCreationOptions.AttachedToParent);
 			if (!_resultCallbackTask.TryAdd(transportMessage.Id, task)) throw new Exception("Failed to send.");
 			var callback = Task.Run(async () =>
 			{

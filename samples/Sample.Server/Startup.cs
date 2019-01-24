@@ -33,7 +33,7 @@ namespace Sample.Server
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddUragano(config =>
 			{
-				config.AddServer("192.168.1.129", 5001, 100);
+				config.AddServer("192.168.1.254", 5001, 100);
 				config.AddConsul(new ConsulClientConfigure("http://192.168.1.142:8500"), new ConsulRegisterServiceConfiguration
 				{
 					ServiceId = "192.168.1.129:5001",

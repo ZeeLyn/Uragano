@@ -52,7 +52,7 @@ namespace Uragano.DynamicProxy
 				ServiceProxyFactory.CreateLocalProxy(service.Interface);
 				var routeAttr = service.Interface.GetCustomAttribute<ServiceRouteAttribute>();
 
-				var route = routeAttr == null ? $"{service.Interface.Namespace}/{service.Interface.Name}" : routeAttr.Route;
+				var routePrefix = routeAttr == null ? $"{service.Interface.Namespace}/{service.Interface.Name}" : routeAttr.Route;
 				var methods = service.Interface.GetMethods();
 				var interfaceInterceptors = service.Interface.GetCustomAttributes(true).Where(p => p is IInterceptor)
 					.Select(p => p.GetType()).ToList();
@@ -60,12 +60,12 @@ namespace Uragano.DynamicProxy
 				foreach (var method in methods)
 				{
 					var idAttr = method.GetCustomAttribute<ServiceRouteAttribute>();
-					route = idAttr == null ? $"{route}/{method.Name}" : $"{route}/{idAttr.Route}";
+					var route = idAttr == null ? $"{routePrefix}/{method.Name}" : $"{routePrefix}/{idAttr.Route}";
 					var interceptors = method.GetCustomAttributes(true)
 						.Where(p => p is IInterceptor).Select(p => p.GetType()).ToList();
 					interceptors.AddRange(interfaceInterceptors);
 					interceptors.Reverse();
-					InvokerFactory.Create(serviceNameAttr.Name, route, method, interceptors);
+					InvokerFactory.Create(serviceNameAttr.Name, route.ToLower(), method, interceptors);
 				}
 			}
 		}

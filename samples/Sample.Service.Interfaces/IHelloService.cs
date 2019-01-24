@@ -10,13 +10,16 @@ namespace Sample.Service.Interfaces
 	public interface IHelloService : IService
 	{
 
-		[ServiceRoute("say")]
-		Task<ResultModel> SayHello(string name, int age);
+		[ServiceRoute("say/async")]
+		Task<ResultModel> SayHello(string name);
 
+		[ServiceRoute("say/task")]
 		Task SayHello();
 
-		void SayHello(string name);
+		[ServiceRoute("say/void")]
+		void SayHello(string name, int age);
 
-		int SayHello(string name, List<string> list);
+		[ServiceRoute("say/void/return")]
+		ResultModel SayHelloVoid(string name);
 	}
 }

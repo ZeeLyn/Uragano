@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Sample.Service.Interfaces;
 using Uragano.Abstractions;
 
@@ -19,6 +20,21 @@ namespace Sample.Server
 		{
 			TestLib.Exec();
 			return await Task.FromResult(new ResultModel { Message = name });
+		}
+
+		public Task SayHello()
+		{
+			throw new System.NotImplementedException();
+		}
+
+		public void SayHello(string name, int age)
+		{
+			throw new System.NotImplementedException();
+		}
+
+		public ResultModel SayHelloVoid(string name)
+		{
+			return new ResultModel { Message = name };
 		}
 	}
 }

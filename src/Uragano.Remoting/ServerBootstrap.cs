@@ -73,7 +73,7 @@ namespace Uragano.Remoting
 					pipeline.AddLast(new MessageEncoder<ResultMessage>());
 					pipeline.AddLast(new ServerMessageHandler(InvokerFactory, ProxyGenerateFactory));
 				}));
-
+			Console.WriteLine($"监听{ServerSettings.IP}:{ServerSettings.Port}");
 			Channel = await bootstrap.BindAsync(new IPEndPoint(ServerSettings.IP, ServerSettings.Port));
 		}
 
