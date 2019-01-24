@@ -1,4 +1,5 @@
-﻿using Uragano.Abstractions.ServiceDiscovery;
+﻿using Microsoft.Extensions.Configuration;
+using Uragano.Abstractions.ServiceDiscovery;
 
 namespace Uragano.Abstractions
 {
@@ -8,6 +9,8 @@ namespace Uragano.Abstractions
 		void AddServer(string ip, int port, int? weight = default);
 
 		void AddServer(string ip, int port, string certificateUrl, string certificatePwd, int? weight = default);
+
+		void AddServer(IConfigurationSection configurationSection);
 
 		/// <summary>
 		/// For client
@@ -31,13 +34,13 @@ namespace Uragano.Abstractions
 		/// <param name="serviceName"></param>
 		/// <param name="certificateUrl"></param>
 		/// <param name="certificatePassword"></param>
-		void AddClient(string serviceName, string certificateUrl = "", string certificatePassword = "");
+		void DependentService(string serviceName, string certificateUrl = "", string certificatePassword = "");
 
 		/// <summary>
 		/// Add client-dependent services
 		/// </summary>
 		/// <param name="services"></param>
-		void AddClient(params (string SeriviceName, string CertificateUrl, string CertificatePassword)[] services);
+		void DependentServices(params (string SeriviceName, string CertificateUrl, string CertificatePassword)[] services);
 
 
 		void Option<T>(UraganoOption<T> option, T value);

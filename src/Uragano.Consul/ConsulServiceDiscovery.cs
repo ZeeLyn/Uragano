@@ -49,8 +49,8 @@ namespace Uragano.Consul
 				{
 					Address = UraganoSettings.ServerSettings.IP.ToString(),
 					Port = UraganoSettings.ServerSettings.Port,
-					ID = service.ServiceId,
-					Name = string.IsNullOrWhiteSpace(service.ServiceName) ? $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}" : service.ServiceName,
+					ID = service.Id,
+					Name = string.IsNullOrWhiteSpace(service.Name) ? $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}" : service.Name,
 					EnableTagOverride = service.EnableTagOverride,
 					Meta = service.Meta,
 					Tags = service.Tags,

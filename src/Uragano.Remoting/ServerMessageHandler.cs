@@ -32,15 +32,19 @@ namespace Uragano.Remoting
 				throw new ArgumentNullException(nameof(message));
 			try
 			{
-				var service = InvokerFactory.Get(transportMessage.Body.Route);
-				var proxyInstance = ProxyGenerateFactory.CreateLocalProxy(service.MethodInfo.DeclaringType);
-				var result = service.MethodInfo.Invoke(proxyInstance, transportMessage.Body.Args);
-
-				context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
+				using (var scope = ContainerManager.CreateScope())
 				{
-					Id = transportMessage.Id,
-					Body = new ResultMessage(result)
-				}).Wait();
+					var service = InvokerFactory.Get(transportMessage.Body.Route);
+
+					var proxyInstance = ProxyGenerateFactory.CreateLocalProxy(service.MethodInfo.DeclaringType);
+					var result = service.MethodInfo.Invoke(proxyInstance, transportMessage.Body.Args);
+
+					context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
+					{
+						Id = transportMessage.Id,
+						Body = new ResultMessage(result)
+					}).GetAwaiter().GetResult();
+				}
 			}
 			catch (Exception e)
 			{

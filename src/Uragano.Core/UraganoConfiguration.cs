@@ -2,11 +2,11 @@
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyModel;
 using Uragano.Abstractions;
+using Uragano.Abstractions.LoadBalancing;
 using Uragano.Abstractions.ServiceDiscovery;
 using Uragano.DynamicProxy;
 using Uragano.Remoting;
@@ -45,7 +45,12 @@ namespace Uragano.Core
 				UraganoSettings.ServerSettings.X509Certificate2 =
 					new X509Certificate2(certificateUrl, certificateUrl);
 			}
-			RegisterServicesAndInterceptors();
+			RegisterServerServicesAndInterceptors();
+		}
+
+		public void AddServer(IConfigurationSection configurationSection)
+		{
+			AddServer(configurationSection.GetValue<string>("ip"), configurationSection.GetValue<int>("port"), configurationSection.GetValue<string>("certificateurl"), configurationSection.GetValue<string>("certificatePwd"), configurationSection.GetValue<int>("weight"));
 		}
 
 		/// <summary>
@@ -70,15 +75,14 @@ namespace Uragano.Core
 		{
 			UraganoSettings.ServiceDiscoveryClientConfiguration = serviceDiscoveryClientConfiguration ?? throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
 			UraganoSettings.ServiceRegisterConfiguration = serviceRegisterConfiguration ?? throw new ArgumentNullException(nameof(serviceRegisterConfiguration));
-			if (string.IsNullOrWhiteSpace(serviceRegisterConfiguration.ServiceId))
-				throw new ArgumentNullException(nameof(serviceRegisterConfiguration.ServiceId));
+			if (string.IsNullOrWhiteSpace(serviceRegisterConfiguration.Id))
+				throw new ArgumentNullException(nameof(serviceRegisterConfiguration.Id));
 
 			ServiceCollection.AddSingleton(typeof(IServiceDiscovery), typeof(TServiceDiscovery));
 		}
 
-		public void AddClient(string serviceName, string certificateUrl = "", string certificatePassword = "")
+		public void DependentService(string serviceName, string certificateUrl = "", string certificatePassword = "")
 		{
-			Console.WriteLine("exec addclient ------------------->");
 			if (UraganoSettings.ClientInvokeServices == null)
 				UraganoSettings.ClientInvokeServices =
 					new System.Collections.Generic.Dictionary<string,
@@ -95,17 +99,21 @@ namespace Uragano.Core
 
 			if (ServiceCollection.All(p => p.ServiceType != typeof(IServiceStatusManageFactory)))
 			{
+				ServiceCollection.AddSingleton<IProxyGenerator, ProxyGenerator>();
+				ServiceCollection.AddSingleton<IProxyGenerateFactory, ProxyGenerateFactory>();
 				ServiceCollection.AddSingleton<IServiceStatusManageFactory, ServiceStatusManageFactory>();
 				ServiceCollection.AddSingleton<IClientFactory, ClientFactory>();
-				RegisterProxy();
+				ServiceCollection.AddSingleton<IRemotingInvoke, RemotingInvoke>();
+				ServiceCollection.AddSingleton(typeof(ILoadBalancing), UraganoOptions.Client_LoadBalancing.Value);
+				RegisterClientProxyService();
 			}
 		}
 
-		public void AddClient(params (string SeriviceName, string CertificateUrl, string CertificatePassword)[] dependentServices)
+		public void DependentServices(params (string SeriviceName, string CertificateUrl, string CertificatePassword)[] dependentServices)
 		{
 			foreach (var service in dependentServices)
 			{
-				AddClient(service.SeriviceName, service.CertificateUrl, service.CertificatePassword);
+				DependentService(service.SeriviceName, service.CertificateUrl, service.CertificatePassword);
 			}
 		}
 
@@ -115,27 +123,14 @@ namespace Uragano.Core
 		}
 
 
-		private void RegisterServicesAndInterceptors()
+		private void RegisterServerServicesAndInterceptors()
 		{
-			var ignoreAssemblyFix = new[]
-			{
-				"Microsoft", "System", "Consul", "Polly", "Newtonsoft.Json", "MessagePack", "Google.Protobuf",
-				"Remotion.Linq", "SOS.NETCore", "WindowsBase", "mscorlib", "netstandard", "Uragano"
-			};
-
-			var assemblies = DependencyContext.Default.RuntimeLibraries.SelectMany(i =>
-				i.GetDefaultAssemblyNames(DependencyContext.Default)
-					.Where(p => !ignoreAssemblyFix.Any(ignore =>
-						p.Name.StartsWith(ignore, StringComparison.CurrentCultureIgnoreCase)))
-					.Select(z => Assembly.Load(new AssemblyName(z.Name)))).Where(p => !p.IsDynamic).ToList();
-
-			var types = assemblies.SelectMany(p => p.GetExportedTypes()).ToList();
+			var types = ReflectHelper.GetDependencyTypes();
 			var services = types.Where(t => t.IsInterface && typeof(IService).IsAssignableFrom(t)).Select(@interface => new
 			{
 				Interface = @interface,
 				Implementation = types.FirstOrDefault(p => p.IsClass && p.IsPublic && !p.IsAbstract && @interface.IsAssignableFrom(p))
 			});
-
 
 			foreach (var service in services)
 			{
@@ -150,22 +145,12 @@ namespace Uragano.Core
 			}
 		}
 
-		private void RegisterProxy()
+		/// <summary>
+		/// 客户端注册
+		/// </summary>
+		private void RegisterClientProxyService()
 		{
-			var ignoreAssemblyFix = new[]
-			{
-				"Microsoft", "System", "Consul", "Polly", "Newtonsoft.Json", "MessagePack", "Google.Protobuf",
-				"Remotion.Linq", "SOS.NETCore", "WindowsBase", "mscorlib", "netstandard", "Uragano"
-			};
-
-			var assemblies = DependencyContext.Default.RuntimeLibraries.SelectMany(i =>
-				i.GetDefaultAssemblyNames(DependencyContext.Default)
-					.Where(p => !ignoreAssemblyFix.Any(ignore =>
-						p.Name.StartsWith(ignore, StringComparison.CurrentCultureIgnoreCase)))
-					.Select(z => Assembly.Load(new AssemblyName(z.Name)))).Where(p => !p.IsDynamic).ToList();
-
-			var types = assemblies.SelectMany(p => p.GetExportedTypes()).ToList();
-			var services = types.Where(t => t.IsInterface && typeof(IService).IsAssignableFrom(t)).ToList();
+			var services = ReflectHelper.GetDependencyTypes().Where(t => t.IsInterface && typeof(IService).IsAssignableFrom(t)).ToList();
 			var proxies = ProxyGenerator.GenerateProxy(services);
 			foreach (var service in services)
 			{

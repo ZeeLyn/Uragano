@@ -2,6 +2,6 @@
 {
 	public interface IServiceRegisterConfiguration
 	{
-		string ServiceId { get; set; }
+		string Id { get; set; }
 	}
 }

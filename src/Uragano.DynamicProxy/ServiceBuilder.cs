@@ -9,55 +9,41 @@ namespace Uragano.DynamicProxy
 {
 	public class ServiceBuilder : IServiceBuilder
 	{
-		private IProxyGenerateFactory ServiceProxyFactory { get; }
 		private IInvokerFactory InvokerFactory { get; }
 
 		private IServiceProvider ServiceProvider { get; }
 
-		public ServiceBuilder(IProxyGenerateFactory serviceProxyFactory, IInvokerFactory invokerFactory, IServiceProvider serviceProvider)
+		public ServiceBuilder(IInvokerFactory invokerFactory, IServiceProvider serviceProvider)
 		{
-			ServiceProxyFactory = serviceProxyFactory;
 			InvokerFactory = invokerFactory;
 			ServiceProvider = serviceProvider;
 		}
 
 		public void BuildService()
 		{
-
-			var ignoreAssemblyFix = new[]
-			{
-				"Microsoft", "System", "Consul", "Polly", "Newtonsoft.Json", "MessagePack", "Google.Protobuf",
-				"Remotion.Linq", "SOS.NETCore", "WindowsBase", "mscorlib", "netstandard", "Uragano"
-			};
-
-			var assemblies = DependencyContext.Default.RuntimeLibraries.SelectMany(i =>
-				i.GetDefaultAssemblyNames(DependencyContext.Default)
-					.Where(p => !ignoreAssemblyFix.Any(ignore =>
-						p.Name.StartsWith(ignore, StringComparison.CurrentCultureIgnoreCase)))
-					.Select(z => Assembly.Load(new AssemblyName(z.Name)))).Where(p => !p.IsDynamic).ToList();
-
-			var types = assemblies.SelectMany(p => p.GetExportedTypes()).ToList();
+			var types = ReflectHelper.GetDependencyTypes();
 			var services = types.Where(t => t.IsInterface && typeof(IService).IsAssignableFrom(t)).Select(@interface => new
 			{
 				Interface = @interface,
 				Implementation = types.FirstOrDefault(p => p.IsClass && p.IsPublic && !p.IsAbstract && @interface.IsAssignableFrom(p))
-			});
+			}).Where(p => p.Implementation != null);
 
 			foreach (var service in services)
 			{
-				var serviceNameAttr = service.Interface.GetCustomAttribute<ServiceDiscoveryNameAttribute>();
-				if (serviceNameAttr == null)
-					throw new InvalidOperationException($"Interface {service.Interface.FullName} must add a custom attribute ServiceNameAttribute.");
+				//var serviceNameAttr = service.Interface.GetCustomAttribute<ServiceDiscoveryNameAttribute>();
+				//if (serviceNameAttr == null)
+				//	throw new InvalidOperationException($"Interface {service.Interface.FullName} must add a custom attribute ServiceNameAttribute.");
 
-				ServiceProxyFactory.CreateLocalProxy(service.Interface);
+				//ServiceProxyFactory.CreateLocalProxy(service.Interface);
 				var routeAttr = service.Interface.GetCustomAttribute<ServiceRouteAttribute>();
 
 				var routePrefix = routeAttr == null ? $"{service.Interface.Namespace}/{service.Interface.Name}" : routeAttr.Route;
-				var methods = service.Interface.GetMethods();
+				var interfaceMethods = service.Interface.GetMethods();
+				var implementationMethods = service.Implementation.GetMethods(BindingFlags.Public);
 				var interfaceInterceptors = service.Interface.GetCustomAttributes(true).Where(p => p is IInterceptor)
 					.Select(p => p.GetType()).ToList();
 
-				foreach (var method in methods)
+				foreach (var method in interfaceMethods)
 				{
 					var idAttr = method.GetCustomAttribute<ServiceRouteAttribute>();
 					var route = idAttr == null ? $"{routePrefix}/{method.Name}" : $"{routePrefix}/{idAttr.Route}";
@@ -65,7 +51,8 @@ namespace Uragano.DynamicProxy
 						.Where(p => p is IInterceptor).Select(p => p.GetType()).ToList();
 					interceptors.AddRange(interfaceInterceptors);
 					interceptors.Reverse();
-					InvokerFactory.Create(serviceNameAttr.Name, route.ToLower(), method, interceptors);
+					//方法筛选有bug，可能有同名的
+					InvokerFactory.Create(route.ToLower(), service.Implementation, implementationMethods.First(p => p.Name == method.Name), interceptors);
 				}
 			}
 		}

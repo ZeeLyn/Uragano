@@ -13,15 +13,14 @@ namespace Sample.WebApi.Controllers
 	public class ValuesController : ControllerBase
 	{
 		private IClientFactory ClientFactory { get; }
-		private IServiceProxy ServiceProxy { get; }
+
 
 		private IProxyGenerator ProxyGenerator { get; }
 
 		private IHelloService HelloService { get; }
 
-		public ValuesController(IServiceProxy serviceProxy, IClientFactory clientFactory, IProxyGenerator proxyGenerator, IHelloService helloService)
+		public ValuesController(IClientFactory clientFactory, IProxyGenerator proxyGenerator, IHelloService helloService)
 		{
-			ServiceProxy = serviceProxy;
 			ClientFactory = clientFactory;
 			ProxyGenerator = proxyGenerator;
 			HelloService = helloService;

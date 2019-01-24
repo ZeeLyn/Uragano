@@ -24,15 +24,15 @@ namespace Sample.WebApi
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddUragano(config =>
 			{
-				config.AddConsul(new ConsulClientConfigure("http://192.168.1.142:8500"));
-				config.AddClient(("TestServer", "", ""));
+				config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"));
+				config.DependentServices(("TestServer", "", ""));
 				config.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));
 			});
 			services.AddScoped<TestLib>();
-			services.AddSingleton<IRemotingInvoke, RemotingInvoke>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -16,7 +16,7 @@ namespace Uragano.DynamicProxy
 		private static readonly ConcurrentDictionary<MethodInfo, string>
 			MethodMapRoute = new ConcurrentDictionary<MethodInfo, string>();
 
-		public void Create(string serviceName, string route, MethodInfo methodInfo, IEnumerable<Type> interceptorTypes)
+		public void Create(string route, Type implementationType, MethodInfo methodInfo, IEnumerable<Type> interceptorTypes)
 		{
 			if (ServiceInvokers.ContainsKey(route))
 				throw new Exception();
@@ -25,8 +25,7 @@ namespace Uragano.DynamicProxy
 				Route = route,
 				MethodInfo = methodInfo,
 				MethodInvoker = new MethodInvoker(methodInfo),
-				Interceptors = interceptorTypes,
-				ServiceName = serviceName
+				Interceptors = interceptorTypes
 			});
 			MethodMapRoute.TryAdd(methodInfo, route.ToLower());
 		}

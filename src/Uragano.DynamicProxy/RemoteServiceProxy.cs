@@ -18,8 +18,8 @@ namespace Uragano.DynamicProxy
 			var clientFactory = ContainerManager.ServiceProvider().GetService<IClientFactory>();
 			var service = invokerFactory.Get(targetMethod);
 			var loadBalancing = ContainerManager.ServiceProvider().GetService<ILoadBalancing>();
-			var node = loadBalancing.GetNextNode(service.ServiceName);
-			var client = clientFactory.CreateClient(node.Address, node.Port);
+			//var node = loadBalancing.GetNextNode(service.ServiceName);
+			var client = clientFactory.CreateClient("", 1);
 			var result = client.SendAsync(new InvokeMessage
 			{
 				Args = args,

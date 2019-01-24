@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Hosting;
 using Uragano.Abstractions.ServiceDiscovery;
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Uragano.Core
 {
@@ -17,6 +16,7 @@ namespace Uragano.Core
 		{
 			ContainerManager.Init(applicationBuilder.ApplicationServices);
 			ThreadPool.SetMinThreads(100, 100);
+
 			var applicationLifetime = applicationBuilder.ApplicationServices.GetService<IApplicationLifetime>();
 			var uraganoSettings = applicationBuilder.ApplicationServices.GetService<UraganoSettings>();
 
@@ -27,13 +27,12 @@ namespace Uragano.Core
 			//Start server and register service
 			if (uraganoSettings.ServerSettings != null)
 			{
-
 				var discovery = applicationBuilder.ApplicationServices.GetService<IServiceDiscovery>();
 				var bootstrap = applicationBuilder.ApplicationServices.GetService<IBootstrap>();
 				applicationLifetime.ApplicationStopping.Register(async () =>
 				{
 					CancellationTokenSource.Cancel();
-					await discovery.DeregisterAsync(uraganoSettings.ServiceDiscoveryClientConfiguration, uraganoSettings.ServiceRegisterConfiguration.ServiceId);
+					await discovery.DeregisterAsync(uraganoSettings.ServiceDiscoveryClientConfiguration, uraganoSettings.ServiceRegisterConfiguration.Id);
 					await bootstrap.StopAsync();
 				});
 				bootstrap.StartAsync().GetAwaiter().GetResult();

@@ -6,9 +6,9 @@ namespace Uragano.Consul
 {
 	public class ConsulRegisterServiceConfiguration : IServiceRegisterConfiguration
 	{
-		public string ServiceId { get; set; }
+		public string Id { get; set; }
 
-		public string ServiceName { get; set; }
+		public string Name { get; set; }
 
 		public bool EnableTagOverride { get; set; }
 
