@@ -26,7 +26,7 @@ namespace Uragano.Remoting
 		{
 			if (_resultCallbackTask.TryGetValue(message.Id, out var task))
 			{
-				task.SetResult(message.Body);
+				task.TrySetResult(message.Body);
 			}
 			else
 				Console.WriteLine("not found");
@@ -40,24 +40,21 @@ namespace Uragano.Remoting
 				Id = Guid.NewGuid().ToString(),
 				Body = message
 			};
-			var task = new TaskCompletionSource<ResultMessage>(TaskCreationOptions.AttachedToParent);
+			var task = new TaskCompletionSource<ResultMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
 			if (!_resultCallbackTask.TryAdd(transportMessage.Id, task)) throw new Exception("Failed to send.");
-			var callback = Task.Run(async () =>
+			try
 			{
-				try
-				{
-					return await task.Task;
-				}
-				finally
-				{
-					_resultCallbackTask.TryRemove(transportMessage.Id, out var t);
-					t.TrySetCanceled();
-				}
-			});
-			await Channel.WriteAndFlushAsync(transportMessage);
-			return await callback;
-
+				await Channel.WriteAndFlushAsync(transportMessage);
+				return await task.Task;
+			}
+			finally
+			{
+				_resultCallbackTask.TryRemove(transportMessage.Id, out var t);
+				t.TrySetCanceled();
+			}
+			//return await Task.FromResult(new ResultMessage(new ResultModel { Message = "1" }));
 		}
+
 
 		public void Dispose()
 		{

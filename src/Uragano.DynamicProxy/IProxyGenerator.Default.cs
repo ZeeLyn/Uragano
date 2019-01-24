@@ -65,8 +65,8 @@ namespace Uragano.DynamicProxy
 					SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("System")),
 					SyntaxFactory.UsingDirective(GenerateQualifiedNameSyntax("System.Threading.Tasks")),
 					SyntaxFactory.UsingDirective(GenerateQualifiedNameSyntax("System.Collections.Generic")),
-					//SyntaxFactory.UsingDirective(GenerateQualifiedNameSyntax(typeof(IServiceProvider).Namespace)),
 					SyntaxFactory.UsingDirective(GenerateQualifiedNameSyntax(typeof(DynamicProxyAbstract).Namespace)),
+					SyntaxFactory.UsingDirective(GenerateQualifiedNameSyntax(typeof(IRemotingInvoke).Namespace)),
 					SyntaxFactory.UsingDirective(GenerateQualifiedNameSyntax(@interface.Namespace))
 				}))
 				.WithMembers(GenerateNamespace(@interface));
@@ -201,14 +201,14 @@ namespace Uragano.DynamicProxy
 		{
 			return SyntaxFactory.ConstructorDeclaration(SyntaxFactory.Identifier(className))
 				.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-			//.AddParameterListParameters(SyntaxFactory.Parameter(SyntaxFactory.Identifier("serviceProvider"))
-			//		.WithType(SyntaxFactory.IdentifierName("IServiceProvider")))
-			//.WithInitializer(SyntaxFactory.ConstructorInitializer(SyntaxKind.BaseConstructorInitializer,
-			//	SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(
-			//		new SyntaxNodeOrToken[]
-			//		{
-			//			SyntaxFactory.Argument(SyntaxFactory.IdentifierName("serviceProvider"))
-			//		}))))
+			.AddParameterListParameters(SyntaxFactory.Parameter(SyntaxFactory.Identifier("remotingInvoke"))
+					.WithType(SyntaxFactory.IdentifierName("IRemotingInvoke")))
+			.WithInitializer(SyntaxFactory.ConstructorInitializer(SyntaxKind.BaseConstructorInitializer,
+				SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(
+					new SyntaxNodeOrToken[]
+					{
+						SyntaxFactory.Argument(SyntaxFactory.IdentifierName("remotingInvoke"))
+					}))))
 			.WithBody(SyntaxFactory.Block());
 		}
 		private static TypeSyntax GenerateType(Type type)

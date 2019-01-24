@@ -1,47 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Uragano.Abstractions.Exceptions;
 using Uragano.Abstractions.LoadBalancing;
-using Uragano.Abstractions.ServiceInvoker;
 using Uragano.Codec.MessagePack;
-using Microsoft.Extensions.DependencyInjection;
+using Uragano.Abstractions;
 using Uragano.Remoting;
 
 namespace Uragano.DynamicProxy
 {
-	public class RemotingInvoke
+	public class RemotingInvoke : IRemotingInvoke
 	{
-		private IServiceProvider ServiceProvider { get; }
+		private ILoadBalancing LoadBalancing { get; }
+		private IClientFactory ClientFactory { get; }
 
-		public RemotingInvoke(IServiceProvider serviceProvider)
+		public RemotingInvoke(ILoadBalancing loadBalancing, IClientFactory clientFactory)
 		{
-			ServiceProvider = serviceProvider;
+			LoadBalancing = loadBalancing;
+			ClientFactory = clientFactory;
 		}
 		public async Task<T> InvokeAsync<T>(string serviceName, string route, object[] args)
 		{
-			var invokerFactory = ServiceProvider.GetService<IInvokerFactory>();
-			var clientFactory = ServiceProvider.GetService<IClientFactory>();
-			var service = invokerFactory.Get(route);
-			var loadBalancing = ServiceProvider.GetService<ILoadBalancing>();
-			var node = loadBalancing.GetNextNode(service.ServiceName);
-			var client = clientFactory.CreateClient(node.Address, node.Port);
-
+			var node = LoadBalancing.GetNextNode(serviceName);
+			var client = ClientFactory.CreateClient(node.Address, node.Port);
 			var result = await client.SendAsync(new InvokeMessage
 			{
 				Args = args,
 				Route = route
 			});
-			//var result = new ResultMessage(new ResultModel
-			//{
-			//	Message = args[0].ToString()
-			//});
 
 			if (result.Status != RemotingStatus.Ok)
-				throw new RemoteInvokeException(service.Route, result.Result.ToString());
-			//if (result.Result == null || targetMethod.ReturnType == typeof(void) || targetMethod.ReturnType == typeof(Task))
-			//	return null;
+				throw new RemoteInvokeException(route, result.Result.ToString());
+			if (result.Result == null)
+				return default;
 			return (T)SerializerHelper.Deserialize(SerializerHelper.Serialize(result.Result), typeof(T));
 		}
 	}

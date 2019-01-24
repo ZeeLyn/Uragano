@@ -32,7 +32,7 @@ namespace Sample.WebApi
 				config.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));
 			});
 			services.AddScoped<TestLib>();
-			services.AddSingleton<RemotingInvoke>();
+			services.AddSingleton<IRemotingInvoke, RemotingInvoke>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

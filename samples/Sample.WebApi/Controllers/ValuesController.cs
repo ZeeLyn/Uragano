@@ -29,7 +29,7 @@ namespace Sample.WebApi.Controllers
 
 		// GET api/values
 		[HttpGet]
-		public IActionResult Get()
+		public async Task<IActionResult> Get()
 		{
 			//var proxy = ServiceProxy.GetService<IHelloService>();
 			//var id = Guid.NewGuid().ToString();

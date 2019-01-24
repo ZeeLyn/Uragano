@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
@@ -21,28 +22,31 @@ namespace Sample.Console
 		static void Main(string[] args)
 		{
 			int count = 0;
+			ThreadPool.SetMinThreads(100, 100);
 			//var channel = CreateClient();
-			Parallel.For(1, 100, async (index) =>
-		   {
-			   //channel.WriteAndFlushAsync(new TransportMessage<InvokeMessage>
-			   //{
-			   //	Id = index.ToString(),
-			   //	Body = new InvokeMessage()
-			   //	{
-			   //		Route = "/hello/say",
-			   //		Args = new object[] { "abc" }
-			   //	}
-			   //});
-			   var sw = new Stopwatch();
-			   sw.Start();
-			   System.Console.WriteLine("start:");
-			   var t = new TaskCompletionSource<string>();
-			   count++;
-			   sw.Stop();
-			   System.Console.WriteLine("end:" + count + "----" + sw.ElapsedMilliseconds + "\n");
-			   await t.Task;
-			   System.Console.WriteLine("ended:");
-		   });
+			Parallel.For(1, 200, (index) =>
+		  {
+
+
+			  var t = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+			  count++;
+			  System.Console.WriteLine("start:" + count);
+			  t.Task.Wait();
+
+
+
+			  System.Console.WriteLine("ended");
+
+			  //var r = await Task.Run(async () =>
+			  //{
+			  // System.Console.WriteLine("start");
+			  // var t = new TaskCompletionSource<string>();
+			  // return await t.Task;
+			  // System.Console.WriteLine("ended");
+			  //});
+		  });
+
+
 			System.Console.ReadKey();
 		}
 
