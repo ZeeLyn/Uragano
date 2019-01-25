@@ -15,14 +15,12 @@ namespace Sample.WebApi.Controllers
 		private IClientFactory ClientFactory { get; }
 
 
-		private IProxyGenerator ProxyGenerator { get; }
 
 		private IHelloService HelloService { get; }
 
-		public ValuesController(IClientFactory clientFactory, IProxyGenerator proxyGenerator, IHelloService helloService)
+		public ValuesController(IClientFactory clientFactory, IHelloService helloService)
 		{
 			ClientFactory = clientFactory;
-			ProxyGenerator = proxyGenerator;
 			HelloService = helloService;
 		}
 
@@ -39,7 +37,7 @@ namespace Sample.WebApi.Controllers
 			//	Rece = r.Message
 			//});
 			//ProxyGenerator.GenerateProxy(new[] { typeof(IHelloService) });
-			return Ok(HelloService.SayHelloVoid(Guid.NewGuid().ToString()));
+			return Ok(await HelloService.SayHello(Guid.NewGuid().ToString()));
 		}
 
 		// GET api/values/5

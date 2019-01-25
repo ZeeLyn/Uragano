@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Uragano.Abstractions.ServiceDiscovery;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Uragano.Core
 {
@@ -53,17 +54,17 @@ namespace Uragano.Core
 				serviceStatusRefreshFactory.Refresh(CancellationTokenSource.Token).Wait();
 				if (UraganoOptions.Client_Node_Status_Refresh_Interval.Value.Ticks > 0)
 				{
-					//Task.Factory.StartNew(async () =>
-					//{
-					//	while (!CancellationTokenSource.Token.IsCancellationRequested)
-					//	{
-					//		await serviceStatusRefreshFactory.Refresh(CancellationTokenSource.Token);
-					//		if (CancellationTokenSource.Token.IsCancellationRequested)
-					//			break;
-					//		await Task.Delay(UraganoOptions.Client_Node_Status_Refresh_Interval.Value,
-					//			CancellationTokenSource.Token);
-					//	}
-					//}, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+					Task.Factory.StartNew(async () =>
+					{
+						while (!CancellationTokenSource.Token.IsCancellationRequested)
+						{
+							await serviceStatusRefreshFactory.Refresh(CancellationTokenSource.Token);
+							if (CancellationTokenSource.Token.IsCancellationRequested)
+								break;
+							await Task.Delay(UraganoOptions.Client_Node_Status_Refresh_Interval.Value,
+								CancellationTokenSource.Token);
+						}
+					}, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 				}
 			}
 

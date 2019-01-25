@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading.Tasks;
@@ -10,22 +9,12 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.DependencyModel;
-using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
-using Uragano.Abstractions.LoadBalancing;
-using Uragano.Remoting;
 
 namespace Uragano.DynamicProxy
 {
-	public class ProxyGenerator : IProxyGenerator
+	public class ProxyGenerator
 	{
-
-
-		public object Create<TProxy>(Type type) where TProxy : DispatchProxy
-		{
-			var callExpression = Expression.Call(typeof(DispatchProxy), nameof(DispatchProxy.Create), new[] { type, typeof(TProxy) });
-			return Expression.Lambda<Func<object>>(callExpression).Compile()();
-		}
 
 		public static List<Type> GenerateProxy(IEnumerable<Type> interfaces)
 		{

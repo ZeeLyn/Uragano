@@ -99,7 +99,6 @@ namespace Uragano.Core
 
 			if (ServiceCollection.All(p => p.ServiceType != typeof(IServiceStatusManageFactory)))
 			{
-				ServiceCollection.AddSingleton<IProxyGenerator, ProxyGenerator>();
 				ServiceCollection.AddSingleton<IServiceStatusManageFactory, ServiceStatusManageFactory>();
 				ServiceCollection.AddSingleton<IClientFactory, ClientFactory>();
 				ServiceCollection.AddSingleton<IRemotingInvoke, RemotingInvoke>();
