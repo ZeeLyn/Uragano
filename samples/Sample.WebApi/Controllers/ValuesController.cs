@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Sample.Service.Interfaces;
@@ -37,7 +38,16 @@ namespace Sample.WebApi.Controllers
 			//	Rece = r.Message
 			//});
 			//ProxyGenerator.GenerateProxy(new[] { typeof(IHelloService) });
-			return Ok(await HelloService.SayHello(Guid.NewGuid().ToString()));
+			//ThreadPool.GetMinThreads(out var work, out var comp);
+			//ThreadPool.GetAvailableThreads(out var ava_work, out var ava_comp);
+			return Ok(new
+			{
+				result = await HelloService.SayHello(Guid.NewGuid().ToString()),
+				//work,
+				//comp,
+				//ava_work,
+				//ava_comp
+			});
 		}
 
 		// GET api/values/5

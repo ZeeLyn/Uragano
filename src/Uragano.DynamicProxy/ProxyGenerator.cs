@@ -15,7 +15,6 @@ namespace Uragano.DynamicProxy
 {
 	public class ProxyGenerator
 	{
-
 		public static List<Type> GenerateProxy(IEnumerable<Type> interfaces)
 		{
 			if (interfaces.Any(p => !p.IsInterface && !typeof(IService).IsAssignableFrom(p)))
@@ -106,6 +105,9 @@ namespace Uragano.DynamicProxy
 
 		private static MemberDeclarationSyntax GenerateMethod(string routePrefix, MethodInfo methodInfo, string serviceName)
 		{
+			if (methodInfo.ReturnType.Namespace != typeof(Task).Namespace)
+				throw new InvalidOperationException("Only support proxy asynchronous methods.");
+
 			var methodAttr = methodInfo.GetCustomAttribute<ServiceRouteAttribute>();
 			var serviceRoute = $"{routePrefix}/{(methodAttr == null ? methodInfo.Name : methodAttr.Route)}";
 			var returnDeclaration = GenerateType(methodInfo.ReturnType);

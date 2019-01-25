@@ -16,10 +16,5 @@ namespace Sample.Service.Interfaces
 		[ServiceRoute("say/task")]
 		Task SayHello();
 
-		[ServiceRoute("say/void")]
-		void SayHello(string name, int age);
-
-		[ServiceRoute("say/void/return")]
-		ResultModel SayHelloVoid(string name);
 	}
 }

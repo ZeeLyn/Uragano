@@ -17,8 +17,6 @@ namespace Uragano.DynamicProxy
 		private static readonly ConcurrentDictionary<string, ServiceDescriptor>
 			ServiceInvokers = new ConcurrentDictionary<string, ServiceDescriptor>();
 
-		private static readonly ConcurrentDictionary<MethodInfo, string>
-			MethodMapRoute = new ConcurrentDictionary<MethodInfo, string>();
 
 		private IServiceProvider ServiceProvider { get; }
 		public InvokerFactory(IServiceProvider serviceProvider)
@@ -30,7 +28,7 @@ namespace Uragano.DynamicProxy
 		{
 			route = route.ToLower();
 			if (ServiceInvokers.ContainsKey(route))
-				throw new Exception();
+				throw new DuplicateRouteException(route);
 			ServiceInvokers.TryAdd(route, new ServiceDescriptor
 			{
 				Route = route,
@@ -39,7 +37,6 @@ namespace Uragano.DynamicProxy
 				MethodInvoker = new MethodInvoker(methodInfo),
 				Interceptors = interceptorTypes
 			});
-			MethodMapRoute.TryAdd(methodInfo, route.ToLower());
 		}
 
 		public ServiceDescriptor Get(string route)
@@ -49,20 +46,11 @@ namespace Uragano.DynamicProxy
 			throw new NotFoundRouteException(route);
 		}
 
-		public ServiceDescriptor Get(MethodInfo methodInfo)
-		{
-			if (!MethodMapRoute.TryGetValue(methodInfo, out var route)) throw new NotFoundRouteException("");
-			if (ServiceInvokers.TryGetValue(route, out var serviceDescriptor))
-			{
-				return serviceDescriptor;
-			}
-			throw new NotFoundRouteException(route);
-		}
 
 		public async Task<object> Invoke(string route, object[] args, Dictionary<string, string> meta)
 		{
 			if (!ServiceInvokers.TryGetValue(route, out var service))
-				throw new Exception();
+				throw new NotFoundRouteException(route);
 			using (var scope = ServiceProvider.CreateScope())
 			{
 				var context = new InterceptorContext

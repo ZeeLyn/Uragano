@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Uragano.Abstractions;
 
 namespace Uragano.DynamicProxy
@@ -14,23 +15,23 @@ namespace Uragano.DynamicProxy
 
 		protected void Invoke(object[] args, string route, string serviceName)
 		{
-			RemotingInvoke.InvokeAsync<object>(serviceName, route, args).GetAwaiter().GetResult();
+			RemotingInvoke.InvokeAsync<object>(args, route, serviceName).GetAwaiter().GetResult();
 		}
 
 		protected T Invoke<T>(object[] args, string route, string serviceName)
 		{
-			return RemotingInvoke.InvokeAsync<T>(serviceName, route, args).GetAwaiter().GetResult();
+			return RemotingInvoke.InvokeAsync<T>(args, route, serviceName).ConfigureAwait(false).GetAwaiter().GetResult();
 		}
 
 
 		protected async Task InvokeAsync(object[] args, string route, string serviceName)
 		{
-			await RemotingInvoke.InvokeAsync<object>(serviceName, route, args);
+			await RemotingInvoke.InvokeAsync<object>(args, route, serviceName);
 		}
 
 		protected async Task<T> InvokeAsync<T>(object[] args, string route, string serviceName)
 		{
-			return await RemotingInvoke.InvokeAsync<T>(serviceName, route, args);
+			return await RemotingInvoke.InvokeAsync<T>(args, route, serviceName);
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using DotNetty.Transport.Channels;
 using Uragano.Abstractions;
@@ -22,15 +23,15 @@ namespace Uragano.Remoting
 
 		}
 
-		private Task MessageListener_OnReceived(IMessageSender sender, TransportMessage<ResultMessage> message)
+		private async Task MessageListener_OnReceived(IMessageSender sender, TransportMessage<ResultMessage> message)
 		{
 			if (_resultCallbackTask.TryGetValue(message.Id, out var task))
 			{
 				task.TrySetResult(message.Body);
 			}
 			else
-				Console.WriteLine("not found");
-			return Task.CompletedTask;
+				Console.WriteLine("Not found callback");
+			await Task.CompletedTask;
 		}
 
 		public async Task<ResultMessage> SendAsync(InvokeMessage message)
@@ -45,14 +46,21 @@ namespace Uragano.Remoting
 			try
 			{
 				await Channel.WriteAndFlushAsync(transportMessage);
-				return await task.Task;
+				using (var cts = new CancellationTokenSource())
+				{
+					if (task.Task == await Task.WhenAny(task.Task, Task.Delay(1000, cts.Token)))
+					{
+						cts.Cancel();
+						return await task.Task;
+					}
+				}
+				throw new TimeoutException();
 			}
 			finally
 			{
 				_resultCallbackTask.TryRemove(transportMessage.Id, out var t);
 				t.TrySetCanceled();
 			}
-			//return await Task.FromResult(new ResultMessage(new ResultModel { Message = "1" }));
 		}
 
 

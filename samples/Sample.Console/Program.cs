@@ -19,32 +19,50 @@ namespace Sample.Console
 {
 	class Program
 	{
+		public delegate int AddHandler(int id);
 		static void Main(string[] args)
 		{
-			int count = 0;
-			ThreadPool.SetMinThreads(100, 100);
+
+			//ThreadPool.SetMinThreads(100, 100);
 			//var channel = CreateClient();
-			Parallel.For(1, 200, (index) =>
-		  {
+			//Parallel.For(1, 200, (index) =>
+			// {
+
+			//	 var t = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+			//	 System.Console.WriteLine("start:" + index);
+			//	 ;
+			//	 //t.Task.GetAwaiter().GetResult();
+			//	 System.Console.WriteLine("ended");
+			// });
+
+			Action<int> action = (i) => { };
+			action.BeginInvoke(1, null, null);
+			//AsyncCallback callback = obj => { };
+			//AddHandler handler = new AddHandler(Add);
+			//var result = handler.BeginInvoke(1, callback, "asyncstat");
+
+			//System.Console.WriteLine("继续执行");
+			//System.Console.WriteLine(handler.EndInvoke(result));
 
 
-			  var t = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
-			  count++;
-			  System.Console.WriteLine("start:" + count);
-			  t.Task.Wait();
+			//ThreadPool.SetMinThreads(5, 5); // set min thread to 5
+			//ThreadPool.SetMaxThreads(12, 12); // set max thread to 12
 
+			//Stopwatch watch = new Stopwatch();
+			//watch.Start();
 
+			//WaitCallback callback = index =>
+			//{
+			//	System.Console.WriteLine(String.Format("{0}: Task {1} started", watch.Elapsed, index));
+			//	Thread.Sleep(10000);
+			//	System.Console.WriteLine(String.Format("{0}: Task {1} finished", watch.Elapsed, index));
+			//};
 
-			  System.Console.WriteLine("ended");
-
-			  //var r = await Task.Run(async () =>
-			  //{
-			  // System.Console.WriteLine("start");
-			  // var t = new TaskCompletionSource<string>();
-			  // return await t.Task;
-			  // System.Console.WriteLine("ended");
-			  //});
-		  });
+			//for (int i = 0; i < 20; i++)
+			//{
+			//	ThreadPool.QueueUserWorkItem(callback, i);
+			//}
 
 
 			System.Console.ReadKey();
@@ -100,7 +118,16 @@ namespace Sample.Console
 
 			}
 		}
+
+		public static int Add(int a)
+		{
+			System.Console.WriteLine("\n开始计算：" + a);
+			Thread.Sleep(10000); //模拟该方法运行三秒
+			System.Console.WriteLine("计算完成！");
+			return a;
+		}
 	}
+
 
 
 

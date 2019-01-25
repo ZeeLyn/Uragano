@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Threading.Tasks;
 using DotNetty.Transport.Channels;
 using Uragano.Abstractions.ServiceInvoker;
-using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
 
 namespace Uragano.Remoting
@@ -21,26 +21,29 @@ namespace Uragano.Remoting
 
 		public override void ChannelRead(IChannelHandlerContext context, object message)
 		{
-			if (!(message is TransportMessage<InvokeMessage> transportMessage))
-				throw new ArgumentNullException(nameof(message));
-			try
+			Task.Run(() =>
 			{
-				var result = InvokerFactory.Invoke(transportMessage.Body.Route, transportMessage.Body.Args, transportMessage.Body.Meta).GetAwaiter().GetResult();
+				if (!(message is TransportMessage<InvokeMessage> transportMessage))
+					throw new ArgumentNullException(nameof(message));
+				try
+				{
+					var result = InvokerFactory.Invoke(transportMessage.Body.Route, transportMessage.Body.Args, transportMessage.Body.Meta).GetAwaiter().GetResult();
 
-				context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
+					context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
+					{
+						Id = transportMessage.Id,
+						Body = new ResultMessage(result)
+					});
+				}
+				catch (Exception e)
 				{
-					Id = transportMessage.Id,
-					Body = new ResultMessage(result)
-				}).GetAwaiter().GetResult();
-			}
-			catch (Exception e)
-			{
-				context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
-				{
-					Id = transportMessage.Id,
-					Body = new ResultMessage(e.Message) { Status = RemotingStatus.Error }
-				}).Wait();
-			}
+					context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
+					{
+						Id = transportMessage.Id,
+						Body = new ResultMessage(e.Message) { Status = RemotingStatus.Error }
+					});
+				}
+			});
 		}
 
 		public override void ChannelReadComplete(IChannelHandlerContext context)
@@ -50,7 +53,7 @@ namespace Uragano.Remoting
 
 		public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
 		{
-			context.CloseAsync().Wait();
+			context.CloseAsync();
 		}
 	}
 }

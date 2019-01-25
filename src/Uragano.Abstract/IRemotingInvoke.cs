@@ -7,6 +7,6 @@ namespace Uragano.Abstractions
 {
 	public interface IRemotingInvoke
 	{
-		Task<T> InvokeAsync<T>(string serviceName, string route, object[] args);
+		Task<T> InvokeAsync<T>(object[] args, string route, string serviceName);
 	}
 }

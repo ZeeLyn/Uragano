@@ -17,7 +17,7 @@ namespace Uragano.DynamicProxy
 			LoadBalancing = loadBalancing;
 			ClientFactory = clientFactory;
 		}
-		public async Task<T> InvokeAsync<T>(string serviceName, string route, object[] args)
+		public async Task<T> InvokeAsync<T>(object[] args, string route, string serviceName)
 		{
 			var node = LoadBalancing.GetNextNode(serviceName);
 			var client = ClientFactory.CreateClient(node.Address, node.Port);

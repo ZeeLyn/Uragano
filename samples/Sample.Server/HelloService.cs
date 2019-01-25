@@ -26,15 +26,5 @@ namespace Sample.Server
 		{
 			throw new System.NotImplementedException();
 		}
-
-		public void SayHello(string name, int age)
-		{
-			throw new System.NotImplementedException();
-		}
-
-		public ResultModel SayHelloVoid(string name)
-		{
-			return new ResultModel { Message = name };
-		}
 	}
 }
