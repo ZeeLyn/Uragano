@@ -9,14 +9,14 @@ namespace Uragano.Abstractions
 	{
 		string ServiceRoute { get; }
 
-		MethodInfo Method { get; }
+		Dictionary<string, string> Meta { get; }
 
 		object[] Args { get; }
 
 		IServiceProvider ServiceProvider { get; }
 
 
-		Stack<IInterceptor> Interceptors { get; }
+		Stack<Type> Interceptors { get; }
 
 
 		Task<object> Next();

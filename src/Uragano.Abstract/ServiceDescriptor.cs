@@ -9,10 +9,14 @@ namespace Uragano.Abstractions
 	{
 		public string Route { get; set; }
 
+		public Type InterfaceType { get; set; }
+
 		public MethodInfo MethodInfo { get; set; }
 
 		public IMethodInvoker MethodInvoker { get; set; }
 
-		public IEnumerable<Type> Interceptors { get; set; }
+		public List<Type> Interceptors { get; set; }
+
+
 	}
 }

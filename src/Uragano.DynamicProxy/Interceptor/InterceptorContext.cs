@@ -11,16 +11,17 @@ namespace Uragano.DynamicProxy.Interceptor
 	{
 		public string ServiceRoute { get; internal set; }
 
-		public MethodInfo Method { get; internal set; }
+		public Dictionary<string, string> Meta { get; internal set; }
 
 		public object[] Args { get; internal set; }
 
 		public IServiceProvider ServiceProvider { get; internal set; }
-		public Stack<IInterceptor> Interceptors { get; } = new Stack<IInterceptor>();
+		public Stack<Type> Interceptors { get; } = new Stack<Type>();
 
 		public async Task<object> Next()
 		{
-			return await Interceptors.Pop().Intercept(this);
+			var interceptor = (IInterceptor)ServiceProvider.GetService(Interceptors.Pop());
+			return await interceptor.Intercept(this);
 		}
 	}
 }

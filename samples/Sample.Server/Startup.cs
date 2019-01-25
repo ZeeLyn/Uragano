@@ -34,7 +34,7 @@ namespace Sample.Server
 			services.AddUragano(config =>
 			{
 				config.AddServer(Configuration.GetSection("Uragano:Server"));
-				config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"));
+				config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"), Configuration.GetSection("Uragano:Consul:Service"));
 				config.Option(UraganoOptions.Server_DotNetty_Channel_SoBacklog, 100);
 			});
 

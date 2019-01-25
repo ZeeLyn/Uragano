@@ -17,7 +17,6 @@ namespace Uragano.Remoting
 	{
 		private IChannel Channel { get; set; }
 
-		private IProxyGenerateFactory ProxyGenerateFactory { get; }
 
 		private IInvokerFactory InvokerFactory { get; }
 
@@ -25,12 +24,11 @@ namespace Uragano.Remoting
 
 		private IServiceProvider ServiceProvider { get; }
 
-		public ServerBootstrap(IInvokerFactory invokerFactory, IServiceProvider serviceProvider, IProxyGenerateFactory proxyGenerateFactory, UraganoSettings uraganoSettings)
+		public ServerBootstrap(IInvokerFactory invokerFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings)
 		{
 
 			InvokerFactory = invokerFactory;
 			ServiceProvider = serviceProvider;
-			ProxyGenerateFactory = proxyGenerateFactory;
 			ServerSettings = uraganoSettings.ServerSettings;
 		}
 
@@ -71,7 +69,7 @@ namespace Uragano.Remoting
 					pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
 					pipeline.AddLast(new MessageDecoder<InvokeMessage>());
 					pipeline.AddLast(new MessageEncoder<ResultMessage>());
-					pipeline.AddLast(new ServerMessageHandler(InvokerFactory, ProxyGenerateFactory));
+					pipeline.AddLast(new ServerMessageHandler(InvokerFactory, ServiceProvider));
 				}));
 			Console.WriteLine($"监听{ServerSettings.IP}:{ServerSettings.Port}");
 			Channel = await bootstrap.BindAsync(new IPEndPoint(ServerSettings.IP, ServerSettings.Port));

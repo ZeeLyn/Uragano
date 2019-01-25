@@ -1,12 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using DotNetty.Buffers;
 using DotNetty.Transport.Channels;
 using Uragano.Abstractions.ServiceInvoker;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,12 +10,13 @@ namespace Uragano.Remoting
 	{
 
 		private IInvokerFactory InvokerFactory { get; }
-		private IProxyGenerateFactory ProxyGenerateFactory { get; }
 
-		public ServerMessageHandler(IInvokerFactory invokerFactory, IProxyGenerateFactory proxyGenerateFactory)
+		private IServiceProvider ServiceProvider { get; }
+
+		public ServerMessageHandler(IInvokerFactory invokerFactory, IServiceProvider serviceProvider)
 		{
 			InvokerFactory = invokerFactory;
-			ProxyGenerateFactory = proxyGenerateFactory;
+			ServiceProvider = serviceProvider;
 		}
 
 		public override void ChannelRead(IChannelHandlerContext context, object message)
@@ -32,19 +25,13 @@ namespace Uragano.Remoting
 				throw new ArgumentNullException(nameof(message));
 			try
 			{
-				using (var scope = ContainerManager.CreateScope())
+				var result = InvokerFactory.Invoke(transportMessage.Body.Route, transportMessage.Body.Args, transportMessage.Body.Meta).GetAwaiter().GetResult();
+
+				context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
 				{
-					var service = InvokerFactory.Get(transportMessage.Body.Route);
-
-					var proxyInstance = ProxyGenerateFactory.CreateLocalProxy(service.MethodInfo.DeclaringType);
-					var result = service.MethodInfo.Invoke(proxyInstance, transportMessage.Body.Args);
-
-					context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
-					{
-						Id = transportMessage.Id,
-						Body = new ResultMessage(result)
-					}).GetAwaiter().GetResult();
-				}
+					Id = transportMessage.Id,
+					Body = new ResultMessage(result)
+				}).GetAwaiter().GetResult();
 			}
 			catch (Exception e)
 			{

@@ -30,16 +30,11 @@ namespace Uragano.DynamicProxy
 
 			foreach (var service in services)
 			{
-				//var serviceNameAttr = service.Interface.GetCustomAttribute<ServiceDiscoveryNameAttribute>();
-				//if (serviceNameAttr == null)
-				//	throw new InvalidOperationException($"Interface {service.Interface.FullName} must add a custom attribute ServiceNameAttribute.");
-
-				//ServiceProxyFactory.CreateLocalProxy(service.Interface);
 				var routeAttr = service.Interface.GetCustomAttribute<ServiceRouteAttribute>();
 
 				var routePrefix = routeAttr == null ? $"{service.Interface.Namespace}/{service.Interface.Name}" : routeAttr.Route;
 				var interfaceMethods = service.Interface.GetMethods();
-				var implementationMethods = service.Implementation.GetMethods(BindingFlags.Public);
+				var implementationMethods = service.Implementation.GetMethods();
 				var interfaceInterceptors = service.Interface.GetCustomAttributes(true).Where(p => p is IInterceptor)
 					.Select(p => p.GetType()).ToList();
 
@@ -51,10 +46,39 @@ namespace Uragano.DynamicProxy
 						.Where(p => p is IInterceptor).Select(p => p.GetType()).ToList();
 					interceptors.AddRange(interfaceInterceptors);
 					interceptors.Reverse();
-					//方法筛选有bug，可能有同名的
-					InvokerFactory.Create(route.ToLower(), service.Implementation, implementationMethods.First(p => p.Name == method.Name), interceptors);
+
+					InvokerFactory.Create(route, service.Interface, implementationMethods.First(p => IsImplementationMethod(method, p)), interceptors);
 				}
 			}
+		}
+
+		/// <summary>
+		/// TODO方法筛选有bug，可能有同名的
+		/// </summary>
+		/// <param name="serviceMethod"></param>
+		/// <param name="implementationMethod"></param>
+		/// <returns></returns>
+		private bool IsImplementationMethod(MethodInfo serviceMethod, MethodInfo implementationMethod)
+		{
+			return serviceMethod.Name == implementationMethod.Name &&
+				   serviceMethod.ReturnType == implementationMethod.ReturnType &&
+				   serviceMethod.ContainsGenericParameters == implementationMethod.ContainsGenericParameters &&
+				   SameParameters(serviceMethod.GetParameters(), implementationMethod.GetParameters());
+		}
+
+		/// <summary>
+		/// 需要判断参数顺序
+		/// </summary>
+		/// <param name="parameters1"></param>
+		/// <param name="parameters2"></param>
+		/// <returns></returns>
+		private bool SameParameters(ParameterInfo[] parameters1, ParameterInfo[] parameters2)
+		{
+			if (parameters1.Length == parameters2.Length)
+			{
+				return !parameters1.Where((t, i) => t.ParameterType != parameters2[i].ParameterType || t.IsOptional != parameters2[i].IsOptional).Any();
+			}
+			return false;
 		}
 	}
 }
