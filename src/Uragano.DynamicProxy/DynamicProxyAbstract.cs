@@ -15,7 +15,7 @@ namespace Uragano.DynamicProxy
 
 		protected void Invoke(object[] args, string route, string serviceName)
 		{
-			RemotingInvoke.InvokeAsync<object>(args, route, serviceName).GetAwaiter().GetResult();
+			RemotingInvoke.InvokeAsync<object>(args, route, serviceName).ConfigureAwait(false).GetAwaiter().GetResult();
 		}
 
 		protected T Invoke<T>(object[] args, string route, string serviceName)

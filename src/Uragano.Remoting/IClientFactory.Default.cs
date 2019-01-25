@@ -78,7 +78,7 @@ namespace Uragano.Remoting
 						 endPoint = new IPEndPoint(ip, port);
 					 else
 						 endPoint = new DnsEndPoint(host, port);
-					 var channel = bootstrap.ConnectAsync(endPoint).GetAwaiter().GetResult();
+					 var channel = bootstrap.ConnectAsync(endPoint).ConfigureAwait(false).GetAwaiter().GetResult();
 					 channel.GetAttribute(TransportContextAttributeKey).Set(new TransportContext
 					 {
 						 Host = host,

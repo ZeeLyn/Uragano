@@ -48,11 +48,14 @@ namespace Uragano.Remoting
 				await Channel.WriteAndFlushAsync(transportMessage);
 				using (var cts = new CancellationTokenSource())
 				{
+
 					if (task.Task == await Task.WhenAny(task.Task, Task.Delay(1000, cts.Token)))
 					{
 						cts.Cancel();
-						return await task.Task;
+						return await task.Task.ConfigureAwait(false);
 					}
+					else
+						task.SetCanceled();
 				}
 				throw new TimeoutException();
 			}

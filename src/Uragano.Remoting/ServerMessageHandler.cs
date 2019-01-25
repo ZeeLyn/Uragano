@@ -27,7 +27,7 @@ namespace Uragano.Remoting
 					throw new ArgumentNullException(nameof(message));
 				try
 				{
-					var result = InvokerFactory.Invoke(transportMessage.Body.Route, transportMessage.Body.Args, transportMessage.Body.Meta).GetAwaiter().GetResult();
+					var result = InvokerFactory.Invoke(transportMessage.Body.Route, transportMessage.Body.Args, transportMessage.Body.Meta).ConfigureAwait(false).GetAwaiter().GetResult();
 
 					context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
 					{
