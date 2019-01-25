@@ -6,15 +6,15 @@ using Uragano.Abstractions.ServiceInvoker;
 
 namespace Uragano.DynamicProxy.Interceptor
 {
-	internal class ServerDefaultInterceptor : InterceptorAbstract
+	public class ServerDefaultInterceptor : InterceptorAbstract
 	{
 		public override async Task<object> Intercept(IInterceptorContext context)
 		{
 			Console.WriteLine("-------------->Exec DefaultInterceptor");
-			var proxyFactory = context.ServiceProvider.GetService<IInvokerFactory>();
-			var service = proxyFactory.Get(context.ServiceRoute);
-			var result = service.MethodInvoker.Invoke(context.ServiceProvider.GetService(service.InterfaceType), context.Args);
-			return await Task.FromResult(result);
+			var invokerFactory = context.ServiceProvider.GetService<IInvokerFactory>();
+			var service = invokerFactory.Get(context.ServiceRoute);
+			var instance = context.ServiceProvider.GetRequiredService(service.InterfaceType);
+			return await Task.FromResult(service.MethodInvoker.Invoke(instance, context.Args));
 		}
 	}
 }

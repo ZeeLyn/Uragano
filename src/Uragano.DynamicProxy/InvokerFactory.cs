@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Uragano.Abstractions.Exceptions;
 using Uragano.Abstractions.ServiceInvoker;
 using Microsoft.Extensions.DependencyInjection;
+using Uragano.Abstractions;
 using Uragano.DynamicProxy.Interceptor;
 using ServiceDescriptor = Uragano.Abstractions.ServiceDescriptor;
 
@@ -72,12 +73,13 @@ namespace Uragano.DynamicProxy
 					Meta = meta
 				};
 				context.Interceptors.Push(typeof(ServerDefaultInterceptor));
-				for (var i = 0; i < service.Interceptors.Count - 1; i++)
+				foreach (var interceptor in service.Interceptors)
 				{
-					context.Interceptors.Push(service.Interceptors[i]);
+					context.Interceptors.Push(interceptor);
 				}
-				var instance = scope.ServiceProvider.GetRequiredService(service.InterfaceType);
-				return await Task.FromResult(service.MethodInvoker.Invoke(instance, args));
+
+				return await ((IInterceptor)scope.ServiceProvider.GetRequiredService(context.Interceptors.Pop()))
+					.Intercept(context);
 			}
 		}
 	}

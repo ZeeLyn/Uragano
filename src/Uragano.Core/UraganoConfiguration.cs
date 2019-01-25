@@ -9,6 +9,7 @@ using Uragano.Abstractions;
 using Uragano.Abstractions.LoadBalancing;
 using Uragano.Abstractions.ServiceDiscovery;
 using Uragano.DynamicProxy;
+using Uragano.DynamicProxy.Interceptor;
 using Uragano.Remoting;
 
 namespace Uragano.Core
@@ -123,6 +124,7 @@ namespace Uragano.Core
 
 		private void RegisterServerServicesAndInterceptors()
 		{
+			ServiceCollection.AddSingleton<ServerDefaultInterceptor>();
 			var types = ReflectHelper.GetDependencyTypes();
 			var services = types.Where(t => t.IsInterface && typeof(IService).IsAssignableFrom(t)).Select(@interface => new
 			{
