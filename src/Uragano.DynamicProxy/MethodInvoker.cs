@@ -40,7 +40,7 @@ namespace Uragano.DynamicProxy
 				return (instance, args) => { action(instance, args); return null; };
 			}
 
-			var instanceMethodCaller = Expression.Convert(methodCaller, typeof(object));
+			var instanceMethodCaller = Expression.Convert(methodCaller, methodInfo.ReturnType);
 			return Expression.Lambda<Func<object, object[], object>>(instanceMethodCaller, instanceParameter, argsParameter).Compile();
 		}
 	}
