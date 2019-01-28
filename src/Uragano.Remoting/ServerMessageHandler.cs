@@ -21,15 +21,15 @@ namespace Uragano.Remoting
 
 		public override void ChannelRead(IChannelHandlerContext context, object message)
 		{
-			Task.Run(() =>
+			Task.Run(async () =>
 			{
-				if (!(message is TransportMessage<InvokeMessage> transportMessage))
+				var msg = message;
+				if (!(msg is TransportMessage<InvokeMessage> transportMessage))
 					throw new ArgumentNullException(nameof(message));
 				try
 				{
-					var result = InvokerFactory.Invoke(transportMessage.Body.Route, transportMessage.Body.Args, transportMessage.Body.Meta).ConfigureAwait(false).GetAwaiter().GetResult();
-
-					context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
+					var result = await InvokerFactory.Invoke(transportMessage.Body.Route, transportMessage.Body.Args, transportMessage.Body.Meta);
+					await context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
 					{
 						Id = transportMessage.Id,
 						Body = new ResultMessage(result)
@@ -37,7 +37,7 @@ namespace Uragano.Remoting
 				}
 				catch (Exception e)
 				{
-					context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
+					await context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
 					{
 						Id = transportMessage.Id,
 						Body = new ResultMessage(e.Message) { Status = RemotingStatus.Error }

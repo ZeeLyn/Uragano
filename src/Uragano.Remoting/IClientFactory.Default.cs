@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Common.Utilities;
@@ -18,7 +19,7 @@ namespace Uragano.Remoting
 	{
 		private Bootstrap Bootstrap { get; }
 
-		private readonly ConcurrentDictionary<(string, int), Lazy<IClient>> _clients = new ConcurrentDictionary<(string, int), Lazy<IClient>>();
+		private readonly ConcurrentDictionary<(string, int), Lazy<Task<IClient>>> _clients = new ConcurrentDictionary<(string, int), Lazy<Task<IClient>>>();
 
 		private static readonly AttributeKey<TransportContext> TransportContextAttributeKey = AttributeKey<TransportContext>.ValueOf(typeof(ClientFactory), nameof(TransportContext));
 
@@ -65,29 +66,29 @@ namespace Uragano.Remoting
 				client.Value.Dispose();
 		}
 
-		public IClient CreateClient(string host, int port)
+		public async Task<IClient> CreateClientAsync(string host, int port)
 		{
 			var key = (host, port);
 			try
 			{
-				return _clients.GetOrAdd(key, new Lazy<IClient>(() =>
-				 {
-					 var bootstrap = Bootstrap;
-					 EndPoint endPoint;
-					 if (IPAddress.TryParse(host, out var ip))
-						 endPoint = new IPEndPoint(ip, port);
-					 else
-						 endPoint = new DnsEndPoint(host, port);
-					 var channel = bootstrap.ConnectAsync(endPoint).ConfigureAwait(false).GetAwaiter().GetResult();
-					 channel.GetAttribute(TransportContextAttributeKey).Set(new TransportContext
-					 {
-						 Host = host,
-						 Port = port
-					 });
-					 var listener = new MessageListener();
-					 channel.GetAttribute(MessageListenerAttributeKey).Set(listener);
-					 return new Client(channel, listener);
-				 })).Value;
+				return await _clients.GetOrAdd(key, new Lazy<Task<IClient>>(async () =>
+				{
+					var bootstrap = Bootstrap;
+					EndPoint endPoint;
+					if (IPAddress.TryParse(host, out var ip))
+						endPoint = new IPEndPoint(ip, port);
+					else
+						endPoint = new DnsEndPoint(host, port);
+					var channel = await bootstrap.ConnectAsync(endPoint);
+					channel.GetAttribute(TransportContextAttributeKey).Set(new TransportContext
+					{
+						Host = host,
+						Port = port
+					});
+					var listener = new MessageListener();
+					channel.GetAttribute(MessageListenerAttributeKey).Set(listener);
+					return new Client(channel, listener);
+				})).Value;
 			}
 			catch
 			{

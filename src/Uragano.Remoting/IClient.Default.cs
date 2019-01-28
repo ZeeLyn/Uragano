@@ -41,6 +41,7 @@ namespace Uragano.Remoting
 				Id = Guid.NewGuid().ToString(),
 				Body = message
 			};
+
 			var task = new TaskCompletionSource<ResultMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
 			if (!_resultCallbackTask.TryAdd(transportMessage.Id, task)) throw new Exception("Failed to send.");
 			try
@@ -48,11 +49,10 @@ namespace Uragano.Remoting
 				await Channel.WriteAndFlushAsync(transportMessage);
 				using (var cts = new CancellationTokenSource())
 				{
-
-					if (task.Task == await Task.WhenAny(task.Task, Task.Delay(1000, cts.Token)))
+					if (task.Task == await Task.WhenAny(task.Task, Task.Delay(4000, cts.Token)))
 					{
 						cts.Cancel();
-						return await task.Task.ConfigureAwait(false);
+						return await task.Task;
 					}
 					else
 						task.SetCanceled();

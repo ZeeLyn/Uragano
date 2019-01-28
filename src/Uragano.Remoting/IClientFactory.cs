@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Uragano.Remoting
 {
 	public interface IClientFactory : IDisposable
 	{
-		IClient CreateClient(string host, int port);
+		Task<IClient> CreateClientAsync(string host, int port);
 
 		void RemoveClient(string host, int port);
 	}
