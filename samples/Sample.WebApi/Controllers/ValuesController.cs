@@ -40,6 +40,7 @@ namespace Sample.WebApi.Controllers
 			//ProxyGenerator.GenerateProxy(new[] { typeof(IHelloService) });
 			//ThreadPool.GetMinThreads(out var work, out var comp);
 			//ThreadPool.GetAvailableThreads(out var ava_work, out var ava_comp);
+			//await HelloService.SayHello();
 			return Ok(new
 			{
 				result = await HelloService.SayHello(Guid.NewGuid().ToString()),

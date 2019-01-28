@@ -29,7 +29,7 @@ namespace Sample.WebApi
 			services.AddUragano(config =>
 			{
 				config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"));
-				config.DependentServices(("TestServer", "", ""));
+				config.DependentServices(("RPC", "", ""));
 				config.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));
 			});
 			services.AddScoped<TestLib>();

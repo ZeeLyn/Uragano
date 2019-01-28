@@ -14,7 +14,7 @@ namespace Uragano.DynamicProxy.Interceptor
 			var invokerFactory = context.ServiceProvider.GetService<IInvokerFactory>();
 			var service = invokerFactory.Get(context.ServiceRoute);
 			var instance = context.ServiceProvider.GetRequiredService(service.InterfaceType);
-			return await Task.FromResult(service.MethodInvoker.Invoke(instance, context.Args));
+			return await service.MethodInvoker.Invoke(instance, context.Args);
 		}
 	}
 }

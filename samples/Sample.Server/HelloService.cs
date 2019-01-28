@@ -22,9 +22,9 @@ namespace Sample.Server
 			return await Task.FromResult(new ResultModel { Message = name });
 		}
 
-		public Task SayHello()
+		public async Task SayHello()
 		{
-			throw new System.NotImplementedException();
+
 		}
 	}
 }

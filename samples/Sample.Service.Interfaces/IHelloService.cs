@@ -5,7 +5,7 @@ using Uragano.Abstractions;
 namespace Sample.Service.Interfaces
 {
 	[MyInterceptor1]
-	[ServiceDiscoveryName("TestServer")]
+	[ServiceDiscoveryName("RPC")]
 	[ServiceRoute("hello")]
 	public interface IHelloService : IService
 	{

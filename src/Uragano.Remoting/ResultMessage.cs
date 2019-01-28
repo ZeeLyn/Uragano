@@ -10,7 +10,7 @@ namespace Uragano.Remoting
 			Result = message;
 		}
 		[Key(0)]
-		public object Result { get; }
+		public dynamic Result { get; }
 
 
 		[Key(1)] public RemotingStatus Status { get; set; } = RemotingStatus.Ok;
