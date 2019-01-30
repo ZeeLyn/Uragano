@@ -36,7 +36,7 @@ namespace Uragano.Core
 			ServiceCollection.AddSingleton<IBootstrap, ServerBootstrap>();
 			UraganoSettings.ServerSettings = new ServerSettings
 			{
-				IP = IPAddress.Parse(ip.ReplaceIPPlaceholder()),
+				IP = IPAddress.Parse(ip.ReplaceIpPlaceholder()),
 				Port = port,
 				Weight = weight
 			};
@@ -52,7 +52,7 @@ namespace Uragano.Core
 
 		public void AddServer(IConfigurationSection configurationSection)
 		{
-			AddServer(configurationSection.GetValue<string>("ip").ReplaceIPPlaceholder(), configurationSection.GetValue<int>("port"), configurationSection.GetValue<string>("certurl"), configurationSection.GetValue<string>("certpwd"), configurationSection.GetValue<int>("weight"));
+			AddServer(configurationSection.GetValue<string>("ip").ReplaceIpPlaceholder(), configurationSection.GetValue<int>("port"), configurationSection.GetValue<string>("certurl"), configurationSection.GetValue<string>("certpwd"), configurationSection.GetValue<int>("weight"));
 		}
 
 

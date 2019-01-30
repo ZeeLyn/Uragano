@@ -17,7 +17,7 @@ namespace Uragano.Consul
 		{
 			uraganoConfiguration.AddServiceDiscovery<ConsulServiceDiscovery>(new ConsulClientConfigure
 			{
-				Address = new Uri(configurationSection.GetValue<string>("address").ReplaceIPPlaceholder()),
+				Address = new Uri(configurationSection.GetValue<string>("address").ReplaceIpPlaceholder()),
 				Token = configurationSection.GetValue<string>("token"),
 				Datacenter = configurationSection.GetValue<string>("datacenter"),
 				WaitTime = string.IsNullOrWhiteSpace(configurationSection.GetValue<string>("waittime")) ? default : TimeSpan.FromMilliseconds(configurationSection.GetValue<int>("waittime"))
@@ -59,7 +59,7 @@ namespace Uragano.Consul
 
 			uraganoConfiguration.AddServiceDiscovery<ConsulServiceDiscovery>(new ConsulClientConfigure
 			{
-				Address = new Uri(clientConfigurationSection.GetValue<string>("address").ReplaceIPPlaceholder()),
+				Address = new Uri(clientConfigurationSection.GetValue<string>("address").ReplaceIpPlaceholder()),
 				Token = clientConfigurationSection.GetValue<string>("token"),
 				Datacenter = clientConfigurationSection.GetValue<string>("datacenter"),
 				WaitTime = string.IsNullOrWhiteSpace(clientConfigurationSection.GetValue<string>("waittime")) ? default : TimeSpan.FromMilliseconds(clientConfigurationSection.GetValue<int>("waittime"))
