@@ -47,11 +47,9 @@ namespace Uragano.Core
 					discovery.RegisterAsync(uraganoSettings.ServiceDiscoveryClientConfiguration, uraganoSettings.ServiceRegisterConfiguration, uraganoSettings.ServerSettings.Weight).ConfigureAwait(false).GetAwaiter().GetResult();
 				}
 			}
-
-			if (applicationBuilder.ApplicationServices.GetService<ILoadBalancing>() != null)
+			var serviceStatusRefreshFactory = applicationBuilder.ApplicationServices.GetService<IServiceStatusManageFactory>();
+			if (serviceStatusRefreshFactory != null)
 			{
-				var serviceStatusRefreshFactory = applicationBuilder.ApplicationServices.GetService<IServiceStatusManageFactory>();
-
 				if (UraganoOptions.Client_Node_Status_Refresh_Interval.Value.Ticks > 0)
 				{
 					//NOTE:Replace with Timer

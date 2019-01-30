@@ -8,9 +8,9 @@ namespace Uragano.DynamicProxy
 {
 	public class ReflectHelper
 	{
-		private static readonly object lockObject = new object();
+		private static readonly object LockObject = new object();
 
-		private static List<Type> types { get; set; }
+		private static List<Type> Types { get; set; }
 
 		private ReflectHelper()
 		{
@@ -18,10 +18,10 @@ namespace Uragano.DynamicProxy
 
 		public static List<Type> GetDependencyTypes()
 		{
-			lock (lockObject)
+			lock (LockObject)
 			{
-				if (types != null)
-					return types;
+				if (Types != null)
+					return Types;
 				var ignoreAssemblyFix = new[]
 				{
 					"Microsoft", "System", "Consul", "Polly", "Newtonsoft.Json", "MessagePack", "Google.Protobuf",
@@ -34,8 +34,8 @@ namespace Uragano.DynamicProxy
 							p.Name.StartsWith(ignore, StringComparison.CurrentCultureIgnoreCase)))
 						.Select(z => Assembly.Load(new AssemblyName(z.Name)))).Where(p => !p.IsDynamic).ToList();
 
-				types = assemblies.SelectMany(p => p.GetExportedTypes()).ToList();
-				return types;
+				Types = assemblies.SelectMany(p => p.GetExportedTypes()).ToList();
+				return Types;
 			}
 		}
 	}

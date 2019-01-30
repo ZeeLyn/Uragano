@@ -31,7 +31,7 @@ namespace Uragano.Core
 			AddServer(ip, port, "", "", weight);
 		}
 
-		public void AddServer(string ip, int port, string certificateUrl, string certificatePwd, int? weight = default)
+		public void AddServer(string ip, int port, string certUrl, string certPwd, int? weight = default)
 		{
 			ServiceCollection.AddSingleton<IBootstrap, ServerBootstrap>();
 			UraganoSettings.ServerSettings = new ServerSettings
@@ -40,19 +40,19 @@ namespace Uragano.Core
 				Port = port,
 				Weight = weight
 			};
-			if (!string.IsNullOrWhiteSpace(certificateUrl))
+			if (!string.IsNullOrWhiteSpace(certUrl))
 			{
-				if (!File.Exists(certificateUrl))
-					throw new FileNotFoundException($"Certificate file {certificateUrl} not found.");
+				if (!File.Exists(certUrl))
+					throw new FileNotFoundException($"Certificate file {certUrl} not found.");
 				UraganoSettings.ServerSettings.X509Certificate2 =
-					new X509Certificate2(certificateUrl, certificateUrl);
+					new X509Certificate2(certUrl, certUrl);
 			}
 			RegisterServerServicesAndInterceptors();
 		}
 
 		public void AddServer(IConfigurationSection configurationSection)
 		{
-			AddServer(configurationSection.GetValue<string>("ip").ReplaceIPPlaceholder(), configurationSection.GetValue<int>("port"), configurationSection.GetValue<string>("certificateurl"), configurationSection.GetValue<string>("certificatePwd"), configurationSection.GetValue<int>("weight"));
+			AddServer(configurationSection.GetValue<string>("ip").ReplaceIPPlaceholder(), configurationSection.GetValue<int>("port"), configurationSection.GetValue<string>("certurl"), configurationSection.GetValue<string>("certpwd"), configurationSection.GetValue<int>("weight"));
 		}
 
 
@@ -98,8 +98,8 @@ namespace Uragano.Core
 		{
 			UraganoSettings.ServiceDiscoveryClientConfiguration = serviceDiscoveryClientConfiguration ?? throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
 			UraganoSettings.ServiceRegisterConfiguration = serviceRegisterConfiguration ?? throw new ArgumentNullException(nameof(serviceRegisterConfiguration));
-			if (string.IsNullOrWhiteSpace(serviceRegisterConfiguration.Id))
-				throw new ArgumentNullException(nameof(serviceRegisterConfiguration.Id));
+			if (string.IsNullOrWhiteSpace(serviceRegisterConfiguration.Name))
+				throw new ArgumentNullException(nameof(serviceRegisterConfiguration.Name));
 
 			ServiceCollection.AddSingleton(typeof(IServiceDiscovery), typeof(TServiceDiscovery));
 		}
@@ -191,7 +191,7 @@ namespace Uragano.Core
 
 			foreach (var service in services)
 			{
-				ServiceCollection.AddTransient(service.Interface, service.Implementation);
+				ServiceCollection.AddScoped(service.Interface, service.Implementation);
 			}
 
 			var interceptors = types.FindAll(t => typeof(IInterceptor).IsAssignableFrom(t));

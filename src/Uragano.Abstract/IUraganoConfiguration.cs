@@ -9,7 +9,7 @@ namespace Uragano.Abstractions
 
 		void AddServer(string ip, int port, int? weight = default);
 
-		void AddServer(string ip, int port, string certificateUrl, string certificatePwd, int? weight = default);
+		void AddServer(string ip, int port, string certUrl, string certPwd, int? weight = default);
 
 		void AddServer(IConfigurationSection configurationSection);
 
