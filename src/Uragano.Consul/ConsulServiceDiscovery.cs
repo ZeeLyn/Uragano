@@ -67,7 +67,7 @@ namespace Uragano.Consul
 					Logger.LogError("--------------->  Registration service failed:{0}", result.StatusCode);
 					throw new ConsulRequestException("Registration service failed.", result.StatusCode);
 				}
-				Logger.LogInformation("---------------> Consul service registration completed");
+				Logger.LogDebug("---------------> Consul service registration completed");
 				return result.StatusCode != HttpStatusCode.OK;
 			}
 		}

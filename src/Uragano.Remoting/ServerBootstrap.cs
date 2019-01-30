@@ -7,6 +7,7 @@ using DotNetty.Handlers.Tls;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using DotNetty.Transport.Libuv;
+using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceInvoker;
 using Uragano.Codec.MessagePack;
@@ -24,12 +25,15 @@ namespace Uragano.Remoting
 
 		private IServiceProvider ServiceProvider { get; }
 
-		public ServerBootstrap(IInvokerFactory invokerFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings)
+		private ILogger Logger { get; }
+
+		public ServerBootstrap(IInvokerFactory invokerFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings, ILogger<ServerBootstrap> logger)
 		{
 
 			InvokerFactory = invokerFactory;
 			ServiceProvider = serviceProvider;
 			ServerSettings = uraganoSettings.ServerSettings;
+			Logger = logger;
 		}
 
 		public async Task StartAsync()
@@ -71,7 +75,7 @@ namespace Uragano.Remoting
 					pipeline.AddLast(new MessageEncoder<ResultMessage>());
 					pipeline.AddLast(new ServerMessageHandler(InvokerFactory, ServiceProvider));
 				}));
-			Console.WriteLine($"监听{ServerSettings.IP}:{ServerSettings.Port}");
+			Logger.LogDebug($"Listening {ServerSettings.IP}:{ServerSettings.Port}");
 			Channel = await bootstrap.BindAsync(new IPEndPoint(ServerSettings.IP, ServerSettings.Port));
 		}
 

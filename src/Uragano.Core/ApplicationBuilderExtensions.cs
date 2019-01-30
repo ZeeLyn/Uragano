@@ -16,7 +16,7 @@ namespace Uragano.Core
 		public static IApplicationBuilder UseUragano(this IApplicationBuilder applicationBuilder)
 		{
 
-			ThreadPool.SetMinThreads(UraganoOptions.ThreadPool_MinThreads.Value, UraganoOptions.ThreadPool_MinThreads.Value);
+			ThreadPool.SetMinThreads(UraganoOptions.ThreadPool_MinThreads.Value, UraganoOptions.ThreadPool_CompletionPortThreads.Value);
 
 			var applicationLifetime = applicationBuilder.ApplicationServices.GetService<IApplicationLifetime>();
 			var uraganoSettings = applicationBuilder.ApplicationServices.GetService<UraganoSettings>();

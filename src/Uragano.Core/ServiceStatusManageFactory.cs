@@ -53,13 +53,13 @@ namespace Uragano.Core
 
 		public async Task Refresh(CancellationToken cancellationToken)
 		{
-			Logger.LogInformation("------------> Start refresh service status...");
-			Logger.LogInformation("------------> Waiting for locking...");
+			Logger.LogDebug("------------> Start refresh service status...");
+			Logger.LogDebug("------------> Waiting for locking...");
 			using (await AsyncLock.LockAsync(cancellationToken))
 			{
 				if (cancellationToken.IsCancellationRequested)
 					return;
-				Logger.LogInformation("------------> Refreshing...");
+				Logger.LogDebug("------------> Refreshing...");
 				foreach (var service in ServiceNodes)
 				{
 					var healthNodes = await ServiceDiscovery.QueryServiceAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, service.Key, ServiceStatus.Alive, cancellationToken);
@@ -75,7 +75,7 @@ namespace Uragano.Core
 						{
 							if (node.Alive) continue;
 							node.Alive = true;
-							Logger.LogInformation($"------------> The status of node {node.Address}:{node.Port} changes to alive.");
+							Logger.LogDebug($"------------> The status of node {node.Address}:{node.Port} changes to alive.");
 						}
 						else
 						{
@@ -83,7 +83,7 @@ namespace Uragano.Core
 								continue;
 							node.Alive = false;
 							node.CurrentWeight = 0;
-							Logger.LogInformation($"------------> The status of node {node.Address}:{node.Port} changes to dead.");
+							Logger.LogDebug($"------------> The status of node {node.Address}:{node.Port} changes to dead.");
 						}
 					}
 
@@ -101,11 +101,11 @@ namespace Uragano.Core
 					if (newEndPoints.Any())
 					{
 						service.Value.AddRange(newEndPoints);
-						Logger.LogInformation($"------------> New nodes added:{string.Join(",", newEndPoints.Select(p => p.Address + ":" + p.Port))}");
+						Logger.LogDebug($"------------> New nodes added:{string.Join(",", newEndPoints.Select(p => p.Address + ":" + p.Port))}");
 					}
 
 				}
-				Logger.LogInformation("------------> Complete refresh.");
+				Logger.LogDebug("------------> Complete refresh.");
 			}
 		}
 	}
