@@ -11,7 +11,7 @@ namespace Uragano.Codec.MessagePack
 		protected override void Decode(IChannelHandlerContext context, IByteBuffer message, List<object> output)
 		{
 			var len = message.ReadableBytes;
-			byte[] array = new byte[len];
+			var array = new byte[len];
 			message.GetBytes(message.ReaderIndex, array, 0, len);
 			output.Add(SerializerHelper.Deserialize<TransportMessage<T>>(array));
 		}

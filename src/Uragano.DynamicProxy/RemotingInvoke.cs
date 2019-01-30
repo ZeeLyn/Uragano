@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Uragano.Abstractions.Exceptions;
-using Uragano.Abstractions.LoadBalancing;
 using Uragano.Codec.MessagePack;
 using Uragano.Abstractions;
 using Uragano.Remoting;
@@ -19,7 +18,7 @@ namespace Uragano.DynamicProxy
 		}
 		public async Task<T> InvokeAsync<T>(object[] args, string route, string serviceName)
 		{
-			var node = LoadBalancing.GetNextNode(serviceName);
+			var node = await LoadBalancing.GetNextNode(serviceName);
 			var client = await ClientFactory.CreateClientAsync(node.Address, node.Port);
 			var result = await client.SendAsync(new InvokeMessage
 			{

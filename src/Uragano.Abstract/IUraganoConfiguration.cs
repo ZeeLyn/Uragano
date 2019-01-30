@@ -6,11 +6,16 @@ namespace Uragano.Abstractions
 	public interface IUraganoConfiguration
 	{
 
+
 		void AddServer(string ip, int port, int? weight = default);
 
 		void AddServer(string ip, int port, string certificateUrl, string certificatePwd, int? weight = default);
 
 		void AddServer(IConfigurationSection configurationSection);
+
+		void AddClient<TLoadBalancing>() where TLoadBalancing : ILoadBalancing;
+
+		void AddClient();
 
 		/// <summary>
 		/// For client
@@ -34,13 +39,22 @@ namespace Uragano.Abstractions
 		/// <param name="serviceName"></param>
 		/// <param name="certificateUrl"></param>
 		/// <param name="certificatePassword"></param>
-		void DependentService(string serviceName, string certificateUrl = "", string certificatePassword = "");
+		void DependencyService(string serviceName, string certificateUrl = "", string certificatePassword = "");
+
+
 
 		/// <summary>
 		/// Add client-dependent services
 		/// </summary>
 		/// <param name="services"></param>
-		void DependentServices(params (string SeriviceName, string CertificateUrl, string CertificatePassword)[] services);
+		void DependencyServices(params (string SeriviceName, string CertificateUrl, string CertificatePassword)[] services);
+
+		/// <summary>
+		///  Add client-dependent services
+		/// </summary>
+		/// <param name="configurationSection"></param>
+		void DependencyServices(IConfigurationSection configurationSection);
+
 
 
 		void Option<T>(UraganoOption<T> option, T value);

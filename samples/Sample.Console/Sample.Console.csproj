@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Uragano.Core\Uragano.Core.csproj" />
     <ProjectReference Include="..\..\src\Uragano.Remoting\Uragano.Remoting.csproj" />
   </ItemGroup>
 

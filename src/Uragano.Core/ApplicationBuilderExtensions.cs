@@ -48,12 +48,13 @@ namespace Uragano.Core
 				}
 			}
 
-			if (uraganoSettings.ClientInvokeServices != null && uraganoSettings.ClientInvokeServices.Count > 0)
+			if (applicationBuilder.ApplicationServices.GetService<ILoadBalancing>() != null)
 			{
 				var serviceStatusRefreshFactory = applicationBuilder.ApplicationServices.GetService<IServiceStatusManageFactory>();
-				serviceStatusRefreshFactory.Refresh(CancellationTokenSource.Token).Wait();
+
 				if (UraganoOptions.Client_Node_Status_Refresh_Interval.Value.Ticks > 0)
 				{
+					//NOTE:Replace with Timer
 					Task.Factory.StartNew(async () =>
 					{
 						while (!CancellationTokenSource.Token.IsCancellationRequested)
@@ -63,6 +64,7 @@ namespace Uragano.Core
 								break;
 							await Task.Delay(UraganoOptions.Client_Node_Status_Refresh_Interval.Value,
 								CancellationTokenSource.Token);
+
 						}
 					}, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 				}

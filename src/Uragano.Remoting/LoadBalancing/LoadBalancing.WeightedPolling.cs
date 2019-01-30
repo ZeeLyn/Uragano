@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
+using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceDiscovery;
 
-namespace Uragano.Abstractions.LoadBalancing
+namespace Uragano.Remoting.LoadBalancing
 {
 	public class LoadBalancingWeightedPolling : ILoadBalancing
 	{
@@ -15,11 +15,11 @@ namespace Uragano.Abstractions.LoadBalancing
 		{
 			ServiceStatusManageFactory = serviceStatusManageFactory;
 		}
-		public override ServiceNodeInfo GetNextNode(string serviceName)
+		public async Task<ServiceNodeInfo> GetNextNode(string serviceName)
 		{
+			var nodes = await ServiceStatusManageFactory.GetServiceNodes(serviceName);
 			lock (LockObject)
 			{
-				var nodes = ServiceStatusManageFactory.GetServiceNodes(serviceName);
 				if (!nodes.Any())
 					throw new Exception($"Service {serviceName} did not find available nodes.");
 				var index = -1;
@@ -33,7 +33,6 @@ namespace Uragano.Abstractions.LoadBalancing
 						index = i;
 					}
 				}
-
 				nodes[index].CurrentWeight -= total;
 				return nodes[index];
 			}

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Common.Utilities;
+using DotNetty.Handlers.Tls;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
@@ -50,6 +51,10 @@ namespace Uragano.Remoting
 				.Handler(new ActionChannelInitializer<IChannel>(channel =>
 				{
 					var pipeline = channel.Pipeline;
+					//if (ServerSettings.X509Certificate2 != null)
+					//{
+					//	pipeline.AddLast(new TlsHandler(new ClientTlsSettings());
+					//}
 					//pipeline.AddLast(new LoggingHandler("SRV-CONN"));
 					pipeline.AddLast(new LengthFieldPrepender(4));
 					pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));

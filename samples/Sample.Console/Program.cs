@@ -12,6 +12,7 @@ using DotNetty.Transport.Channels.Sockets;
 using DotNetty.Transport.Libuv;
 using Uragano.Abstractions;
 using Uragano.Codec.MessagePack;
+using Uragano.Core;
 using Uragano.Remoting;
 
 
@@ -22,12 +23,12 @@ namespace Sample.Console
 		public delegate int AddHandler(int id);
 		static void Main(string[] args)
 		{
-
-			System.Console.WriteLine(SpinWait.SpinUntil(() =>
-			 {
-				 System.Console.WriteLine(DateTime.Now);
-				 return false;
-			 }, 1000));
+			System.Console.WriteLine(IPHelper.GetLocalInternetIP());
+			//System.Console.WriteLine(SpinWait.SpinUntil(() =>
+			// {
+			//	 System.Console.WriteLine(DateTime.Now);
+			//	 return false;
+			// }, 1000));
 
 			//ThreadPool.SetMinThreads(100, 100);
 			//var channel = CreateClient();

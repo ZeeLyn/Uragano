@@ -6,11 +6,11 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
-using Uragano.Abstractions.LoadBalancing;
 using Uragano.Abstractions.ServiceDiscovery;
 using Uragano.DynamicProxy;
 using Uragano.DynamicProxy.Interceptor;
 using Uragano.Remoting;
+using Uragano.Remoting.LoadBalancing;
 
 namespace Uragano.Core
 {
@@ -25,6 +25,7 @@ namespace Uragano.Core
 			ServiceCollection = serviceCollection;
 		}
 
+
 		public void AddServer(string ip, int port, int? weight = default)
 		{
 			AddServer(ip, port, "", "", weight);
@@ -35,7 +36,7 @@ namespace Uragano.Core
 			ServiceCollection.AddSingleton<IBootstrap, ServerBootstrap>();
 			UraganoSettings.ServerSettings = new ServerSettings
 			{
-				IP = IPAddress.Parse(ip),
+				IP = IPAddress.Parse(ip.ReplaceIPPlaceholder()),
 				Port = port,
 				Weight = weight
 			};
@@ -51,7 +52,28 @@ namespace Uragano.Core
 
 		public void AddServer(IConfigurationSection configurationSection)
 		{
-			AddServer(configurationSection.GetValue<string>("ip"), configurationSection.GetValue<int>("port"), configurationSection.GetValue<string>("certificateurl"), configurationSection.GetValue<string>("certificatePwd"), configurationSection.GetValue<int>("weight"));
+			AddServer(configurationSection.GetValue<string>("ip").ReplaceIPPlaceholder(), configurationSection.GetValue<int>("port"), configurationSection.GetValue<string>("certificateurl"), configurationSection.GetValue<string>("certificatePwd"), configurationSection.GetValue<int>("weight"));
+		}
+
+
+		public void AddClient<TLoadBalancing>() where TLoadBalancing : ILoadBalancing
+		{
+			ServiceCollection.AddSingleton(typeof(ILoadBalancing), typeof(TLoadBalancing));
+			RegisterClientServices();
+		}
+
+		public void AddClient()
+		{
+			ServiceCollection.AddSingleton<ILoadBalancing, LoadBalancingPolling>();
+			RegisterClientServices();
+		}
+
+		private void RegisterClientServices()
+		{
+			ServiceCollection.AddSingleton<IServiceStatusManageFactory, ServiceStatusManageFactory>();
+			ServiceCollection.AddSingleton<IClientFactory, ClientFactory>();
+			ServiceCollection.AddSingleton<IRemotingInvoke, RemotingInvoke>();
+			RegisterClientProxyService();
 		}
 
 		/// <summary>
@@ -82,7 +104,7 @@ namespace Uragano.Core
 			ServiceCollection.AddSingleton(typeof(IServiceDiscovery), typeof(TServiceDiscovery));
 		}
 
-		public void DependentService(string serviceName, string certificateUrl = "", string certificatePassword = "")
+		public void DependencyService(string serviceName, string certificateUrl = "", string certificatePassword = "")
 		{
 			if (UraganoSettings.ClientInvokeServices == null)
 				UraganoSettings.ClientInvokeServices =
@@ -97,24 +119,24 @@ namespace Uragano.Core
 			}
 
 			UraganoSettings.ClientInvokeServices[serviceName] = cert;
-
-			if (ServiceCollection.All(p => p.ServiceType != typeof(IServiceStatusManageFactory)))
-			{
-				ServiceCollection.AddSingleton<IServiceStatusManageFactory, ServiceStatusManageFactory>();
-				ServiceCollection.AddSingleton<IClientFactory, ClientFactory>();
-				ServiceCollection.AddSingleton<IRemotingInvoke, RemotingInvoke>();
-				ServiceCollection.AddSingleton(typeof(ILoadBalancing), UraganoOptions.Client_LoadBalancing.Value);
-				RegisterClientProxyService();
-			}
 		}
 
-		public void DependentServices(params (string SeriviceName, string CertificateUrl, string CertificatePassword)[] dependentServices)
+		public void DependencyServices(params (string SeriviceName, string CertificateUrl, string CertificatePassword)[] dependentServices)
 		{
 			foreach (var service in dependentServices)
 			{
-				DependentService(service.SeriviceName, service.CertificateUrl, service.CertificatePassword);
+				DependencyService(service.SeriviceName, service.CertificateUrl, service.CertificatePassword);
 			}
 		}
+
+		public void DependencyServices(IConfigurationSection configurationSection)
+		{
+			foreach (var service in configurationSection.GetChildren())
+			{
+				DependencyService(service.Key, service.GetValue<string>("certificateUrl"), service.GetValue<string>("certificatePassword"));
+			}
+		}
+
 
 		public void Option<T>(UraganoOption<T> option, T value)
 		{
@@ -129,6 +151,9 @@ namespace Uragano.Core
 				{
 					case "threadpool_minthreads":
 						UraganoOptions.SetOption(UraganoOptions.ThreadPool_MinThreads, configuration.GetValue<int>(section.Key));
+						break;
+					case "threadpool_completionportthreads":
+						UraganoOptions.SetOption(UraganoOptions.ThreadPool_CompletionPortThreads, configuration.GetValue<int>(section.Key));
 						break;
 					case "client_loadbalancing":
 						UraganoOptions.SetOption(UraganoOptions.Client_LoadBalancing, Type.GetType(configuration.GetValue<string>(section.Key)));
@@ -168,7 +193,6 @@ namespace Uragano.Core
 			{
 				ServiceCollection.AddTransient(service.Interface, service.Implementation);
 			}
-
 
 			var interceptors = types.FindAll(t => typeof(IInterceptor).IsAssignableFrom(t));
 			foreach (var interceptor in interceptors)

@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
-using Uragano.Abstractions.LoadBalancing;
 using Uragano.Abstractions.ServiceInvoker;
 using Uragano.DynamicProxy;
 

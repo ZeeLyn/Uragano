@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -12,14 +13,15 @@ namespace Uragano.Core
 	public class ServiceStatusManageFactory : IServiceStatusManageFactory
 	{
 		private ILogger Logger { get; }
+
 		private static readonly AsyncLock AsyncLock = new AsyncLock();
 
 		private IServiceDiscovery ServiceDiscovery { get; }
 
 		private UraganoSettings UraganoSettings { get; }
 
-		private static readonly Dictionary<string, List<ServiceNodeInfo>> ServiceNodes =
-			new Dictionary<string, List<ServiceNodeInfo>>();
+		private static readonly ConcurrentDictionary<string, List<ServiceNodeInfo>> ServiceNodes =
+			new ConcurrentDictionary<string, List<ServiceNodeInfo>>();
 
 
 		public ServiceStatusManageFactory(ILogger<ServiceStatusManageFactory> logger, IServiceDiscovery serviceDiscovery, UraganoSettings uraganoSettings)
@@ -29,14 +31,24 @@ namespace Uragano.Core
 			UraganoSettings = uraganoSettings;
 		}
 
-		public List<ServiceNodeInfo> GetServiceNodes(string serviceName, bool alive = true)
+		public async Task<List<ServiceNodeInfo>> GetServiceNodes(string serviceName, bool alive = true)
 		{
-			if (!UraganoSettings.ClientInvokeServices.Any(p =>
-				p.Key.Equals(serviceName, StringComparison.CurrentCultureIgnoreCase)))
-				throw new InvalidOperationException($"Not found service {serviceName}");
 			if (ServiceNodes.TryGetValue(serviceName, out var result))
 				return result.FindAll(p => p.Alive == alive);
-			return new List<ServiceNodeInfo>();
+			var serviceNodes = await ServiceDiscovery.QueryServiceAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, serviceName);
+			var nodes = serviceNodes.Select(p => new ServiceNodeInfo
+			{
+				Address = p.Address,
+				Port = p.Port,
+				Alive = true,
+				ServiceId = p.ServiceId,
+				Meta = p.Meta,
+				Weight = int.Parse(p.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0")
+			}).ToList();
+
+			if (ServiceNodes.TryAdd(serviceName, nodes))
+				return nodes;
+			throw new InvalidOperationException($"Get service[{serviceName}] failure.");
 		}
 
 		public async Task Refresh(CancellationToken cancellationToken)
@@ -48,64 +60,50 @@ namespace Uragano.Core
 				if (cancellationToken.IsCancellationRequested)
 					return;
 				Logger.LogInformation("------------> Refreshing...");
-				foreach (var service in UraganoSettings.ClientInvokeServices)
+				foreach (var service in ServiceNodes)
 				{
 					var healthNodes = await ServiceDiscovery.QueryServiceAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, service.Key, ServiceStatus.Alive, cancellationToken);
 					if (cancellationToken.IsCancellationRequested)
 						break;
-					if (ServiceNodes.TryGetValue(service.Key, out var nodes))
+
+					foreach (var node in service.Value)
 					{
-						foreach (var node in nodes)
-						{
-							if (cancellationToken.IsCancellationRequested)
-								break;
+						if (cancellationToken.IsCancellationRequested)
+							break;
 
-							if (healthNodes.Any(p => node.Address == p.Address && node.Port == p.Port))
-							{
-								if (node.Alive) continue;
-								node.Alive = true;
-								Logger.LogInformation($"------------> The status of node {node.Address}:{node.Port} changes to alive.");
-							}
-							else
-							{
-								if (!node.Alive)
-									continue;
-								node.Alive = false;
-								node.CurrentWeight = 0;
-								Logger.LogInformation($"------------> The status of node {node.Address}:{node.Port} changes to dead.");
-							}
+						if (healthNodes.Any(p => node.Address == p.Address && node.Port == p.Port))
+						{
+							if (node.Alive) continue;
+							node.Alive = true;
+							Logger.LogInformation($"------------> The status of node {node.Address}:{node.Port} changes to alive.");
 						}
-
-						var newEndPoints = healthNodes.FindAll(p =>
-							!nodes.Any(e => e.Address == p.Address && e.Port == p.Port)).Select(p => new ServiceNodeInfo
-							{
-								Address = p.Address,
-								Port = p.Port,
-								Alive = true,
-								Weight = int.Parse(p.Meta.FirstOrDefault(m => m.Key == "X-Weight").Value),
-								ServiceId = p.ServiceId,
-								Meta = p.Meta
-							}).ToList();
-
-						if (newEndPoints.Any())
+						else
 						{
-							nodes.AddRange(newEndPoints);
-							Logger.LogInformation($"------------> New nodes added:{string.Join(",", newEndPoints.Select(p => p.Address + ":" + p.Port))}");
+							if (!node.Alive)
+								continue;
+							node.Alive = false;
+							node.CurrentWeight = 0;
+							Logger.LogInformation($"------------> The status of node {node.Address}:{node.Port} changes to dead.");
 						}
 					}
-					else
-					{
-						ServiceNodes.Add(service.Key, healthNodes.Select(p => new ServiceNodeInfo
+
+					var newEndPoints = healthNodes.FindAll(p =>
+						!service.Value.Any(e => e.Address == p.Address && e.Port == p.Port)).Select(p => new ServiceNodeInfo
 						{
 							Address = p.Address,
 							Port = p.Port,
 							Alive = true,
+							Weight = int.Parse(p.Meta.FirstOrDefault(m => m.Key == "X-Weight").Value),
 							ServiceId = p.ServiceId,
-							Meta = p.Meta,
-							Weight = int.Parse(p.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0")
-						}).ToList());
-						Logger.LogInformation($"------------> Discover a new {service.Key} service.");
+							Meta = p.Meta
+						}).ToList();
+
+					if (newEndPoints.Any())
+					{
+						service.Value.AddRange(newEndPoints);
+						Logger.LogInformation($"------------> New nodes added:{string.Join(",", newEndPoints.Select(p => p.Address + ":" + p.Port))}");
 					}
+
 				}
 				Logger.LogInformation("------------> Complete refresh.");
 			}

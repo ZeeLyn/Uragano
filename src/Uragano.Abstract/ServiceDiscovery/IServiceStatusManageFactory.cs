@@ -6,7 +6,7 @@ namespace Uragano.Abstractions.ServiceDiscovery
 {
 	public interface IServiceStatusManageFactory
 	{
-		List<ServiceNodeInfo> GetServiceNodes(string serviceName, bool alive = true);
+		Task<List<ServiceNodeInfo>> GetServiceNodes(string serviceName, bool alive = true);
 
 		Task Refresh(CancellationToken cancellationToken);
 	}

@@ -5,13 +5,19 @@ namespace Uragano.Abstractions
 {
 	public class UraganoOptions
 	{
-
 		public static UraganoOption<int> ThreadPool_MinThreads { get; } = new UraganoOption<int>(() =>
 		{
-			ThreadPool.GetMinThreads(out var min, out var completion);
+			ThreadPool.GetMinThreads(out var min, out _);
 			return min;
 		});
-		public static UraganoOption<Type> Client_LoadBalancing { get; } = new UraganoOption<Type>(LoadBalancing.ILoadBalancing.Polling);
+
+		public static UraganoOption<int> ThreadPool_CompletionPortThreads { get; } = new UraganoOption<int>(() =>
+		 {
+			 ThreadPool.GetMinThreads(out _, out var completion);
+			 return completion;
+		 });
+
+		public static UraganoOption<Type> Client_LoadBalancing { get; } = new UraganoOption<Type>(typeof(ILoadBalancing));
 
 		public static UraganoOption<TimeSpan> Client_Node_Status_Refresh_Interval { get; } = new UraganoOption<TimeSpan>(TimeSpan.FromSeconds(10));
 
@@ -21,11 +27,11 @@ namespace Uragano.Abstractions
 
 		public static UraganoOption<bool> DotNetty_Enable_Libuv { get; } = new UraganoOption<bool>(false);
 
-		public static UraganoOption<int> DotNetty_Event_Loop_Count { get; set; } = new UraganoOption<int>(() =>
-		{
-			ThreadPool.GetMinThreads(out var min, out var completion);
-			return min;
-		});
+		public static UraganoOption<int> DotNetty_Event_Loop_Count { get; } = new UraganoOption<int>(() =>
+		 {
+			 ThreadPool.GetMinThreads(out var min, out _);
+			 return min;
+		 });
 
 
 		public static void SetOption<T>(UraganoOption<T> option, T value)
@@ -33,6 +39,10 @@ namespace Uragano.Abstractions
 			option.Value = value;
 		}
 
+		public static void SetOption<T>(UraganoOption<T> option, Func<T> func)
+		{
+			option.Value = func();
+		}
 
 	}
 	public class UraganoOption<T>

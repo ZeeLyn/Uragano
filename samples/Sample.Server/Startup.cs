@@ -11,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Uragano.Abstractions;
-using Uragano.Abstractions.LoadBalancing;
 using Uragano.Codec.MessagePack;
 using Uragano.Consul;
 using Uragano.Core;
@@ -34,9 +33,11 @@ namespace Sample.Server
 			services.AddUragano(config =>
 			{
 				config.AddServer(Configuration.GetSection("Uragano:Server"));
-				config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"), Configuration.GetSection("Uragano:Consul:Service"));
+				config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"),
+					Configuration.GetSection("Uragano:Consul:Service"));
 				config.Option(UraganoOptions.Server_DotNetty_Channel_SoBacklog, 100);
 				config.Options(Configuration.GetSection("Uragano:Options"));
+
 			});
 
 			services.AddScoped<TestLib>();
