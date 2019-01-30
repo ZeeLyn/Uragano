@@ -33,27 +33,27 @@ namespace Uragano.Abstractions
 		void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, IServiceRegisterConfiguration serviceRegisterConfiguration) where TServiceDiscovery : IServiceDiscovery;
 
 
-		/// <summary>
-		/// Add client-dependent services
-		/// </summary>
-		/// <param name="serviceName"></param>
-		/// <param name="certificateUrl"></param>
-		/// <param name="certificatePassword"></param>
-		void DependencyService(string serviceName, string certificateUrl = "", string certificatePassword = "");
+		///// <summary>
+		///// Add client-dependent services
+		///// </summary>
+		///// <param name="serviceName"></param>
+		///// <param name="certificateUrl"></param>
+		///// <param name="certificatePassword"></param>
+		//void DependencyService(string serviceName, string certificateUrl = "", string certificatePassword = "");
 
 
 
-		/// <summary>
-		/// Add client-dependent services
-		/// </summary>
-		/// <param name="services"></param>
-		void DependencyServices(params (string SeriviceName, string CertificateUrl, string CertificatePassword)[] services);
+		///// <summary>
+		///// Add client-dependent services
+		///// </summary>
+		///// <param name="services"></param>
+		//void DependencyServices(params (string SeriviceName, string CertificateUrl, string CertificatePassword)[] services);
 
-		/// <summary>
-		///  Add client-dependent services
-		/// </summary>
-		/// <param name="configurationSection"></param>
-		void DependencyServices(IConfigurationSection configurationSection);
+		///// <summary>
+		/////  Add client-dependent services
+		///// </summary>
+		///// <param name="configurationSection"></param>
+		//void DependencyServices(IConfigurationSection configurationSection);
 
 
 

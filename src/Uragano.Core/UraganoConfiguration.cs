@@ -210,7 +210,7 @@ namespace Uragano.Core
 			var proxies = ProxyGenerator.GenerateProxy(services);
 			foreach (var service in services)
 			{
-				ServiceCollection.AddSingleton(service, proxies.FirstOrDefault(p => service.IsAssignableFrom(p)));
+				ServiceCollection.AddScoped(service, proxies.FirstOrDefault(p => service.IsAssignableFrom(p)));
 			}
 		}
 	}

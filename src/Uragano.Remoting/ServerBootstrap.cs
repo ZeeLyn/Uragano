@@ -84,7 +84,7 @@ namespace Uragano.Remoting
 
 		public void Dispose()
 		{
-			Channel.DisconnectAsync().Wait();
+			StopAsync().Wait();
 		}
 	}
 }

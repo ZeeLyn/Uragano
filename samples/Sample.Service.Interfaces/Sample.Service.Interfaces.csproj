@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Uragano.Abstract\Uragano.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Uragano.DynamicProxy\Uragano.DynamicProxy.csproj" />
   </ItemGroup>
 
 </Project>

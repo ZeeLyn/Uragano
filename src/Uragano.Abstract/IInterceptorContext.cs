@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Uragano.Abstractions
@@ -16,7 +15,7 @@ namespace Uragano.Abstractions
 		IServiceProvider ServiceProvider { get; }
 
 
-		Stack<Type> Interceptors { get; }
+		//Stack<Type> Interceptors { get; }
 
 
 		Task<object> Next();

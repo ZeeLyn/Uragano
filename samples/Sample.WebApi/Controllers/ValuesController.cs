@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Sample.Service.Interfaces;
-using Uragano.Abstractions;
-using Uragano.DynamicProxy;
-using Uragano.Remoting;
+using Uragano.Core;
+
 
 namespace Sample.WebApi.Controllers
 {
@@ -13,15 +11,10 @@ namespace Sample.WebApi.Controllers
 	[ApiController]
 	public class ValuesController : ControllerBase
 	{
-		private IClientFactory ClientFactory { get; }
-
-
-
 		private IHelloService HelloService { get; }
 
-		public ValuesController(IClientFactory clientFactory, IHelloService helloService)
+		public ValuesController(IHelloService helloService)
 		{
-			ClientFactory = clientFactory;
 			HelloService = helloService;
 		}
 
@@ -29,26 +22,9 @@ namespace Sample.WebApi.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Get()
 		{
-			//var proxy = ServiceProxy.GetService<IHelloService>();
-			//var id = Guid.NewGuid().ToString();
-			//var r = await proxy.SayHello(id);
-			//return Ok(new
-			//{
-			//	Send = id,
-			//	Rece = r.Message
-			//});
-			//ProxyGenerator.GenerateProxy(new[] { typeof(IHelloService) });
-			//ThreadPool.GetMinThreads(out var work, out var comp);
-			//ThreadPool.GetAvailableThreads(out var ava_work, out var ava_comp);
-			//await HelloService.SayHello();
-
 			return Ok(new
 			{
-				result = await HelloService.SayHello(Guid.NewGuid().ToString()),
-				//work,
-				//comp,
-				//ava_work,
-				//ava_comp
+				result = await HelloService.SetMeta(("token", "bearer .....")).SayHello(Guid.NewGuid().ToString()),
 			});
 		}
 

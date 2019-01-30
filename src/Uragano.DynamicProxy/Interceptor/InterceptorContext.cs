@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
 using Uragano.Abstractions;
 
@@ -16,6 +15,7 @@ namespace Uragano.DynamicProxy.Interceptor
 		public object[] Args { get; internal set; }
 
 		public IServiceProvider ServiceProvider { get; internal set; }
+
 		public Stack<Type> Interceptors { get; } = new Stack<Type>();
 
 		public async Task<object> Next()

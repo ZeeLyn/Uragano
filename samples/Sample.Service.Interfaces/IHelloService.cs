@@ -10,7 +10,7 @@ namespace Sample.Service.Interfaces
 	public interface IHelloService : IService
 	{
 
-		[ServiceRoute("say/async")]
+		[ServiceRoute(@"say/async")]
 		Task<ResultModel> SayHello(string name);
 
 		[ServiceRoute("say/task")]

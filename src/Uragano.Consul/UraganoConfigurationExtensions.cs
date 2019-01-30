@@ -5,7 +5,7 @@ using Uragano.Abstractions;
 
 namespace Uragano.Consul
 {
-	public static class IUraganoConfigurationExtensions
+	public static class UraganoConfigurationExtensions
 	{
 		public static void AddConsul(this IUraganoConfiguration uraganoConfiguration,
 			ConsulClientConfigure consulClientConfiguration)
