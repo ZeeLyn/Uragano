@@ -48,7 +48,7 @@ namespace Uragano.Remoting
 			else
 			{
 				bossGroup = new MultithreadEventLoopGroup(1);
-				workerGroup = new MultithreadEventLoopGroup();
+				workerGroup = new MultithreadEventLoopGroup(UraganoOptions.DotNetty_Event_Loop_Count.Value);
 				bootstrap.Channel<TcpServerSocketChannel>();
 			}
 
@@ -57,7 +57,7 @@ namespace Uragano.Remoting
 				.Option(ChannelOption.SoBacklog, UraganoOptions.Server_DotNetty_Channel_SoBacklog.Value)
 				.ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
 				.ChildOption(ChannelOption.ConnectTimeout, UraganoOptions.DotNetty_Connect_Timeout.Value)
-				.ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
+				.ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
 				{
 					var pipeline = channel.Pipeline;
 					if (ServerSettings.X509Certificate2 != null)

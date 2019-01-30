@@ -17,16 +17,16 @@ namespace Uragano.Abstractions.LoadBalancing
 
 		public override ServiceNodeInfo GetNextNode(string serviceName)
 		{
-			//lock (LockObject)
-			//{
-			var nodes = ServiceStatusManageFactory.GetServiceNodes(serviceName);
-			if (!nodes.Any())
-				throw new Exception($"Service {serviceName} did not find available nodes.");
-			_index++;
-			if (_index > nodes.Count - 1)
-				_index = 0;
-			return nodes[_index];
-			//}
+			lock (LockObject)
+			{
+				var nodes = ServiceStatusManageFactory.GetServiceNodes(serviceName);
+				if (!nodes.Any())
+					throw new Exception($"Service {serviceName} did not find available nodes.");
+				_index++;
+				if (_index > nodes.Count - 1)
+					_index = 0;
+				return nodes[_index];
+			}
 		}
 	}
 }

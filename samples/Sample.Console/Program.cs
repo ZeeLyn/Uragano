@@ -23,6 +23,12 @@ namespace Sample.Console
 		static void Main(string[] args)
 		{
 
+			System.Console.WriteLine(SpinWait.SpinUntil(() =>
+			 {
+				 System.Console.WriteLine(DateTime.Now);
+				 return false;
+			 }, 1000));
+
 			//ThreadPool.SetMinThreads(100, 100);
 			//var channel = CreateClient();
 			//Parallel.For(1, 200, (index) =>
@@ -36,8 +42,8 @@ namespace Sample.Console
 			//	 System.Console.WriteLine("ended");
 			// });
 
-			Action<int> action = (i) => { };
-			action.BeginInvoke(1, null, null);
+			//Action<int> action = (i) => { };
+			//action.BeginInvoke(1, null, null);
 			//AsyncCallback callback = obj => { };
 			//AddHandler handler = new AddHandler(Add);
 			//var result = handler.BeginInvoke(1, callback, "asyncstat");

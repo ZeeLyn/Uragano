@@ -44,5 +44,7 @@ namespace Uragano.Abstractions
 
 
 		void Option<T>(UraganoOption<T> option, T value);
+
+		void Options(IConfigurationSection configuration);
 	}
 }

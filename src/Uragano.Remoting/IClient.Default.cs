@@ -23,7 +23,7 @@ namespace Uragano.Remoting
 
 		}
 
-		private async Task MessageListener_OnReceived(IMessageSender sender, TransportMessage<ResultMessage> message)
+		private void MessageListener_OnReceived(IMessageSender sender, TransportMessage<ResultMessage> message)
 		{
 			if (_resultCallbackTask.TryGetValue(message.Id, out var task))
 			{
@@ -31,7 +31,6 @@ namespace Uragano.Remoting
 			}
 			else
 				Console.WriteLine("Not found callback");
-			await Task.CompletedTask;
 		}
 
 		public async Task<ResultMessage> SendAsync(InvokeMessage message)
@@ -47,17 +46,17 @@ namespace Uragano.Remoting
 			try
 			{
 				await Channel.WriteAndFlushAsync(transportMessage);
-				using (var cts = new CancellationTokenSource())
-				{
-					if (task.Task == await Task.WhenAny(task.Task, Task.Delay(4000, cts.Token)))
-					{
-						cts.Cancel();
-						return await task.Task;
-					}
-					else
-						task.SetCanceled();
-				}
-				throw new TimeoutException();
+				//using (var cts = new CancellationTokenSource())
+				//{
+				//	if (task.Task == await Task.WhenAny(task.Task, Task.Delay(4000, cts.Token)))
+				//	{
+				//		cts.Cancel();
+				return await task.Task;
+				//}
+				//else
+				//	task.SetCanceled();
+				//}
+				//throw new TimeoutException();
 			}
 			finally
 			{

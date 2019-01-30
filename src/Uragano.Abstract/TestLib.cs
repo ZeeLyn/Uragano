@@ -6,12 +6,12 @@ namespace Uragano.Abstractions
 	{
 		public void Exec()
 		{
-			Console.WriteLine("Exec-------------------->");
+			//Console.WriteLine("Exec-------------------->");
 		}
 
 		public void Dispose()
 		{
-			Console.WriteLine("Dispose-------------------->");
+			//Console.WriteLine("Dispose-------------------->");
 		}
 	}
 }

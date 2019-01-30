@@ -15,8 +15,8 @@ namespace Uragano.Core
 		private static readonly CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
 		public static IApplicationBuilder UseUragano(this IApplicationBuilder applicationBuilder)
 		{
-			//ThreadPool.SetMinThreads(200, 200);
 
+			ThreadPool.SetMinThreads(UraganoOptions.ThreadPool_MinThreads.Value, UraganoOptions.ThreadPool_MinThreads.Value);
 
 			var applicationLifetime = applicationBuilder.ApplicationServices.GetService<IApplicationLifetime>();
 			var uraganoSettings = applicationBuilder.ApplicationServices.GetService<UraganoSettings>();

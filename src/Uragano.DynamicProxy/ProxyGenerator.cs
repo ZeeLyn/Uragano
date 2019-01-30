@@ -31,7 +31,7 @@ namespace Uragano.DynamicProxy
 
 			var trees = interfaces.Select(GenerateProxyTree).ToList();
 			var text = trees.First().GetText();
-			File.WriteAllText(@"F:\Imp.cs", text.ToString());
+			//File.WriteAllText(@"F:\Imp.cs", text.ToString());
 			using (var stream = CompileClientProxy(trees,
 				assemblies.Select(x => MetadataReference.CreateFromFile(x.Location))
 					.Concat(new[]

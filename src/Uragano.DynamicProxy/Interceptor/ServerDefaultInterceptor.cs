@@ -10,7 +10,7 @@ namespace Uragano.DynamicProxy.Interceptor
 	{
 		public override async Task<object> Intercept(IInterceptorContext context)
 		{
-			Console.WriteLine("-------------->Exec DefaultInterceptor");
+			//Console.WriteLine("-------------->Exec DefaultInterceptor");
 			var invokerFactory = context.ServiceProvider.GetService<IInvokerFactory>();
 			var service = invokerFactory.Get(context.ServiceRoute);
 			var instance = context.ServiceProvider.GetRequiredService(service.InterfaceType);

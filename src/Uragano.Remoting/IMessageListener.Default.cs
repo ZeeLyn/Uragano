@@ -10,9 +10,8 @@ namespace Uragano.Remoting
 
 		public async Task Received(IMessageSender sender, TransportMessage<ResultMessage> message)
 		{
-			if (OnReceived == null)
-				return;
-			await OnReceived(sender, message);
+			OnReceived?.Invoke(sender, message);
+			await Task.CompletedTask;
 		}
 	}
 }

@@ -121,6 +121,38 @@ namespace Uragano.Core
 			UraganoOptions.SetOption(option, value);
 		}
 
+		public void Options(IConfigurationSection configuration)
+		{
+			foreach (var section in configuration.GetChildren())
+			{
+				switch (section.Key.ToLower())
+				{
+					case "threadpool_minthreads":
+						UraganoOptions.SetOption(UraganoOptions.ThreadPool_MinThreads, configuration.GetValue<int>(section.Key));
+						break;
+					case "client_loadbalancing":
+						UraganoOptions.SetOption(UraganoOptions.Client_LoadBalancing, Type.GetType(configuration.GetValue<string>(section.Key)));
+						break;
+					case "client_node_status_refresh_interval":
+						UraganoOptions.SetOption(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromMilliseconds(configuration.GetValue<int>(section.Key)));
+						break;
+					case "server_dotnetty_channel_sobacklog":
+						UraganoOptions.SetOption(UraganoOptions.Server_DotNetty_Channel_SoBacklog, configuration.GetValue<int>(section.Key));
+						break;
+					case "dotnetty_connect_timeout":
+						UraganoOptions.SetOption(UraganoOptions.DotNetty_Connect_Timeout, TimeSpan.FromMilliseconds(configuration.GetValue<int>(section.Key)));
+						break;
+					case "dotnetty_enable_libuv":
+						UraganoOptions.SetOption(UraganoOptions.DotNetty_Enable_Libuv, configuration.GetValue<bool>(section.Key));
+						break;
+					case "dotnetty_event_loop_count":
+						UraganoOptions.SetOption(UraganoOptions.DotNetty_Event_Loop_Count, configuration.GetValue<int>(section.Key));
+						break;
+				}
+
+			}
+		}
+
 
 		private void RegisterServerServicesAndInterceptors()
 		{
