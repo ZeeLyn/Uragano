@@ -1,16 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Uragano.Abstractions;
 
 namespace Sample.Service.Interfaces
 {
-    [ClientInterceptor]
+    [ClientInterceptor_1_]
+    [ClientInterceptor_2_]
     [ServiceDiscoveryName("RPC")]
     [ServiceRoute("hello")]
     public interface IHelloService : IService
     {
 
-        [ServiceRoute(@"say/async")]
+        [ClientMethodInterceptor_1_]
+        [ClientMethodInterceptor_2_]
+        [ServiceRoute("say/async")]
         Task<ResultModel> SayHello(string name);
 
         [ServiceRoute("say/task")]

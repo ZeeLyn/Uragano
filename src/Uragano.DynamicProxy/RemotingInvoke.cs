@@ -34,7 +34,7 @@ namespace Uragano.DynamicProxy
             {
                 var context = new InterceptorContext
                 {
-                    ServiceProvider = ServiceProvider,
+                    ServiceProvider = scope.ServiceProvider,
                     Args = args,
                     ServiceRoute = route,
                     Meta = meta,

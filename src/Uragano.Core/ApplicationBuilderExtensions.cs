@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Uragano.Abstractions.ServiceDiscovery;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,6 +21,9 @@ namespace Uragano.Core
 
             var applicationLifetime = applicationBuilder.ApplicationServices.GetService<IApplicationLifetime>();
             var uraganoSettings = applicationBuilder.ApplicationServices.GetService<UraganoSettings>();
+
+            uraganoSettings.ClientGlobalInterceptors.Reverse();
+            uraganoSettings.ServerGlobalInterceptors.Reverse();
 
             //build service proxy
             var serviceBuilder = applicationBuilder.ApplicationServices.GetService<IServiceBuilder>();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Uragano.Abstractions.Exceptions;
@@ -19,9 +20,13 @@ namespace Uragano.DynamicProxy
 
 
         private IServiceProvider ServiceProvider { get; }
-        public InvokerFactory(IServiceProvider serviceProvider)
+
+        private UraganoSettings UraganoSettings { get; }
+
+        public InvokerFactory(IServiceProvider serviceProvider, UraganoSettings uraganoSettings)
         {
             ServiceProvider = serviceProvider;
+            UraganoSettings = uraganoSettings;
         }
 
         public void Create(string route, MethodInfo methodInfo, List<Type> serverInterceptors, List<Type> clientInterceptors)
@@ -65,6 +70,13 @@ namespace Uragano.DynamicProxy
                 foreach (var interceptor in service.ServerInterceptors)
                 {
                     context.Interceptors.Push(interceptor);
+                }
+                if (UraganoSettings.ServerGlobalInterceptors.Any())
+                {
+                    foreach (var interceptor in UraganoSettings.ServerGlobalInterceptors)
+                    {
+                        context.Interceptors.Push(interceptor);
+                    }
                 }
 
                 return await ((IInterceptor)scope.ServiceProvider.GetRequiredService(context.Interceptors.Pop()))

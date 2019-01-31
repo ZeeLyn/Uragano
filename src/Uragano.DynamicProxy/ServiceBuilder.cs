@@ -58,18 +58,18 @@ namespace Uragano.DynamicProxy
                     var serverInterceptors = new List<Type>();
                     if (enableServer)
                     {
-                        serverInterceptors = serverMethod.GetCustomAttributes(true)
-                            .Where(p => p is IInterceptor).Select(p => p.GetType()).ToList();
                         serverInterceptors.AddRange(serverClassInterceptors);
+                        serverInterceptors.AddRange(serverMethod.GetCustomAttributes(true)
+                            .Where(p => p is IInterceptor).Select(p => p.GetType()).ToList());
                         serverInterceptors.Reverse();
                     }
 
                     var clientInterceptors = new List<Type>();
                     if (enableClient)
                     {
-                        clientInterceptors = interfaceMethod.GetCustomAttributes(true)
-                            .Where(p => p is IInterceptor).Select(p => p.GetType()).ToList();
                         clientInterceptors.AddRange(clientClassInterceptors);
+                        clientInterceptors.AddRange(interfaceMethod.GetCustomAttributes(true)
+                            .Where(p => p is IInterceptor).Select(p => p.GetType()).ToList());
                         clientInterceptors.Reverse();
                     }
 

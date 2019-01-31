@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Uragano.Abstractions;
 using Uragano.Abstractions.Exceptions;
 using Uragano.Codec.MessagePack;
@@ -9,7 +6,7 @@ using Uragano.Remoting;
 
 namespace Uragano.DynamicProxy.Interceptor
 {
-    public class ClientDefaultInterceptor : InterceptorAbstract
+    public sealed class ClientDefaultInterceptor : InterceptorAbstract
     {
         private ILoadBalancing LoadBalancing { get; }
         private IClientFactory ClientFactory { get; }
@@ -22,6 +19,8 @@ namespace Uragano.DynamicProxy.Interceptor
         public override async Task<object> Intercept(IInterceptorContext context)
         {
             var ctx = context as InterceptorContext;
+
+            // TODO 实现熔断
             var node = await LoadBalancing.GetNextNode(ctx.ServiceName);
             var client = await ClientFactory.CreateClientAsync(node.Address, node.Port);
             var result = await client.SendAsync(new InvokeMessage

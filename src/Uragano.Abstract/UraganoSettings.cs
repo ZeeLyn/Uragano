@@ -16,9 +16,9 @@ namespace Uragano.Abstractions
 
         public Dictionary<string, X509Certificate2> ClientInvokeServices { get; set; }
 
-        public HashSet<Type> ClientGlobalInterceptors { get; } = new HashSet<Type>();
+        public List<Type> ClientGlobalInterceptors { get; } = new List<Type>();
 
-        public HashSet<Type> ServerGlobalInterceptors { get; } = new HashSet<Type>();
+        public List<Type> ServerGlobalInterceptors { get; } = new List<Type>();
     }
 
 

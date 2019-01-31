@@ -5,7 +5,7 @@ using Uragano.Abstractions.ServiceInvoker;
 
 namespace Uragano.DynamicProxy.Interceptor
 {
-    public class ServerDefaultInterceptor : InterceptorAbstract
+    public sealed class ServerDefaultInterceptor : InterceptorAbstract
     {
         private IInvokerFactory InvokerFactory { get; }
 

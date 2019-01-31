@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sample.Service.Interfaces;
 using Uragano.Abstractions;
 using Uragano.Codec.MessagePack;
 using Uragano.Consul;
@@ -36,6 +37,9 @@ namespace Sample.Server
                 config.AddServer(Configuration.GetSection("Uragano:Server"));
                 config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"),
                     Configuration.GetSection("Uragano:Consul:Service"));
+                config.AddClientGlobalInterceptor<ClientGlobal_1_Interceptor>();
+                config.AddClientGlobalInterceptor<ClientGlobal_2_Interceptor>();
+                config.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
                 //config.Option(UraganoOptions.Server_DotNetty_Channel_SoBacklog, 100);
                 config.Options(Configuration.GetSection("Uragano:Options"));
             });

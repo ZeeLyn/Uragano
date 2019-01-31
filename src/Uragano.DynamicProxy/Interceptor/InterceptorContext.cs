@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
 
 
@@ -27,7 +28,7 @@ namespace Uragano.DynamicProxy.Interceptor
 
         public async Task<object> Next()
         {
-            var interceptor = (IInterceptor)ServiceProvider.GetService(Interceptors.Pop());
+            var interceptor = (IInterceptor)ServiceProvider.GetRequiredService(Interceptors.Pop());
             return await interceptor.Intercept(this);
         }
     }

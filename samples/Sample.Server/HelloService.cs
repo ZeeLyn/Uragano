@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Sample.Service.Interfaces;
 using Uragano.Abstractions;
 
