@@ -7,7 +7,7 @@ namespace Uragano.Abstractions.ServiceInvoker
 {
     public interface IInvokerFactory
     {
-        void Create(string route, MethodInfo methodInfo, List<Type> serverInterceptors, List<Type> clientInterceptors);
+        void Create(string route, MethodInfo serverMethodInfo, MethodInfo clientMethodInfo, List<Type> serverInterceptors, List<Type> clientInterceptors);
 
         ServiceDescriptor Get(string route);
 

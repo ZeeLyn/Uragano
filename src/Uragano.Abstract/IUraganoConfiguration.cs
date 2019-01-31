@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using Microsoft.Extensions.Configuration;
+using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.ServiceDiscovery;
 
 namespace Uragano.Abstractions
@@ -64,5 +66,12 @@ namespace Uragano.Abstractions
         void Option<T>(UraganoOption<T> option, T value);
 
         void Options(IConfigurationSection configuration);
+
+
+        void AddCircuitBreaker<TCircuitBreakerEvent>(int timeout = 3000, int retry = 3, int exceptionsAllowedBeforeBreaking = 10, int durationOfBreak = 60 * 1000) where TCircuitBreakerEvent : ICircuitBreakerEvent;
+
+        void AddCircuitBreaker(int timeout = 3000, int retry = 3, int exceptionsAllowedBeforeBreaking = 10,
+            int durationOfBreak = 60 * 1000);
+
     }
 }

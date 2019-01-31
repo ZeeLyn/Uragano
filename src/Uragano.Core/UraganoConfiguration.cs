@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
+using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.ServiceDiscovery;
 using Uragano.DynamicProxy;
 using Uragano.DynamicProxy.Interceptor;
@@ -19,8 +20,6 @@ namespace Uragano.Core
         internal IServiceCollection ServiceCollection { get; }
 
         internal UraganoSettings UraganoSettings { get; set; } = new UraganoSettings();
-
-        private bool GenerateProxy { get; set; }
 
 
         public UraganoConfiguration(IServiceCollection serviceCollection)
@@ -199,6 +198,38 @@ namespace Uragano.Core
             }
         }
 
+
+
+        #endregion
+
+        #region Circuit breaker
+        public void AddCircuitBreaker<TCircuitBreakerEvent>(int timeout = 3000, int retry = 3,
+            int exceptionsAllowedBeforeBreaking = 10, int durationOfBreak = 60000) where TCircuitBreakerEvent : ICircuitBreakerEvent
+        {
+            UraganoSettings.CircuitBreakerOptions = new CircuitBreakerOptions
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout),
+                Retry = retry,
+                ExceptionsAllowedBeforeBreaking = exceptionsAllowedBeforeBreaking,
+                DurationOfBreak = TimeSpan.FromMilliseconds(durationOfBreak)
+            };
+            RegisterSingletonService(typeof(ICircuitBreakerEvent), typeof(TCircuitBreakerEvent));
+            //RegisterSingletonService<ICircuitBreaker, PollyCircuitBreaker>();
+        }
+
+        public void AddCircuitBreaker(int timeout = 3000, int retry = 3, int exceptionsAllowedBeforeBreaking = 10,
+            int durationOfBreak = 60000)
+        {
+            UraganoSettings.CircuitBreakerOptions = new CircuitBreakerOptions
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout),
+                Retry = retry,
+                ExceptionsAllowedBeforeBreaking = exceptionsAllowedBeforeBreaking,
+                DurationOfBreak = TimeSpan.FromMilliseconds(durationOfBreak)
+            };
+            //RegisterSingletonService<ICircuitBreaker, PollyCircuitBreaker>();
+        }
+
         #endregion
 
         #region Private methods
@@ -232,7 +263,8 @@ namespace Uragano.Core
             RegisterSingletonService<ClientDefaultInterceptor>();
             RegisterSingletonService<IClientFactory, ClientFactory>();
             RegisterSingletonService<IRemotingInvoke, RemotingInvoke>();
-
+            RegisterSingletonService<IScriptInjection, ScriptInjection>();
+            RegisterSingletonService<ICircuitBreaker, PollyCircuitBreaker>();
 
             var types = ReflectHelper.GetDependencyTypes();
             var services = types.Where(t => t.IsInterface && typeof(IService).IsAssignableFrom(t)).ToList();

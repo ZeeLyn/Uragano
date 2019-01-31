@@ -60,5 +60,39 @@ namespace Uragano.DynamicProxy
                 return (T)await ((IInterceptor)scope.ServiceProvider.GetRequiredService(context.Interceptors.Pop())).Intercept(context);
             }
         }
+
+        public async Task InvokeAsync(object[] args, string route, string serviceName, Dictionary<string, string> meta = default)
+        {
+            var service = InvokerFactory.Get(route);
+
+            using (var scope = ServiceProvider.CreateScope())
+            {
+                var context = new InterceptorContext
+                {
+                    ServiceProvider = scope.ServiceProvider,
+                    Args = args,
+                    ServiceRoute = route,
+                    Meta = meta,
+                    MethodInfo = service.MethodInfo,
+                    ServiceName = serviceName
+                };
+
+                context.Interceptors.Push(typeof(ClientDefaultInterceptor));
+                foreach (var interceptor in service.ClientInterceptors)
+                {
+                    context.Interceptors.Push(interceptor);
+                }
+
+                if (UraganoSettings.ClientGlobalInterceptors.Any())
+                {
+                    foreach (var interceptor in UraganoSettings.ClientGlobalInterceptors)
+                    {
+                        context.Interceptors.Push(interceptor);
+                    }
+                }
+
+                await ((IInterceptor)scope.ServiceProvider.GetRequiredService(context.Interceptors.Pop())).Intercept(context);
+            }
+        }
     }
 }

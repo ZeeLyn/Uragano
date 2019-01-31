@@ -8,6 +8,7 @@ using Uragano.Abstractions.Exceptions;
 using Uragano.Abstractions.ServiceInvoker;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
+using Uragano.Abstractions.CircuitBreaker;
 using Uragano.DynamicProxy.Interceptor;
 using ServiceDescriptor = Uragano.Abstractions.ServiceDescriptor;
 
@@ -23,22 +24,28 @@ namespace Uragano.DynamicProxy
 
         private UraganoSettings UraganoSettings { get; }
 
-        public InvokerFactory(IServiceProvider serviceProvider, UraganoSettings uraganoSettings)
+        private IScriptInjection ScriptInjection { get; }
+
+        public InvokerFactory(IServiceProvider serviceProvider, UraganoSettings uraganoSettings, IScriptInjection scriptInjection)
         {
             ServiceProvider = serviceProvider;
             UraganoSettings = uraganoSettings;
+            ScriptInjection = scriptInjection;
         }
 
-        public void Create(string route, MethodInfo methodInfo, List<Type> serverInterceptors, List<Type> clientInterceptors)
+        public void Create(string route, MethodInfo serverMethodInfo, MethodInfo clientMethodInfo, List<Type> serverInterceptors, List<Type> clientInterceptors)
         {
             route = route.ToLower();
             if (ServiceInvokers.ContainsKey(route))
                 throw new DuplicateRouteException(route);
+
+            var circuitBreakerAttr = clientMethodInfo.GetCustomAttribute<CircuitBreakerAttribute>();
+
             ServiceInvokers.TryAdd(route, new ServiceDescriptor
             {
                 Route = route,
-                MethodInfo = methodInfo,
-                MethodInvoker = new MethodInvoker(methodInfo),
+                MethodInfo = serverMethodInfo,
+                MethodInvoker = new MethodInvoker(serverMethodInfo),
                 ServerInterceptors = serverInterceptors,
                 ClientInterceptors = clientInterceptors
             });

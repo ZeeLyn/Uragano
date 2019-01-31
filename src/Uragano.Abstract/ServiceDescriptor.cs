@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.ServiceInvoker;
 
 namespace Uragano.Abstractions
@@ -16,5 +17,7 @@ namespace Uragano.Abstractions
         public List<Type> ServerInterceptors { get; set; }
 
         public List<Type> ClientInterceptors { get; set; }
+
+        public ServiceCircuitBreakerOptions ServiceCircuitBreakerOptions { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
+using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.ServiceInvoker;
 
 namespace Uragano.DynamicProxy
@@ -15,6 +16,8 @@ namespace Uragano.DynamicProxy
         private IServiceProvider ServiceProvider { get; }
 
         private UraganoSettings UraganoSettings { get; }
+
+
 
         public ServiceBuilder(IInvokerFactory invokerFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings)
         {
@@ -73,7 +76,7 @@ namespace Uragano.DynamicProxy
                         clientInterceptors.Reverse();
                     }
 
-                    InvokerFactory.Create(route, serverMethod, serverInterceptors, clientInterceptors);
+                    InvokerFactory.Create(route, serverMethod, interfaceMethod, serverInterceptors, clientInterceptors);
                 }
             }
         }
