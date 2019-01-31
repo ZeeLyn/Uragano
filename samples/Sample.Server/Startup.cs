@@ -17,41 +17,42 @@ using Uragano.Core;
 
 namespace Sample.Server
 {
-	public class Startup
-	{
-		public Startup(IConfiguration configuration)
-		{
-			Configuration = configuration;
-		}
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
 
-		public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; }
 
-		// This method gets called by the runtime. Use this method to add services to the container.
-		public void ConfigureServices(IServiceCollection services)
-		{
-			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-			services.AddUragano(config =>
-			{
-				config.AddServer(Configuration.GetSection("Uragano:Server"));
-				config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"),
-					Configuration.GetSection("Uragano:Consul:Service"));
-				//config.Option(UraganoOptions.Server_DotNetty_Channel_SoBacklog, 100);
-				config.Options(Configuration.GetSection("Uragano:Options"));
-			});
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddUragano(config =>
+            {
+                config.AddClient();
+                config.AddServer(Configuration.GetSection("Uragano:Server"));
+                config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"),
+                    Configuration.GetSection("Uragano:Consul:Service"));
+                //config.Option(UraganoOptions.Server_DotNetty_Channel_SoBacklog, 100);
+                config.Options(Configuration.GetSection("Uragano:Options"));
+            });
 
-			services.AddScoped<TestLib>();
-		}
+            services.AddScoped<TestLib>();
+        }
 
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-		{
-			if (env.IsDevelopment())
-			{
-				app.UseDeveloperExceptionPage();
-			}
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
 
-			app.UseMvc();
-			app.UseUragano();
-		}
-	}
+            app.UseMvc();
+            app.UseUragano();
+        }
+    }
 }

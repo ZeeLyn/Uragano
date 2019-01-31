@@ -6,21 +6,19 @@ using Uragano.DynamicProxy;
 
 namespace Uragano.Core
 {
-	public static class ServiceCollectionExtensions
-	{
-		public static IServiceCollection AddUragano(this IServiceCollection serviceCollection, Action<IUraganoConfiguration> configuration)
-		{
-			#region register base service
-			serviceCollection.AddSingleton<IServiceBuilder, ServiceBuilder>();
-			serviceCollection.AddSingleton<IInvokerFactory, InvokerFactory>();
+    public static class ServiceCollectionExtensions
+    {
+        public static IServiceCollection AddUragano(this IServiceCollection serviceCollection, Action<IUraganoConfiguration> configuration)
+        {
+            #region register base service
+            serviceCollection.AddSingleton<IServiceBuilder, ServiceBuilder>();
+            serviceCollection.AddSingleton<IInvokerFactory, InvokerFactory>();
+            #endregion
+            var config = new UraganoConfiguration(serviceCollection);
+            configuration(config);
+            serviceCollection.AddSingleton(config.UraganoSettings);
 
-			#endregion
-
-			var config = new UraganoConfiguration(serviceCollection);
-			configuration(config);
-			serviceCollection.AddSingleton(config.UraganoSettings);
-
-			return serviceCollection;
-		}
-	}
+            return serviceCollection;
+        }
+    }
 }

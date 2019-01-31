@@ -12,42 +12,44 @@ using Uragano.DynamicProxy;
 
 namespace Sample.WebApi
 {
-	public class Startup
-	{
-		public Startup(IConfiguration configuration)
-		{
-			Configuration = configuration;
-		}
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
 
-		public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; }
 
-		// This method gets called by the runtime. Use this method to add services to the container.
-		public void ConfigureServices(IServiceCollection services)
-		{
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
 
-			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-			services.AddUragano(config =>
-			{
-				config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"));
-				config.AddClient();
-				//config.DependencyServices(("RPC", "", ""));
-				//config.DependencyServices(Configuration.GetSection("Uragano:DependencyServices"));
-				//config.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));
-				config.Options(Configuration.GetSection("Uragano:Options"));
-			});
-			services.AddScoped<TestLib>();
-		}
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddUragano(config =>
+            {
+                config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"));
+                config.AddClient();
+                config.AddClient();
+                config.AddClient();
+                //config.DependencyServices(("RPC", "", ""));
+                //config.DependencyServices(Configuration.GetSection("Uragano:DependencyServices"));
+                //config.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));
+                config.Options(Configuration.GetSection("Uragano:Options"));
+            });
+            services.AddScoped<TestLib>();
+        }
 
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-		{
-			if (env.IsDevelopment())
-			{
-				app.UseDeveloperExceptionPage();
-			}
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
 
-			app.UseMvc();
-			app.UseUragano();
-		}
-	}
+            app.UseMvc();
+            app.UseUragano();
+        }
+    }
 }
