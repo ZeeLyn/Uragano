@@ -31,7 +31,7 @@ namespace Sample.WebApi
             {
                 config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"));
                 config.AddClient();
-                //config.AddCircuitBreaker<CircuitBreakerEvent>(1000);
+                config.AddCircuitBreaker<CircuitBreakerEvent>(1000);
                 //config.DependencyServices(("RPC", "", ""));
                 //config.DependencyServices(Configuration.GetSection("Uragano:DependencyServices"));
                 //config.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));
