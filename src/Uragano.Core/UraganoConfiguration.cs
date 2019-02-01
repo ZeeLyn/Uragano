@@ -263,7 +263,6 @@ namespace Uragano.Core
             RegisterSingletonService<ClientDefaultInterceptor>();
             RegisterSingletonService<IClientFactory, ClientFactory>();
             RegisterSingletonService<IRemotingInvoke, RemotingInvoke>();
-            RegisterSingletonService<IScriptInjection, ScriptInjection>();
             RegisterSingletonService<ICircuitBreaker, PollyCircuitBreaker>();
 
             var types = ReflectHelper.GetDependencyTypes();

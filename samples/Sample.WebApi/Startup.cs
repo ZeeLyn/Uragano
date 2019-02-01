@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Sample.Service.Interfaces;
 using Uragano.Abstractions;
 using Uragano.Codec.MessagePack;
 using Uragano.Consul;
@@ -30,8 +31,7 @@ namespace Sample.WebApi
             {
                 config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"));
                 config.AddClient();
-                config.AddClient();
-                config.AddClient();
+                //config.AddCircuitBreaker<CircuitBreakerEvent>(1000);
                 //config.DependencyServices(("RPC", "", ""));
                 //config.DependencyServices(Configuration.GetSection("Uragano:DependencyServices"));
                 //config.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));

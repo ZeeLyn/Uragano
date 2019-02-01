@@ -43,7 +43,7 @@ namespace Uragano.DynamicProxy
             {
                 Route = route,
                 MethodInfo = serverMethodInfo,
-                MethodInvoker = new MethodInvoker(serverMethodInfo),
+                MethodInvoker = serverMethodInfo == null ? null : new MethodInvoker(serverMethodInfo),
                 ServerInterceptors = serverInterceptors,
                 ClientInterceptors = clientInterceptors
             };

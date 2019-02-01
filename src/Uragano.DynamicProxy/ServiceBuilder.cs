@@ -35,34 +35,45 @@ namespace Uragano.DynamicProxy
             {
                 Interface = @interface,
                 Implementation = types.FirstOrDefault(p => p.IsClass && p.IsPublic && !p.IsAbstract && !p.Name.EndsWith("_____UraganoClientProxy") && @interface.IsAssignableFrom(p))
-            }).Where(p => p.Implementation != null);
+            });
 
             foreach (var service in services)
             {
+                var imp = service.Implementation;
+                if (imp == null && enableServer)
+                    continue;
+
                 var routeAttr = service.Interface.GetCustomAttribute<ServiceRouteAttribute>();
                 var routePrefix = routeAttr == null ? $"{service.Interface.Namespace}/{service.Interface.Name}" : routeAttr.Route;
 
+
                 var interfaceMethods = service.Interface.GetMethods();
-                var implementationMethods = service.Implementation.GetMethods();
+
+                List<MethodInfo> implementationMethods = null;
+                if (enableServer)
+                    implementationMethods = imp.GetMethods().ToList();
 
                 var clientClassInterceptors = service.Interface.GetCustomAttributes(true).Where(p => p is IInterceptor)
                     .Select(p => p.GetType()).ToList();
 
-                var serverClassInterceptors = service.Implementation.GetCustomAttributes(true).Where(p => p is IInterceptor)
-                    .Select(p => p.GetType()).ToList();
+                List<Type> serverClassInterceptors = null;
+                if (enableServer)
+                    serverClassInterceptors = imp.GetCustomAttributes(true).Where(p => p is IInterceptor).Select(p => p.GetType()).ToList();
 
                 foreach (var interfaceMethod in interfaceMethods)
                 {
-                    var serverMethod = implementationMethods.First(p => IsImplementationMethod(interfaceMethod, p));
+                    MethodInfo serverMethod = null;
                     var idAttr = interfaceMethod.GetCustomAttribute<ServiceRouteAttribute>();
                     var route = idAttr == null ? $"{routePrefix}/{interfaceMethod.Name}" : $"{routePrefix}/{idAttr.Route}";
 
                     var serverInterceptors = new List<Type>();
                     if (enableServer)
                     {
-                        serverInterceptors.AddRange(serverClassInterceptors);
-                        serverInterceptors.AddRange(serverMethod.GetCustomAttributes(true)
-                            .Where(p => p is IInterceptor).Select(p => p.GetType()).ToList());
+                        serverMethod = implementationMethods.First(p => IsImplementationMethod(interfaceMethod, p));
+                        serverInterceptors.AddRange(serverClassInterceptors.ToList());
+                        if (serverMethod != null)
+                            serverInterceptors.AddRange(serverMethod.GetCustomAttributes(true)
+                                .Where(p => p is IInterceptor).Select(p => p.GetType()).ToList());
                         serverInterceptors.Reverse();
                     }
 

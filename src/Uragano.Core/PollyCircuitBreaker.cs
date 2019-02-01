@@ -58,28 +58,6 @@ namespace Uragano.Core
                              return await ScriptInjection.Run(route);
                          return returnValueType.IsValueType ? Activator.CreateInstance(returnValueType) : null;
                      });
-
-
-                if (serviceCircuitBreakerOptions.Timeout.Ticks > 0)
-                {
-                    policy = policy.WrapAsync(Policy.TimeoutAsync(serviceCircuitBreakerOptions.Timeout, TimeoutStrategy.Pessimistic,
-                        async (ctx, ts, task, ex) =>
-                        {
-                            if (circuitBreakerEvent != null)
-                                await circuitBreakerEvent.OnTimeOut(route, service.MethodInfo, ex);
-                        }));
-
-                }
-                if (serviceCircuitBreakerOptions.Retry > 0)
-                {
-                    policy = policy.WrapAsync(Policy.Handle<Exception>().RetryAsync(serviceCircuitBreakerOptions.Retry,
-                        async (ex, times) =>
-                        {
-                            if (circuitBreakerEvent != null)
-                                await circuitBreakerEvent.OnRetry(route, service.MethodInfo, ex, times);
-                        }));
-                }
-
                 if (serviceCircuitBreakerOptions.ExceptionsAllowedBeforeBreaking > 0)
                 {
                     policy = policy.WrapAsync(Policy.Handle<Exception>().CircuitBreakerAsync(serviceCircuitBreakerOptions.ExceptionsAllowedBeforeBreaking, serviceCircuitBreakerOptions.DurationOfBreak,
@@ -99,6 +77,29 @@ namespace Uragano.Core
                                 await circuitBreakerEvent.OnHalfOpen(route, service.MethodInfo);
                         }));
                 }
+                if (serviceCircuitBreakerOptions.Retry > 0)
+                {
+                    policy = policy.WrapAsync(Policy.Handle<Exception>().RetryAsync(serviceCircuitBreakerOptions.Retry,
+                        async (ex, times) =>
+                        {
+                            if (circuitBreakerEvent != null)
+                                await circuitBreakerEvent.OnRetry(route, service.MethodInfo, ex, times);
+                        }));
+                }
+
+                if (serviceCircuitBreakerOptions.Timeout.Ticks > 0)
+                {
+                    policy = policy.WrapAsync(Policy.TimeoutAsync(serviceCircuitBreakerOptions.Timeout, TimeoutStrategy.Pessimistic,
+                        async (ctx, ts, task, ex) =>
+                        {
+                            if (circuitBreakerEvent != null)
+                                await circuitBreakerEvent.OnTimeOut(route, service.MethodInfo, ex);
+                        }));
+
+                }
+
+
+
 
                 return policy;
             });
