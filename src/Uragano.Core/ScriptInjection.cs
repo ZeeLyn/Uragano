@@ -40,6 +40,7 @@ namespace Uragano.Core
             if (script.UsingNamespaces != null && script.UsingNamespaces.Length > 0)
             {
                 scriptOptions = scriptOptions.WithReferences(script.UsingNamespaces);
+                scriptOptions = scriptOptions.AddImports(script.UsingNamespaces);
             }
             var result = await CSharpScript.EvaluateAsync(script.Script, scriptOptions);
             ScriptResult.TryAdd(route, result);

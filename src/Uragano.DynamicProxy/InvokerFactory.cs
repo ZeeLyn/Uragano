@@ -38,17 +38,58 @@ namespace Uragano.DynamicProxy
             route = route.ToLower();
             if (ServiceInvokers.ContainsKey(route))
                 throw new DuplicateRouteException(route);
-
-            var circuitBreakerAttr = clientMethodInfo.GetCustomAttribute<CircuitBreakerAttribute>();
-
-            ServiceInvokers.TryAdd(route, new ServiceDescriptor
+            var enableClient = ServiceProvider.GetService<ILoadBalancing>() != null;
+            var serviceDescriptor = new ServiceDescriptor
             {
                 Route = route,
                 MethodInfo = serverMethodInfo,
                 MethodInvoker = new MethodInvoker(serverMethodInfo),
                 ServerInterceptors = serverInterceptors,
                 ClientInterceptors = clientInterceptors
-            });
+            };
+            var nonCircuitBreakerAttr = clientMethodInfo.GetCustomAttribute<NonCircuitBreakerAttribute>();
+            if (nonCircuitBreakerAttr == null)
+            {
+                var circuitBreakerAttr = clientMethodInfo.GetCustomAttribute<CircuitBreakerAttribute>();
+                var globalCircuitBreaker = UraganoSettings.CircuitBreakerOptions;
+                if (globalCircuitBreaker != null || circuitBreakerAttr != null)
+                {
+                    var breaker = new ServiceCircuitBreakerOptions();
+                    if (globalCircuitBreaker != null)
+                    {
+                        breaker.Timeout = globalCircuitBreaker.Timeout;
+                        breaker.Retry = globalCircuitBreaker.Retry;
+                        breaker.ExceptionsAllowedBeforeBreaking = globalCircuitBreaker.ExceptionsAllowedBeforeBreaking;
+                        breaker.DurationOfBreak = globalCircuitBreaker.DurationOfBreak;
+                    }
+
+                    if (circuitBreakerAttr != null)
+                    {
+                        if (circuitBreakerAttr.Timeout.HasValue)
+                            breaker.Timeout = circuitBreakerAttr.Timeout.Value;
+                        if (circuitBreakerAttr.Retry.HasValue)
+                            breaker.Retry = circuitBreakerAttr.Retry.Value;
+                        if (circuitBreakerAttr.ExceptionsAllowedBeforeBreaking.HasValue)
+                            breaker.ExceptionsAllowedBeforeBreaking =
+                                circuitBreakerAttr.ExceptionsAllowedBeforeBreaking.Value;
+                        if (circuitBreakerAttr.DurationOfBreak.HasValue)
+                            breaker.DurationOfBreak = circuitBreakerAttr.DurationOfBreak.Value;
+                        if (!string.IsNullOrWhiteSpace(circuitBreakerAttr.FallbackExecuteScript))
+                        {
+                            breaker.HasInjection = true;
+                            if (enableClient)
+                            {
+                                ScriptInjection.AddScript(route, circuitBreakerAttr.FallbackExecuteScript,
+                                    circuitBreakerAttr.ScriptUsingNameSpaces);
+                            }
+                        }
+                    }
+
+                    serviceDescriptor.ServiceCircuitBreakerOptions = breaker;
+                }
+            }
+
+            ServiceInvokers.TryAdd(route, serviceDescriptor);
         }
 
         public ServiceDescriptor Get(string route)

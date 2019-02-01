@@ -19,12 +19,19 @@ namespace Sample.Server
         public async Task<ResultModel> SayHello(string name)
         {
             TestLib.Exec();
+            await Task.Delay(2000);
             return await Task.FromResult(new ResultModel { Message = name });
         }
 
         public async Task SayHello()
         {
 
+        }
+
+        public async Task<int> Age()
+        {
+            //await Task.Delay(2000);
+            return await Task.FromResult(18);
         }
     }
 }

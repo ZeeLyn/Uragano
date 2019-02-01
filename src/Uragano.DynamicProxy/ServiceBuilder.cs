@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
-using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.ServiceInvoker;
 
 namespace Uragano.DynamicProxy

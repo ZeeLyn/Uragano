@@ -40,7 +40,7 @@ namespace Sample.Server
                 config.AddClientGlobalInterceptor<ClientGlobal_1_Interceptor>();
                 config.AddClientGlobalInterceptor<ClientGlobal_2_Interceptor>();
                 config.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
-                config.AddCircuitBreaker();
+                config.AddCircuitBreaker(1000);
                 //config.Option(UraganoOptions.Server_DotNetty_Channel_SoBacklog, 100);
                 config.Options(Configuration.GetSection("Uragano:Options"));
             });

@@ -48,7 +48,7 @@ namespace Uragano.Core
                 var service = InvokerFactory.Get(route);
                 var serviceCircuitBreakerOptions = service.ServiceCircuitBreakerOptions;
                 var circuitBreakerEvent = ServiceProvider.GetService<ICircuitBreakerEvent>();
-                Policy<object> policy = Policy<object>.Handle<Exception>().Or<BrokenCircuitException>().FallbackAsync(
+                Policy<object> policy = Policy<object>.Handle<Exception>().FallbackAsync(
                      async ct =>
                      {
 
@@ -58,6 +58,28 @@ namespace Uragano.Core
                              return await ScriptInjection.Run(route);
                          return returnValueType.IsValueType ? Activator.CreateInstance(returnValueType) : null;
                      });
+
+
+                if (serviceCircuitBreakerOptions.Timeout.Ticks > 0)
+                {
+                    policy = policy.WrapAsync(Policy.TimeoutAsync(serviceCircuitBreakerOptions.Timeout, TimeoutStrategy.Pessimistic,
+                        async (ctx, ts, task, ex) =>
+                        {
+                            if (circuitBreakerEvent != null)
+                                await circuitBreakerEvent.OnTimeOut(route, service.MethodInfo, ex);
+                        }));
+
+                }
+                if (serviceCircuitBreakerOptions.Retry > 0)
+                {
+                    policy = policy.WrapAsync(Policy.Handle<Exception>().RetryAsync(serviceCircuitBreakerOptions.Retry,
+                        async (ex, times) =>
+                        {
+                            if (circuitBreakerEvent != null)
+                                await circuitBreakerEvent.OnRetry(route, service.MethodInfo, ex, times);
+                        }));
+                }
+
                 if (serviceCircuitBreakerOptions.ExceptionsAllowedBeforeBreaking > 0)
                 {
                     policy = policy.WrapAsync(Policy.Handle<Exception>().CircuitBreakerAsync(serviceCircuitBreakerOptions.ExceptionsAllowedBeforeBreaking, serviceCircuitBreakerOptions.DurationOfBreak,
@@ -76,17 +98,6 @@ namespace Uragano.Core
                             if (circuitBreakerEvent != null)
                                 await circuitBreakerEvent.OnHalfOpen(route, service.MethodInfo);
                         }));
-                }
-
-                if (serviceCircuitBreakerOptions.Timeout.Ticks > 0)
-                {
-                    policy = policy.WrapAsync(Policy.TimeoutAsync(serviceCircuitBreakerOptions.Timeout, TimeoutStrategy.Pessimistic,
-                        async (ctx, ts, task, ex) =>
-                        {
-                            if (circuitBreakerEvent != null)
-                                await circuitBreakerEvent.OnTimeOut(route, service.MethodInfo, ex);
-                        }));
-
                 }
 
                 return policy;
@@ -108,6 +119,30 @@ namespace Uragano.Core
                          if (service.ServiceCircuitBreakerOptions.HasInjection)
                              await ScriptInjection.Run(route);
                      });
+
+
+
+                if (serviceCircuitBreakerOptions.Timeout.Ticks > 0)
+                {
+                    policy = policy.WrapAsync(Policy.TimeoutAsync(serviceCircuitBreakerOptions.Timeout, TimeoutStrategy.Pessimistic,
+                        async (ctx, ts, task, ex) =>
+                        {
+                            if (circuitBreakerEvent != null)
+                                await circuitBreakerEvent.OnTimeOut(route, service.MethodInfo, ex);
+                        }));
+
+                }
+
+                if (serviceCircuitBreakerOptions.Retry > 0)
+                {
+                    policy = policy.WrapAsync(Policy.Handle<Exception>().RetryAsync(serviceCircuitBreakerOptions.Retry,
+                        async (ex, times) =>
+                        {
+                            if (circuitBreakerEvent != null)
+                                await circuitBreakerEvent.OnRetry(route, service.MethodInfo, ex, times);
+                        }));
+                }
+
                 if (serviceCircuitBreakerOptions.ExceptionsAllowedBeforeBreaking > 0)
                 {
                     policy = policy.WrapAsync(Policy.Handle<Exception>().CircuitBreakerAsync(serviceCircuitBreakerOptions.ExceptionsAllowedBeforeBreaking, serviceCircuitBreakerOptions.DurationOfBreak,
@@ -128,16 +163,7 @@ namespace Uragano.Core
                         }));
                 }
 
-                if (serviceCircuitBreakerOptions.Timeout.Ticks > 0)
-                {
-                    policy = policy.WrapAsync(Policy.TimeoutAsync(serviceCircuitBreakerOptions.Timeout, TimeoutStrategy.Pessimistic,
-                        async (ctx, ts, task, ex) =>
-                        {
-                            if (circuitBreakerEvent != null)
-                                await circuitBreakerEvent.OnTimeOut(route, service.MethodInfo, ex);
-                        }));
 
-                }
                 return policy;
             });
         }
