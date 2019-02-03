@@ -97,7 +97,7 @@ namespace Uragano.DynamicProxy
         /// <param name="serviceMethod"></param>
         /// <param name="implementationMethod"></param>
         /// <returns></returns>
-        private bool IsImplementationMethod(MethodInfo serviceMethod, MethodInfo implementationMethod)
+        private static bool IsImplementationMethod(MethodInfo serviceMethod, MethodInfo implementationMethod)
         {
             return serviceMethod.Name == implementationMethod.Name &&
                    serviceMethod.ReturnType == implementationMethod.ReturnType &&
@@ -111,9 +111,9 @@ namespace Uragano.DynamicProxy
         /// <param name="parameters1"></param>
         /// <param name="parameters2"></param>
         /// <returns></returns>
-        private bool SameParameters(ParameterInfo[] parameters1, ParameterInfo[] parameters2)
+        private static bool SameParameters(IReadOnlyCollection<ParameterInfo> parameters1, IReadOnlyList<ParameterInfo> parameters2)
         {
-            if (parameters1.Length == parameters2.Length)
+            if (parameters1.Count == parameters2.Count)
             {
                 return !parameters1.Where((t, i) => t.ParameterType != parameters2[i].ParameterType || t.IsOptional != parameters2[i].IsOptional).Any();
             }

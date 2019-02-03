@@ -230,6 +230,23 @@ namespace Uragano.Core
             //RegisterSingletonService<ICircuitBreaker, PollyCircuitBreaker>();
         }
 
+        public void AddCircuitBreaker(IConfigurationSection configurationSection)
+        {
+            UraganoSettings.CircuitBreakerOptions = new CircuitBreakerOptions
+            {
+                Timeout = TimeSpan.FromMilliseconds(configurationSection.GetValue<int>("timeout")),
+                Retry = configurationSection.GetValue<int>("retry"),
+                ExceptionsAllowedBeforeBreaking = configurationSection.GetValue<int>("ExceptionsAllowedBeforeBreaking"),
+                DurationOfBreak = TimeSpan.FromMilliseconds(configurationSection.GetValue<int>("DurationOfBreak"))
+            };
+            if (!string.IsNullOrWhiteSpace(configurationSection.GetValue<string>("EventHandler")))
+            {
+                var eventType = Type.GetType(configurationSection.GetValue<string>("EventHandler"));
+                if (eventType != null)
+                    RegisterSingletonService(typeof(ICircuitBreakerEvent), eventType);
+            }
+        }
+
         #endregion
 
         #region Private methods

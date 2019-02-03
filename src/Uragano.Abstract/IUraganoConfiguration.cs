@@ -73,5 +73,7 @@ namespace Uragano.Abstractions
         void AddCircuitBreaker(int timeout = 3000, int retry = 3, int exceptionsAllowedBeforeBreaking = 10,
             int durationOfBreak = 60 * 1000);
 
+        void AddCircuitBreaker(IConfigurationSection configurationSection);
+
     }
 }

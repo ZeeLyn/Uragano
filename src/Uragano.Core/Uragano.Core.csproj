@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Uragano.Consul\Uragano.Consul.csproj" />
     <ProjectReference Include="..\Uragano.DynamicProxy\Uragano.DynamicProxy.csproj" />
     <ProjectReference Include="..\Uragano.Remoting\Uragano.Remoting.csproj" />
   </ItemGroup>

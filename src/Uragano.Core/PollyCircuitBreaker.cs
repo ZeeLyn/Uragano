@@ -97,10 +97,6 @@ namespace Uragano.Core
                         }));
 
                 }
-
-
-
-
                 return policy;
             });
         }
@@ -163,8 +159,6 @@ namespace Uragano.Core
                                 await circuitBreakerEvent.OnHalfOpen(route, service.MethodInfo);
                         }));
                 }
-
-
                 return policy;
             });
         }
