@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Uragano.Abstractions.CircuitBreaker
+﻿namespace Uragano.Abstractions.CircuitBreaker
 {
     public class ServiceCircuitBreakerOptions : CircuitBreakerOptions
     {

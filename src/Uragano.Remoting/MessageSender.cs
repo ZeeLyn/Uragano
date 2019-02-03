@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Uragano.Remoting
+﻿namespace Uragano.Remoting
 {
-	public interface IMessageSender
-	{
-	}
+    public interface IMessageSender
+    {
+    }
 
-	public class MessageSender : IMessageSender
-	{
-	}
+    public class MessageSender : IMessageSender
+    {
+    }
 }
