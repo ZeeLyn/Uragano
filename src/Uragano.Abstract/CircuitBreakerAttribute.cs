@@ -2,6 +2,7 @@
 
 namespace Uragano.Abstractions
 {
+    [AttributeUsage(AttributeTargets.Method)]
     public class CircuitBreakerAttribute : Attribute
     {
 

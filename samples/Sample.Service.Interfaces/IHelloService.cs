@@ -12,7 +12,6 @@ namespace Sample.Service.Interfaces
         //[ClientMethodInterceptor_1_]
         //[ClientMethodInterceptor_2_]
         [CircuitBreaker(FallbackExecuteScript = "return new ResultModel{Message=\"fallback\"};", ScriptUsingNameSpaces = new[] { "Sample.Service.Interfaces" })]
-
         [ServiceRoute("say/async")]
         Task<ResultModel> SayHello(string name);
 
