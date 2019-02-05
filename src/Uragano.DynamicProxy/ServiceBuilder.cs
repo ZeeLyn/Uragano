@@ -115,7 +115,7 @@ namespace Uragano.DynamicProxy
         {
             if (parameters1.Count == parameters2.Count)
             {
-                return !parameters1.Where((t, i) => t.ParameterType != parameters2[i].ParameterType || t.IsOptional != parameters2[i].IsOptional).Any();
+                return !parameters1.Where((t, i) => t.ParameterType != parameters2[i].ParameterType || t.IsOptional != parameters2[i].IsOptional || t.Position != parameters2[i].Position || t.HasDefaultValue != parameters2[i].HasDefaultValue).Any();
             }
             return false;
         }
