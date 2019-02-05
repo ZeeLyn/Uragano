@@ -36,17 +36,6 @@ namespace Uragano.DynamicProxy.Interceptor
                     {
                         await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute, async () =>
                         {
-                            //var node = await LoadBalancing.GetNextNode(ctx.ServiceName);
-                            //var client = await ClientFactory.CreateClientAsync(node.Address, node.Port);
-                            //var result = await client.SendAsync(new InvokeMessage
-                            //{
-                            //    Args = ctx.Args,
-                            //    Route = ctx.ServiceRoute,
-                            //    Meta = ctx.Meta
-                            //});
-
-                            //if (result.Status != RemotingStatus.Ok)
-                            //    throw new RemoteInvokeException(ctx.ServiceRoute, result.Result.ToString());
                             await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, null);
                         });
                         return null;
