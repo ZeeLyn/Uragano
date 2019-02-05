@@ -9,6 +9,7 @@ namespace Uragano.Abstractions
 {
     public class UraganoSettings
     {
+        public bool IsDevelopment { get; set; }
         public ServerSettings ServerSettings { get; set; }
 
         public IServiceDiscoveryClientConfiguration ServiceDiscoveryClientConfiguration { get; set; }

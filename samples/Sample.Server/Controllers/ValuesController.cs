@@ -23,6 +23,7 @@ namespace Sample.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
+            await HelloService.SayHello();
             return Ok(new
             {
                 name = await HelloService.SetMeta(("token", "bearer .....")).SayHello(Guid.NewGuid().ToString()),

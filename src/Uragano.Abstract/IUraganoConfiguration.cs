@@ -8,6 +8,7 @@ namespace Uragano.Abstractions
     public interface IUraganoConfiguration
     {
 
+        void IsDevelopment(bool isDevelopment = false);
 
         void AddServer(string ip, int port, int? weight = default);
 

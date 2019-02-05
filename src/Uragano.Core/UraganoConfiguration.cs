@@ -28,6 +28,12 @@ namespace Uragano.Core
         }
 
         #region Server
+
+        public void IsDevelopment(bool isDevelopment = false)
+        {
+            UraganoSettings.IsDevelopment = isDevelopment;
+        }
+
         public void AddServer(string ip, int port, int? weight = default)
         {
             AddServer(ip, port, "", "", weight);

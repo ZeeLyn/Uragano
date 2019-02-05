@@ -36,13 +36,14 @@ namespace Uragano.Core
                 applicationLifetime.ApplicationStopping.Register(async () =>
                 {
                     CancellationTokenSource.Cancel();
-                    await discovery.DeregisterAsync(uraganoSettings.ServiceDiscoveryClientConfiguration, uraganoSettings.ServiceRegisterConfiguration.Id);
+                    if (!uraganoSettings.IsDevelopment)
+                        await discovery.DeregisterAsync(uraganoSettings.ServiceDiscoveryClientConfiguration, uraganoSettings.ServiceRegisterConfiguration.Id);
                     await bootstrap.StopAsync();
                 });
                 bootstrap.StartAsync().ConfigureAwait(false).GetAwaiter().GetResult();
 
                 //Register service to consul
-                if (uraganoSettings.ServiceRegisterConfiguration != null)
+                if (uraganoSettings.ServiceRegisterConfiguration != null && !uraganoSettings.IsDevelopment)
                 {
                     if (uraganoSettings.ServiceDiscoveryClientConfiguration == null)
                         throw new ArgumentNullException(nameof(uraganoSettings.ServiceDiscoveryClientConfiguration));
@@ -51,7 +52,7 @@ namespace Uragano.Core
                 }
             }
             var serviceStatusRefreshFactory = applicationBuilder.ApplicationServices.GetService<IServiceStatusManageFactory>();
-            if (serviceStatusRefreshFactory != null)
+            if (serviceStatusRefreshFactory != null && !uraganoSettings.IsDevelopment)
             {
                 if (UraganoOptions.Client_Node_Status_Refresh_Interval.Value.Ticks > 0)
                 {
