@@ -91,12 +91,7 @@ namespace Uragano.DynamicProxy
             }
         }
 
-        /// <summary>
-        /// TODO方法筛选有bug，可能有同名的
-        /// </summary>
-        /// <param name="serviceMethod"></param>
-        /// <param name="implementationMethod"></param>
-        /// <returns></returns>
+
         private static bool IsImplementationMethod(MethodInfo serviceMethod, MethodInfo implementationMethod)
         {
             return serviceMethod.Name == implementationMethod.Name &&
@@ -105,12 +100,6 @@ namespace Uragano.DynamicProxy
                    SameParameters(serviceMethod.GetParameters(), implementationMethod.GetParameters());
         }
 
-        /// <summary>
-        /// 需要判断参数顺序
-        /// </summary>
-        /// <param name="parameters1"></param>
-        /// <param name="parameters2"></param>
-        /// <returns></returns>
         private static bool SameParameters(IReadOnlyCollection<ParameterInfo> parameters1, IReadOnlyList<ParameterInfo> parameters2)
         {
             if (parameters1.Count == parameters2.Count)
