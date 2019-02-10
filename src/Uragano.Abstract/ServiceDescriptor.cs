@@ -12,6 +12,8 @@ namespace Uragano.Abstractions
 
         public MethodInfo MethodInfo { get; set; }
 
+        public Type[] ArgsType { get; set; }
+
         public IMethodInvoker MethodInvoker { get; set; }
 
         public List<Type> ServerInterceptors { get; set; }

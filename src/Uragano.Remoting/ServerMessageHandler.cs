@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DotNetty.Transport.Channels;
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions.ServiceInvoker;
 using Uragano.Abstractions;
+using Uragano.Abstractions.Exceptions;
 
 namespace Uragano.Remoting
 {
@@ -33,11 +35,21 @@ namespace Uragano.Remoting
                 try
                 {
                     Logger.LogDebug($"Invoke route[{transportMessage.Body.Route}]");
-                    var result = await InvokerFactory.Invoke(transportMessage.Body.Route, transportMessage.Body.Args, transportMessage.Body.Meta);
+                    var result = await InvokerFactory.Invoke(transportMessage.Body.Route, transportMessage.Body.Args,
+                        transportMessage.Body.Meta);
                     await context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
                     {
                         Id = transportMessage.Id,
                         Body = new ResultMessage(result)
+                    });
+                }
+                catch (NotFoundRouteException e)
+                {
+                    Logger.LogError(e, e.Message);
+                    await context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
+                    {
+                        Id = transportMessage.Id,
+                        Body = new ResultMessage(e.Message) { Status = RemotingStatus.NotFound }
                     });
                 }
                 catch (Exception e)

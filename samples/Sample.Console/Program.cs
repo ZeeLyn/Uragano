@@ -23,7 +23,7 @@ namespace Sample.Console
         public delegate int AddHandler(int id);
         static void Main(string[] args)
         {
-            System.Console.WriteLine(IpHelper.GetLocalInternetIp());
+            System.Console.WriteLine(typeof(IpHelper).AssemblyQualifiedName);
             //System.Console.WriteLine(SpinWait.SpinUntil(() =>
             // {
             //	 System.Console.WriteLine(DateTime.Now);

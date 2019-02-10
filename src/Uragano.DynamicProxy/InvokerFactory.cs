@@ -9,6 +9,7 @@ using Uragano.Abstractions.ServiceInvoker;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
 using Uragano.Abstractions.CircuitBreaker;
+using Uragano.Codec.MessagePack;
 using Uragano.DynamicProxy.Interceptor;
 using ServiceDescriptor = Uragano.Abstractions.ServiceDescriptor;
 
@@ -43,6 +44,7 @@ namespace Uragano.DynamicProxy
             {
                 Route = route,
                 MethodInfo = serverMethodInfo,
+                ArgsType = serverMethodInfo == null ? null : serverMethodInfo.GetParameters().Select(p => p.ParameterType).ToArray(),
                 MethodInvoker = serverMethodInfo == null ? null : new MethodInvoker(serverMethodInfo),
                 ServerInterceptors = serverInterceptors,
                 ClientInterceptors = clientInterceptors
@@ -100,7 +102,7 @@ namespace Uragano.DynamicProxy
         }
 
 
-        public async Task<object> Invoke(string route, object[] args, Dictionary<string, string> meta)
+        public async Task<object> Invoke(string route, byte[][] args, Dictionary<string, string> meta)
         {
             if (!ServiceInvokers.TryGetValue(route, out var service))
                 throw new NotFoundRouteException(route);
@@ -110,7 +112,7 @@ namespace Uragano.DynamicProxy
                 {
                     ServiceRoute = service.Route,
                     ServiceProvider = scope.ServiceProvider,
-                    Args = args,
+                    Args = args.Select((item, index) => SerializerHelper.Deserialize(item, service.ArgsType[index])).ToArray(),
                     Meta = meta,
                     MethodInfo = service.MethodInfo
                 };

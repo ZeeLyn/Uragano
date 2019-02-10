@@ -27,20 +27,25 @@ namespace Uragano.DynamicProxy.Interceptor
 
         public override async Task<object> Intercept(IInterceptorContext context)
         {
-            if (!(context is InterceptorContext ctx)) throw new ArgumentNullException(nameof(context));
-            if (UraganoSettings.CircuitBreakerOptions == null)
-                return await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, ctx.ReturnType);
-            if (ctx.ReturnType != null)
-                return await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute,
-                    async () => await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta,
-                        ctx.ReturnType), ctx.ReturnType);
-
-            await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute, async () =>
+            try
             {
-                await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, null);
-            });
-            return null;
+                if (!(context is InterceptorContext ctx)) throw new ArgumentNullException(nameof(context));
+                if (UraganoSettings.CircuitBreakerOptions == null)
+                    return await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, ctx.ReturnType);
+                if (ctx.ReturnType != null)
+                    return await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute,
+                        async () => await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta,
+                            ctx.ReturnType), ctx.ReturnType);
 
+                await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute,
+                    async () => { await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, null); });
+                return null;
+            }
+            catch (Exception e)
+            {
+                var r = e;
+                return null;
+            }
         }
 
         private async Task<object> Exec(string serviceName, string route, object[] args, Dictionary<string, string> meta, Type returnValueType)
@@ -51,13 +56,7 @@ namespace Uragano.DynamicProxy.Interceptor
             else
                 node = await LoadBalancing.GetNextNode(serviceName);
             var client = await ClientFactory.CreateClientAsync(node.Address, node.Port);
-            var result = await client.SendAsync(new InvokeMessage
-            {
-                Args = args,
-                Route = route,
-                Meta = meta
-            });
-
+            var result = await client.SendAsync(new InvokeMessage(route, args, meta));
             if (result.Status != RemotingStatus.Ok)
                 throw new RemoteInvokeException(route, result.Result.ToString());
             if (returnValueType == null)

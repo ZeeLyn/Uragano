@@ -1,13 +1,33 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using MessagePack;
+using Uragano.Codec.MessagePack;
 
 namespace Uragano.Remoting
 {
-	public class InvokeMessage
-	{
-		public string Route { get; set; }
+    [MessagePackObject]
+    public class InvokeMessage
+    {
+        public InvokeMessage()
+        {
+        }
 
-		public object[] Args { get; set; }
+        public InvokeMessage(string route, object[] args, Dictionary<string, string> meta)
+        {
+            Route = route;
+            Meta = meta;
+            Args = args.Select(SerializerHelper.Serialize).ToArray();
+        }
 
-		public Dictionary<string, string> Meta { get; set; }
-	}
+        [Key(0)]
+        public string Route { get; set; }
+
+
+        [Key(1)]
+        public byte[][] Args { get; set; }
+
+
+        [Key(2)]
+        public Dictionary<string, string> Meta { get; set; }
+    }
 }
