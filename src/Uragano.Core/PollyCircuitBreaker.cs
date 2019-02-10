@@ -1,12 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Polly;
-using Polly.CircuitBreaker;
 using Polly.Timeout;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Polly.Fallback;
-using Polly.Wrap;
 using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.ServiceInvoker;
 
@@ -20,9 +17,9 @@ namespace Uragano.Core
 
         private IInvokerFactory InvokerFactory { get; }
 
-        private static readonly ConcurrentDictionary<string, AsyncPolicy<object>> HasReturnValuePolicies = new ConcurrentDictionary<string, AsyncPolicy<object>>();
+        private static readonly ConcurrentDictionary<string, AsyncPolicy<object>> Policies = new ConcurrentDictionary<string, AsyncPolicy<object>>();
 
-        private static readonly ConcurrentDictionary<string, AsyncPolicy> NoReturnValuePolicies = new ConcurrentDictionary<string, AsyncPolicy>();
+        //private static readonly ConcurrentDictionary<string, AsyncPolicy> NoReturnValuePolicies = new ConcurrentDictionary<string, AsyncPolicy>();
 
         public PollyCircuitBreaker(IServiceProvider serviceProvider, IScriptInjection scriptInjection, IInvokerFactory invokerFactory)
         {
@@ -39,13 +36,17 @@ namespace Uragano.Core
 
         public async Task ExecuteAsync(string route, Func<Task> action)
         {
-            var policy = GetPolicy(route);
-            await policy.ExecuteAsync(action);
+            var policy = GetPolicy(route, null);
+            await policy.ExecuteAsync(async () =>
+            {
+                await action();
+                return null;
+            });
         }
 
         private AsyncPolicy<object> GetPolicy(string route, Type returnValueType)
         {
-            return HasReturnValuePolicies.GetOrAdd(route, (key) =>
+            return Policies.GetOrAdd(route, (key) =>
             {
                 var service = InvokerFactory.Get(route);
                 var serviceCircuitBreakerOptions = service.ServiceCircuitBreakerOptions;
@@ -56,6 +57,8 @@ namespace Uragano.Core
 
                          if (circuitBreakerEvent != null)
                              await circuitBreakerEvent.OnFallback(route, service.MethodInfo);
+                         if (returnValueType == null)
+                             return null;
                          if (service.ServiceCircuitBreakerOptions.HasInjection)
                              return await ScriptInjection.Run(route);
                          return returnValueType.IsValueType ? Activator.CreateInstance(returnValueType) : null;
@@ -103,66 +106,66 @@ namespace Uragano.Core
             });
         }
 
-        private AsyncPolicy GetPolicy(string route)
-        {
-            return NoReturnValuePolicies.GetOrAdd(route, (key) =>
-            {
-                var service = InvokerFactory.Get(route);
-                var serviceCircuitBreakerOptions = service.ServiceCircuitBreakerOptions;
-                var circuitBreakerEvent = ServiceProvider.GetService<ICircuitBreakerEvent>();
-                AsyncPolicy policy = Policy.Handle<Exception>().Or<BrokenCircuitException>().FallbackAsync(
-                     async ct =>
-                     {
-                         if (circuitBreakerEvent != null)
-                             await circuitBreakerEvent.OnFallback(route, service.MethodInfo);
-                         if (service.ServiceCircuitBreakerOptions.HasInjection)
-                             await ScriptInjection.Run(route);
-                     });
+        //private AsyncPolicy GetPolicy(string route)
+        //{
+        //    return NoReturnValuePolicies.GetOrAdd(route, (key) =>
+        //    {
+        //        var service = InvokerFactory.Get(route);
+        //        var serviceCircuitBreakerOptions = service.ServiceCircuitBreakerOptions;
+        //        var circuitBreakerEvent = ServiceProvider.GetService<ICircuitBreakerEvent>();
+        //        AsyncPolicy policy = Policy.Handle<Exception>().Or<BrokenCircuitException>().FallbackAsync(
+        //             async ct =>
+        //             {
+        //                 if (circuitBreakerEvent != null)
+        //                     await circuitBreakerEvent.OnFallback(route, service.MethodInfo);
+        //                 if (service.ServiceCircuitBreakerOptions.HasInjection)
+        //                     await ScriptInjection.Run(route);
+        //             });
 
 
 
-                if (serviceCircuitBreakerOptions.Timeout.Ticks > 0)
-                {
-                    policy = policy.WrapAsync(Policy.TimeoutAsync(serviceCircuitBreakerOptions.Timeout, TimeoutStrategy.Pessimistic,
-                        async (ctx, ts, task, ex) =>
-                        {
-                            if (circuitBreakerEvent != null)
-                                await circuitBreakerEvent.OnTimeOut(route, service.MethodInfo, ex);
-                        }));
+        //        if (serviceCircuitBreakerOptions.Timeout.Ticks > 0)
+        //        {
+        //            policy = policy.WrapAsync(Policy.TimeoutAsync(serviceCircuitBreakerOptions.Timeout, TimeoutStrategy.Pessimistic,
+        //                async (ctx, ts, task, ex) =>
+        //                {
+        //                    if (circuitBreakerEvent != null)
+        //                        await circuitBreakerEvent.OnTimeOut(route, service.MethodInfo, ex);
+        //                }));
 
-                }
+        //        }
 
-                if (serviceCircuitBreakerOptions.Retry > 0)
-                {
-                    policy = policy.WrapAsync(Policy.Handle<Exception>().RetryAsync(serviceCircuitBreakerOptions.Retry,
-                        async (ex, times) =>
-                        {
-                            if (circuitBreakerEvent != null)
-                                await circuitBreakerEvent.OnRetry(route, service.MethodInfo, ex, times);
-                        }));
-                }
+        //        if (serviceCircuitBreakerOptions.Retry > 0)
+        //        {
+        //            policy = policy.WrapAsync(Policy.Handle<Exception>().RetryAsync(serviceCircuitBreakerOptions.Retry,
+        //                async (ex, times) =>
+        //                {
+        //                    if (circuitBreakerEvent != null)
+        //                        await circuitBreakerEvent.OnRetry(route, service.MethodInfo, ex, times);
+        //                }));
+        //        }
 
-                if (serviceCircuitBreakerOptions.ExceptionsAllowedBeforeBreaking > 0)
-                {
-                    policy = policy.WrapAsync(Policy.Handle<Exception>().CircuitBreakerAsync(serviceCircuitBreakerOptions.ExceptionsAllowedBeforeBreaking, serviceCircuitBreakerOptions.DurationOfBreak,
-                        async (ex, state, ts, ctx) =>
-                        {
-                            if (circuitBreakerEvent != null)
-                                await circuitBreakerEvent.OnBreak(route, service.MethodInfo, ex, ts);
-                        },
-                        async ctx =>
-                        {
-                            if (circuitBreakerEvent != null)
-                                await circuitBreakerEvent.OnRest(route, service.MethodInfo);
-                        },
-                        async () =>
-                        {
-                            if (circuitBreakerEvent != null)
-                                await circuitBreakerEvent.OnHalfOpen(route, service.MethodInfo);
-                        }));
-                }
-                return policy;
-            });
-        }
+        //        if (serviceCircuitBreakerOptions.ExceptionsAllowedBeforeBreaking > 0)
+        //        {
+        //            policy = policy.WrapAsync(Policy.Handle<Exception>().CircuitBreakerAsync(serviceCircuitBreakerOptions.ExceptionsAllowedBeforeBreaking, serviceCircuitBreakerOptions.DurationOfBreak,
+        //                async (ex, state, ts, ctx) =>
+        //                {
+        //                    if (circuitBreakerEvent != null)
+        //                        await circuitBreakerEvent.OnBreak(route, service.MethodInfo, ex, ts);
+        //                },
+        //                async ctx =>
+        //                {
+        //                    if (circuitBreakerEvent != null)
+        //                        await circuitBreakerEvent.OnRest(route, service.MethodInfo);
+        //                },
+        //                async () =>
+        //                {
+        //                    if (circuitBreakerEvent != null)
+        //                        await circuitBreakerEvent.OnHalfOpen(route, service.MethodInfo);
+        //                }));
+        //        }
+        //        return policy;
+        //    });
+        //}
     }
 }
