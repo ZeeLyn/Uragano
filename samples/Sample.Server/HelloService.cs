@@ -23,6 +23,14 @@ namespace Sample.Server
             return await Task.FromResult(new ResultModel { Message = name });
         }
 
+        public async Task<ResultModel> SayHello(TestModel testModel)
+        {
+            return await Task.FromResult(new ResultModel
+            {
+                Message = "Rec " + testModel.Name
+            });
+        }
+
         public async Task SayHello()
         {
 

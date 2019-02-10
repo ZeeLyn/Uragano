@@ -27,7 +27,8 @@ namespace Sample.Server.Controllers
             return Ok(new
             {
                 name = await HelloService.SetMeta(("token", "bearer .....")).SayHello(Guid.NewGuid().ToString()),
-                age = await HelloService.Age()
+                age = await HelloService.Age(),
+                entity = await HelloService.SayHello(new TestModel { Id = 1, Name = "owen" })
             });
         }
 

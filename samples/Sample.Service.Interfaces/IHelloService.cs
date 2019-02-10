@@ -15,6 +15,9 @@ namespace Sample.Service.Interfaces
         [ServiceRoute("say/async")]
         Task<ResultModel> SayHello(string name);
 
+        [ServiceRoute("say/async/entity")]
+        Task<ResultModel> SayHello(TestModel testModel);
+
         [ServiceRoute("say/task")]
         Task SayHello();
 

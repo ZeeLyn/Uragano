@@ -72,7 +72,7 @@ namespace Uragano.Remoting
                     pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
                     pipeline.AddLast(new MessageDecoder<InvokeMessage>());
                     pipeline.AddLast(new MessageEncoder<ResultMessage>());
-                    pipeline.AddLast(new ServerMessageHandler(InvokerFactory, ServiceProvider));
+                    pipeline.AddLast(new ServerMessageHandler(InvokerFactory, ServiceProvider, Logger));
                 }));
             Logger.LogDebug($"Listening {ServerSettings.IP}:{ServerSettings.Port}");
             Channel = await bootstrap.BindAsync(new IPEndPoint(ServerSettings.IP, ServerSettings.Port));

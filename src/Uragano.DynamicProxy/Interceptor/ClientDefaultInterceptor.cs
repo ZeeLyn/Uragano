@@ -15,7 +15,6 @@ namespace Uragano.DynamicProxy.Interceptor
         private ILoadBalancing LoadBalancing { get; }
         private IClientFactory ClientFactory { get; }
         private ICircuitBreaker CircuitBreaker { get; }
-
         private UraganoSettings UraganoSettings { get; }
 
         public ClientDefaultInterceptor(ILoadBalancing loadBalancing, IClientFactory clientFactory, ICircuitBreaker circuitBreaker, UraganoSettings uraganoSettings)
