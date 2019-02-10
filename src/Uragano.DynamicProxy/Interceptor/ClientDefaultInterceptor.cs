@@ -32,18 +32,16 @@ namespace Uragano.DynamicProxy.Interceptor
             {
                 if (UraganoSettings.CircuitBreakerOptions != null)
                 {
-                    if (ctx.ReturnType == null)
-                    {
-                        await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute, async () =>
-                        {
-                            await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, null);
-                        });
-                        return null;
-                    }
+                    if (ctx.ReturnType != null)
+                        return await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute,
+                            async () => await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta,
+                                ctx.ReturnType), ctx.ReturnType);
 
-                    return await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute,
-                        async () => await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta,
-                            ctx.ReturnType), ctx.ReturnType);
+                    await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute, async () =>
+                    {
+                        await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, null);
+                    });
+                    return null;
                 }
 
                 return await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, ctx.ReturnType);

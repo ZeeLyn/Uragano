@@ -5,6 +5,8 @@ using Polly.Timeout;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Polly.Fallback;
+using Polly.Wrap;
 using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.ServiceInvoker;
 
@@ -18,9 +20,9 @@ namespace Uragano.Core
 
         private IInvokerFactory InvokerFactory { get; }
 
-        private static readonly ConcurrentDictionary<string, Policy<object>> HasReturnValuePolicies = new ConcurrentDictionary<string, Policy<object>>();
+        private static readonly ConcurrentDictionary<string, AsyncPolicy<object>> HasReturnValuePolicies = new ConcurrentDictionary<string, AsyncPolicy<object>>();
 
-        private static readonly ConcurrentDictionary<string, Policy> NoReturnValuePolicies = new ConcurrentDictionary<string, Policy>();
+        private static readonly ConcurrentDictionary<string, AsyncPolicy> NoReturnValuePolicies = new ConcurrentDictionary<string, AsyncPolicy>();
 
         public PollyCircuitBreaker(IServiceProvider serviceProvider, IScriptInjection scriptInjection, IInvokerFactory invokerFactory)
         {
@@ -41,14 +43,14 @@ namespace Uragano.Core
             await policy.ExecuteAsync(action);
         }
 
-        private Policy<object> GetPolicy(string route, Type returnValueType)
+        private AsyncPolicy<object> GetPolicy(string route, Type returnValueType)
         {
             return HasReturnValuePolicies.GetOrAdd(route, (key) =>
             {
                 var service = InvokerFactory.Get(route);
                 var serviceCircuitBreakerOptions = service.ServiceCircuitBreakerOptions;
                 var circuitBreakerEvent = ServiceProvider.GetService<ICircuitBreakerEvent>();
-                Policy<object> policy = Policy<object>.Handle<Exception>().FallbackAsync(
+                AsyncPolicy<object> policy = Policy<object>.Handle<Exception>().FallbackAsync(
                      async ct =>
                      {
 
@@ -101,14 +103,14 @@ namespace Uragano.Core
             });
         }
 
-        private Policy GetPolicy(string route)
+        private AsyncPolicy GetPolicy(string route)
         {
             return NoReturnValuePolicies.GetOrAdd(route, (key) =>
             {
                 var service = InvokerFactory.Get(route);
                 var serviceCircuitBreakerOptions = service.ServiceCircuitBreakerOptions;
                 var circuitBreakerEvent = ServiceProvider.GetService<ICircuitBreakerEvent>();
-                Policy policy = Policy.Handle<Exception>().Or<BrokenCircuitException>().FallbackAsync(
+                AsyncPolicy policy = Policy.Handle<Exception>().Or<BrokenCircuitException>().FallbackAsync(
                      async ct =>
                      {
                          if (circuitBreakerEvent != null)
