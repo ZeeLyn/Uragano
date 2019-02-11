@@ -5,7 +5,7 @@ using Uragano.Abstractions;
 namespace Sample.Server
 {
 
-    //[ServerInterceptor]
+    [ServerInterceptor]
     public class HelloService : IHelloService
     {
         private TestLib TestLib { get; }

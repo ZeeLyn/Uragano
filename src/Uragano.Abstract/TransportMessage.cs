@@ -1,9 +1,14 @@
-﻿namespace Uragano.Abstractions
-{
-	public class TransportMessage<T> : ITransportMessage<T>
-	{
-		public string Id { get; set; }
+﻿using MessagePack;
 
-		public T Body { get; set; }
-	}
+namespace Uragano.Abstractions
+{
+    [MessagePackObject]
+    public class TransportMessage<T> : ITransportMessage<T>
+    {
+        [Key(0)]
+        public string Id { get; set; }
+
+        [Key(1)]
+        public T Body { get; set; }
+    }
 }

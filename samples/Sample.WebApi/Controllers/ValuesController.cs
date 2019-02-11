@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,10 +31,11 @@ namespace Sample.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var r = ServiceProvider.GetServices<IRemotingInvoke>();
+
+            //var r = ServiceProvider.GetServices<IRemotingInvoke>();
             return Ok(new
             {
-                count = r.Count(),
+                //count = r.Count(),
                 result = await HelloService.SetMeta(("token", "bearer .....")).SayHello(Guid.NewGuid().ToString()),
             });
         }

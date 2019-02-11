@@ -6,6 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="MyInterceptor1Attribute.cs" />
+    <Compile Remove="MyInterceptor2Attribute.cs" />
+    <Compile Remove="MyInterceptor3Attribute.cs" />
+    <Compile Remove="MyInterceptor4Attribute.cs" />
+    <Compile Remove="Test1Interceptor.cs" />
+    <Compile Remove="Test2INterceptor.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
   </ItemGroup>

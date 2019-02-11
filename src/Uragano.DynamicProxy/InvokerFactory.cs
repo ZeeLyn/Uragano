@@ -102,7 +102,7 @@ namespace Uragano.DynamicProxy
         }
 
 
-        public async Task<object> Invoke(string route, byte[][] args, Dictionary<string, string> meta)
+        public async Task<ResultMessage> Invoke(string route, object[] args, Dictionary<string, string> meta)
         {
             if (!ServiceInvokers.TryGetValue(route, out var service))
                 throw new NotFoundRouteException(route);
@@ -112,7 +112,7 @@ namespace Uragano.DynamicProxy
                 {
                     ServiceRoute = service.Route,
                     ServiceProvider = scope.ServiceProvider,
-                    Args = args.Select((arg, index) => SerializerHelper.Deserialize(arg, service.ArgsType[index])).ToArray(),
+                    Args = args,
                     Meta = meta,
                     MethodInfo = service.MethodInfo
                 };

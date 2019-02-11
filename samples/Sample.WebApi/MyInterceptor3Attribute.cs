@@ -2,14 +2,15 @@
 using System.Threading.Tasks;
 using Uragano.Abstractions;
 using Uragano.DynamicProxy.Interceptor;
+using Uragano.Remoting;
 
 namespace Sample.WebApi
 {
-	public class MyInterceptor3Attribute : InterceptorAttributeAbstract
-	{
-		public override async Task<object> Intercept(IInterceptorContext context)
-		{
-			return await context.Next();
-		}
-	}
+    public class MyInterceptor3Attribute : InterceptorAttributeAbstract
+    {
+        public override async Task<ResultMessage> Intercept(IInterceptorContext context)
+        {
+            return await context.Next();
+        }
+    }
 }

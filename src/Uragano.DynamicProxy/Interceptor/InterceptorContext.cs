@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
+using Uragano.Remoting;
 
 
 namespace Uragano.DynamicProxy.Interceptor
@@ -26,7 +27,7 @@ namespace Uragano.DynamicProxy.Interceptor
 
         public Stack<Type> Interceptors { get; } = new Stack<Type>();
 
-        public async Task<object> Next()
+        public async Task<ResultMessage> Next()
         {
             var interceptor = (IInterceptor)ServiceProvider.GetRequiredService(Interceptors.Pop());
             return await interceptor.Intercept(this);

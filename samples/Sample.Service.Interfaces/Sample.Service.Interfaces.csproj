@@ -5,6 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ClientGlobal_2_Interceptor.cs" />
+    <Compile Remove="ClientInterceptor_1_Attribute.cs" />
+    <Compile Remove="ClientInterceptor_2_Attribute.cs" />
+    <Compile Remove="ClientMethodInterceptor_1_Attribute.cs" />
+    <Compile Remove="ClientMethodInterceptor_2_Attribute.cs" />
+    <Compile Remove="ServerGlobalInterceptor.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Uragano.Abstract\Uragano.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\Uragano.DynamicProxy\Uragano.DynamicProxy.csproj" />
   </ItemGroup>

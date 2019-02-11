@@ -25,19 +25,27 @@ namespace Uragano.DynamicProxy.Interceptor
             UraganoSettings = uraganoSettings;
         }
 
-        public override async Task<object> Intercept(IInterceptorContext context)
+        public override async Task<ResultMessage> Intercept(IInterceptorContext context)
         {
             if (!(context is InterceptorContext ctx)) throw new ArgumentNullException(nameof(context));
+            //No circuit breaker
             if (UraganoSettings.CircuitBreakerOptions == null)
-                return await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, ctx.ReturnType);
+            {
+                if (ctx.ReturnType != null)
+                    return new ResultMessage(await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta,
+                        ctx.ReturnType));
+                await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, null);
+                return new ResultMessage(null);
+            }
+            //Circuit breaker
             if (ctx.ReturnType != null)
-                return await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute,
+                return new ResultMessage(await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute,
                     async () => await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta,
-                        ctx.ReturnType), ctx.ReturnType);
+                        ctx.ReturnType), ctx.ReturnType));
 
             await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute,
                 async () => { await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, null); });
-            return null;
+            return new ResultMessage(null);
         }
 
         private async Task<object> Exec(string serviceName, string route, object[] args, Dictionary<string, string> meta, Type returnValueType)
@@ -50,12 +58,10 @@ namespace Uragano.DynamicProxy.Interceptor
             var client = await ClientFactory.CreateClientAsync(node.Address, node.Port);
             var result = await client.SendAsync(new InvokeMessage(route, args, meta));
             if (result.Status != RemotingStatus.Ok)
-                throw new RemoteInvokeException(route, result.Result.ToString());
+                throw new RemoteInvokeException(route, result.Result?.ToString(), result.Status);
             if (returnValueType == null)
                 return null;
-            if (result.Result == null)
-                return default;
-            return SerializerHelper.Deserialize(SerializerHelper.Serialize(result.Result), returnValueType);
+            return result.Result;
         }
     }
 }

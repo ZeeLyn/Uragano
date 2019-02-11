@@ -16,7 +16,7 @@ namespace Uragano.Remoting
         {
             Route = route;
             Meta = meta;
-            Args = args.Select(SerializerHelper.Serialize).ToArray();
+            Args = args;
         }
 
         [Key(0)]
@@ -24,7 +24,7 @@ namespace Uragano.Remoting
 
 
         [Key(1)]
-        public byte[][] Args { get; set; }
+        public object[] Args { get; set; }
 
 
         [Key(2)]

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 using Uragano.DynamicProxy.Interceptor;
 
+
 namespace Sample.Service.Interfaces
 {
     public class ClientGlobal_1_Interceptor : InterceptorAbstract
@@ -16,10 +17,11 @@ namespace Sample.Service.Interfaces
         }
 
 
-        public override async Task<object> Intercept(IInterceptorContext context)
+        public override async Task<ResultMessage> Intercept(IInterceptorContext context)
         {
             Logger.LogDebug("\n---------------->Client global interceptor\n");
             return await context.Next();
+
         }
     }
 }

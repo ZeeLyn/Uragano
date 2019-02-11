@@ -21,6 +21,6 @@ namespace Uragano.Abstractions
         //Stack<Type> Interceptors { get; }
 
 
-        Task<object> Next();
+        Task<ResultMessage> Next();
     }
 }

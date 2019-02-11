@@ -33,14 +33,14 @@ namespace Sample.Server
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddUragano(config =>
             {
-                config.IsDevelopment(true);
+                //config.IsDevelopment(true);
                 config.AddClient();
                 config.AddServer(Configuration.GetSection("Uragano:Server"));
                 config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"),
                     Configuration.GetSection("Uragano:Consul:Service"));
-                //config.AddClientGlobalInterceptor<ClientGlobal_1_Interceptor>();
+                config.AddClientGlobalInterceptor<ClientGlobal_1_Interceptor>();
                 //config.AddClientGlobalInterceptor<ClientGlobal_2_Interceptor>();
-                config.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
+                //config.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
 
                 //config.Option(UraganoOptions.Server_DotNetty_Channel_SoBacklog, 100);
                 config.Options(Configuration.GetSection("Uragano:Options"));

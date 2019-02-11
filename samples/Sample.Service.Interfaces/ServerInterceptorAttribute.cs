@@ -3,6 +3,7 @@ using Uragano.Abstractions;
 using Uragano.DynamicProxy.Interceptor;
 using System;
 using Microsoft.Extensions.Logging;
+using Uragano.Remoting;
 
 namespace Sample.Service.Interfaces
 {
@@ -19,10 +20,13 @@ namespace Sample.Service.Interfaces
         {
             Logger = logger;
         }
-        public override async Task<object> Intercept(IInterceptorContext context)
+        public override async Task<ResultMessage> Intercept(IInterceptorContext context)
         {
             Logger.LogDebug("\n------------------>Server Interceptor attribute\n");
-            return await context.Next();
+            var r = await context.Next();
+            return r;
+            r.Status = RemotingStatus.Forbidden;
+            return r;
         }
     }
 }

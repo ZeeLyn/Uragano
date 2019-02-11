@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
+using Uragano.Abstractions.Exceptions;
 using Uragano.Abstractions.ServiceInvoker;
 using Uragano.DynamicProxy.Interceptor;
 using Uragano.Remoting;
@@ -58,9 +59,11 @@ namespace Uragano.DynamicProxy
                 }
 
                 var result = await ((IInterceptor)scope.ServiceProvider.GetRequiredService(context.Interceptors.Pop())).Intercept(context);
-                if (result == null)
+                if (result.Status != RemotingStatus.Ok)
+                    throw new RemoteInvokeException(route, result.Result?.ToString(), result.Status);
+                if (result.Result == null)
                     return default;
-                return (T)result;
+                return (T)result.Result;
             }
         }
 

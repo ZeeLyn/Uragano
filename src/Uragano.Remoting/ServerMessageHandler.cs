@@ -40,7 +40,7 @@ namespace Uragano.Remoting
                     await context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
                     {
                         Id = transportMessage.Id,
-                        Body = new ResultMessage(result)
+                        Body = result
                     });
                 }
                 catch (NotFoundRouteException e)
@@ -49,7 +49,7 @@ namespace Uragano.Remoting
                     await context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
                     {
                         Id = transportMessage.Id,
-                        Body = new ResultMessage(e.Message) { Status = RemotingStatus.NotFound }
+                        Body = new ResultMessage(e.Message, RemotingStatus.NotFound)
                     });
                 }
                 catch (Exception e)
@@ -58,7 +58,7 @@ namespace Uragano.Remoting
                     await context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
                     {
                         Id = transportMessage.Id,
-                        Body = new ResultMessage(e.Message) { Status = RemotingStatus.Error }
+                        Body = new ResultMessage(e.Message, RemotingStatus.Error)
                     });
                 }
             });

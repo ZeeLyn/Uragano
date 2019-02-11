@@ -2,8 +2,8 @@
 
 namespace Uragano.Abstractions
 {
-	public interface IInterceptor
-	{
-		Task<object> Intercept(IInterceptorContext context);
-	}
+    public interface IInterceptor
+    {
+        Task<ResultMessage> Intercept(IInterceptorContext context);
+    }
 }
