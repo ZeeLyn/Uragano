@@ -199,6 +199,9 @@ namespace Uragano.Core
                     case "dotnetty_event_loop_count":
                         UraganoOptions.SetOption(UraganoOptions.DotNetty_Event_Loop_Count, configuration.GetValue<int>(section.Key));
                         break;
+                    case "remoting_invoke_cancellationtokensource_timeout":
+                        UraganoOptions.SetOption(UraganoOptions.Remoting_Invoke_CancellationTokenSource_Timeout, configuration.GetValue<TimeSpan>(section.Key));
+                        break;
                 }
 
             }

@@ -21,6 +21,4 @@ namespace Uragano.Abstractions
         [Key(1)]
         public RemotingStatus Status { get; set; }
     }
-
-
 }
