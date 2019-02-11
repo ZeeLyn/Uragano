@@ -25,27 +25,27 @@ namespace Uragano.DynamicProxy.Interceptor
             UraganoSettings = uraganoSettings;
         }
 
-        public override async Task<ResultMessage> Intercept(IInterceptorContext context)
+        public override async Task<IServiceResult> Intercept(IInterceptorContext context)
         {
             if (!(context is InterceptorContext ctx)) throw new ArgumentNullException(nameof(context));
             //No circuit breaker
             if (UraganoSettings.CircuitBreakerOptions == null)
             {
                 if (ctx.ReturnType != null)
-                    return new ResultMessage(await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta,
+                    return new ServiceResult(await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta,
                         ctx.ReturnType));
                 await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, null);
-                return new ResultMessage(null);
+                return new ServiceResult(null);
             }
             //Circuit breaker
             if (ctx.ReturnType != null)
-                return new ResultMessage(await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute,
+                return new ServiceResult(await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute,
                     async () => await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta,
                         ctx.ReturnType), ctx.ReturnType));
 
             await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute,
                 async () => { await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, null); });
-            return new ResultMessage(null);
+            return new ServiceResult(null);
         }
 
         private async Task<object> Exec(string serviceName, string route, object[] args, Dictionary<string, string> meta, Type returnValueType)

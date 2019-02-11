@@ -1,5 +1,4 @@
-﻿using System;
-using MP = MessagePack;
+﻿using MP = MessagePack;
 using MessagePack.Resolvers;
 
 namespace Uragano.Codec.MessagePack

@@ -15,12 +15,8 @@ namespace Uragano.Abstractions
 
         IServiceProvider ServiceProvider { get; }
 
-
         MethodInfo MethodInfo { get; }
 
-        //Stack<Type> Interceptors { get; }
-
-
-        Task<ResultMessage> Next();
+        Task<IServiceResult> Next();
     }
 }

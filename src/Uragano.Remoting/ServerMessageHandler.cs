@@ -37,7 +37,7 @@ namespace Uragano.Remoting
                     Logger.LogDebug($"Invoke route[{transportMessage.Body.Route}]");
                     var result = await InvokerFactory.Invoke(transportMessage.Body.Route, transportMessage.Body.Args,
                         transportMessage.Body.Meta);
-                    await context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
+                    await context.WriteAndFlushAsync(new TransportMessage<IServiceResult>
                     {
                         Id = transportMessage.Id,
                         Body = result
@@ -46,21 +46,22 @@ namespace Uragano.Remoting
                 catch (NotFoundRouteException e)
                 {
                     Logger.LogError(e, e.Message);
-                    await context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
+                    await context.WriteAndFlushAsync(new TransportMessage<IServiceResult>
                     {
                         Id = transportMessage.Id,
-                        Body = new ResultMessage(e.Message, RemotingStatus.NotFound)
+                        Body = new ServiceResult(e.Message, RemotingStatus.NotFound)
                     });
                 }
                 catch (Exception e)
                 {
                     Logger.LogError(e, e.Message);
-                    await context.WriteAndFlushAsync(new TransportMessage<ResultMessage>
+                    await context.WriteAndFlushAsync(new TransportMessage<IServiceResult>
                     {
                         Id = transportMessage.Id,
-                        Body = new ResultMessage(e.Message, RemotingStatus.Error)
+                        Body = new ServiceResult(e.Message, RemotingStatus.Error)
                     });
                 }
+
             });
         }
 

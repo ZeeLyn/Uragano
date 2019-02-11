@@ -27,7 +27,7 @@ namespace Uragano.DynamicProxy.Interceptor
 
         public Stack<Type> Interceptors { get; } = new Stack<Type>();
 
-        public async Task<ResultMessage> Next()
+        public async Task<IServiceResult> Next()
         {
             var interceptor = (IInterceptor)ServiceProvider.GetRequiredService(Interceptors.Pop());
             return await interceptor.Intercept(this);

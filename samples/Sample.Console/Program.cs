@@ -103,7 +103,7 @@ namespace Sample.Console
                     //pipeline.AddLast(new LoggingHandler("SRV-CONN"));
                     pipeline.AddLast(new LengthFieldPrepender(4));
                     pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
-                    pipeline.AddLast(new MessageDecoder<ResultMessage>());
+                    pipeline.AddLast(new MessageDecoder<IServiceResult>());
                     pipeline.AddLast(new MessageEncoder<InvokeMessage>());
                     pipeline.AddLast(new ClientMessageHandler());
                 }));

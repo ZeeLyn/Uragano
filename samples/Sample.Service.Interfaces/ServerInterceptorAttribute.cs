@@ -20,7 +20,7 @@ namespace Sample.Service.Interfaces
         {
             Logger = logger;
         }
-        public override async Task<ResultMessage> Intercept(IInterceptorContext context)
+        public override async Task<IServiceResult> Intercept(IInterceptorContext context)
         {
             Logger.LogDebug("\n------------------>Server Interceptor attribute\n");
             var r = await context.Next();

@@ -57,7 +57,7 @@ namespace Uragano.Remoting
                     //pipeline.AddLast(new LoggingHandler("SRV-CONN"));
                     pipeline.AddLast(new LengthFieldPrepender(4));
                     pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
-                    pipeline.AddLast(new MessageDecoder<ResultMessage>());
+                    pipeline.AddLast(new MessageDecoder<IServiceResult>());
                     pipeline.AddLast(new MessageEncoder<InvokeMessage>());
                     pipeline.AddLast(new ClientMessageHandler(this));
                 }));
@@ -123,9 +123,9 @@ namespace Uragano.Remoting
 
             public override void ChannelRead(IChannelHandlerContext context, object message)
             {
-                var msg = message as TransportMessage<ResultMessage>;
+                var msg = message as TransportMessage<IServiceResult>;
                 var listener = context.Channel.GetAttribute(MessageListenerAttributeKey).Get();
-                listener.Received(new MessageSender(), msg);
+                listener.Received(msg);
             }
 
             public override void ChannelInactive(IChannelHandlerContext context)

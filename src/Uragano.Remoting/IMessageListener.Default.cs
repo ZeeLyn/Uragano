@@ -7,9 +7,9 @@ namespace Uragano.Remoting
     {
         public event ReceiveMessageHandler OnReceived;
 
-        public async Task Received(IMessageSender sender, TransportMessage<ResultMessage> message)
+        public async Task Received(TransportMessage<IServiceResult> message)
         {
-            OnReceived?.Invoke(sender, message);
+            OnReceived?.Invoke(message);
             await Task.CompletedTask;
         }
     }

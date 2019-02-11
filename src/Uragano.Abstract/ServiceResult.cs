@@ -1,22 +1,21 @@
 ﻿using MessagePack;
-using MessagePack.Formatters;
 
 namespace Uragano.Abstractions
 {
     [MessagePackObject]
-    public class ResultMessage : IServiceResult
+    public class ServiceResult : IServiceResult
     {
-        public ResultMessage()
+        public ServiceResult()
         {
         }
 
-        public ResultMessage(object message, RemotingStatus status = RemotingStatus.Ok)
+        public ServiceResult(object message, RemotingStatus status = RemotingStatus.Ok)
         {
             Result = message;
             Status = status;
         }
 
-        [Key(0), MessagePackFormatter(typeof(TypelessFormatter))]
+        [Key(0)]
         public object Result { get; set; }
 
         [Key(1)]

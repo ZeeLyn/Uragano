@@ -11,6 +11,6 @@ namespace Uragano.Abstractions.ServiceInvoker
 
         ServiceDescriptor Get(string route);
 
-        Task<ResultMessage> Invoke(string route, object[] args, Dictionary<string, string> meta);
+        Task<IServiceResult> Invoke(string route, object[] args, Dictionary<string, string> meta);
     }
 }

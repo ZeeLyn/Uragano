@@ -2,7 +2,7 @@
 
 namespace Uragano.Abstractions
 {
-    [MessagePack.Union(0, typeof(ResultMessage))]
+    [Union(0, typeof(ServiceResult))]
     public interface IServiceResult
     {
         [Key(0)]

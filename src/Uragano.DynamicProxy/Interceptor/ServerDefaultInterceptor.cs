@@ -15,11 +15,11 @@ namespace Uragano.DynamicProxy.Interceptor
             InvokerFactory = invokerFactory;
         }
 
-        public override async Task<ResultMessage> Intercept(IInterceptorContext context)
+        public override async Task<IServiceResult> Intercept(IInterceptorContext context)
         {
             var service = InvokerFactory.Get(context.ServiceRoute);
             var instance = context.ServiceProvider.GetRequiredService(service.MethodInfo.DeclaringType);
-            return new ResultMessage(await service.MethodInvoker.Invoke(instance, context.Args));
+            return new ServiceResult(await service.MethodInvoker.Invoke(instance, context.Args));
         }
     }
 }
