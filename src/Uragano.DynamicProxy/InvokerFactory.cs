@@ -112,7 +112,7 @@ namespace Uragano.DynamicProxy
                 {
                     ServiceRoute = service.Route,
                     ServiceProvider = scope.ServiceProvider,
-                    Args = args.Select((item, index) => SerializerHelper.Deserialize(item, service.ArgsType[index])).ToArray(),
+                    Args = args.Select((arg, index) => SerializerHelper.Deserialize(arg, service.ArgsType[index])).ToArray(),
                     Meta = meta,
                     MethodInfo = service.MethodInfo
                 };

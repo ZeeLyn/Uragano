@@ -57,7 +57,10 @@ namespace Uragano.DynamicProxy
                     }
                 }
 
-                return (T)await ((IInterceptor)scope.ServiceProvider.GetRequiredService(context.Interceptors.Pop())).Intercept(context);
+                var result = await ((IInterceptor)scope.ServiceProvider.GetRequiredService(context.Interceptors.Pop())).Intercept(context);
+                if (result == null)
+                    return default;
+                return (T)result;
             }
         }
 

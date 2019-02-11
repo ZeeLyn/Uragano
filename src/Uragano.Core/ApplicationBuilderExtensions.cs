@@ -40,7 +40,7 @@ namespace Uragano.Core
                         await discovery.DeregisterAsync(uraganoSettings.ServiceDiscoveryClientConfiguration, uraganoSettings.ServiceRegisterConfiguration.Id);
                     await bootstrap.StopAsync();
                 });
-                bootstrap.StartAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                bootstrap.StartAsync().Wait();
 
                 //Register service to consul
                 if (uraganoSettings.ServiceRegisterConfiguration != null && !uraganoSettings.IsDevelopment)
@@ -48,7 +48,7 @@ namespace Uragano.Core
                     if (uraganoSettings.ServiceDiscoveryClientConfiguration == null)
                         throw new ArgumentNullException(nameof(uraganoSettings.ServiceDiscoveryClientConfiguration));
 
-                    discovery.RegisterAsync(uraganoSettings.ServiceDiscoveryClientConfiguration, uraganoSettings.ServiceRegisterConfiguration, uraganoSettings.ServerSettings.Weight).ConfigureAwait(false).GetAwaiter().GetResult();
+                    discovery.RegisterAsync(uraganoSettings.ServiceDiscoveryClientConfiguration, uraganoSettings.ServiceRegisterConfiguration, uraganoSettings.ServerSettings.Weight).Wait();
                 }
             }
             var serviceStatusRefreshFactory = applicationBuilder.ApplicationServices.GetService<IServiceStatusManageFactory>();

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceInvoker;
+using Uragano.Remoting;
 
 namespace Uragano.DynamicProxy.Interceptor
 {
@@ -14,11 +15,11 @@ namespace Uragano.DynamicProxy.Interceptor
             InvokerFactory = invokerFactory;
         }
 
-        public override async Task<object> Intercept(IInterceptorContext context)
+        public override async Task<IServiceResult<object>> Intercept(IInterceptorContext context)
         {
             var service = InvokerFactory.Get(context.ServiceRoute);
             var instance = context.ServiceProvider.GetRequiredService(service.MethodInfo.DeclaringType);
-            return await service.MethodInvoker.Invoke(instance, context.Args);
+            return new ServiceResult<object>(await service.MethodInvoker.Invoke(instance, context.Args));
         }
     }
 }
