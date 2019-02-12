@@ -3,6 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>7.1</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageIconUrl>https://github.com/ww198643/Uragano/blob/master/icon.png?raw=true</PackageIconUrl>
+    <PackageTags>Uragano,RPC,DotNetty,Microservice,MessagePack,DynamicProxy</PackageTags>
+    <PackageProjectUrl>https://github.com/ww198643/Uragano</PackageProjectUrl>
+    <Description>A simple, high performance RPC library.</Description>
+    <Version>0.0.1-preview.201</Version>
   </PropertyGroup>
 
   <ItemGroup>
