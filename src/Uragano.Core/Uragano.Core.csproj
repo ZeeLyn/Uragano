@@ -7,9 +7,11 @@
     <PackageIconUrl>https://github.com/ww198643/Uragano/blob/master/icon.png?raw=true</PackageIconUrl>
     <PackageProjectUrl>https://github.com/ww198643/Uragano</PackageProjectUrl>
     <Description>A simple, high performance RPC library.</Description>
-    <Version>0.0.1-preview.201</Version>
+    <Version>0.0.1-CI.202</Version>
     <PackageLicenseUrl>https://github.com/ww198643/Uragano/blob/master/LICENSE</PackageLicenseUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Owen</Authors>
+    <Company>Owen</Company>
   </PropertyGroup>
 
   <ItemGroup>
