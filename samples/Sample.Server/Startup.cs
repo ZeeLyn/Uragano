@@ -33,7 +33,7 @@ namespace Sample.Server
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddUragano(config =>
             {
-                config.IsDevelopment(true);
+                //config.IsDevelopment(true);
                 config.AddClient();
                 config.AddServer(Configuration.GetSection("Uragano:Server"));
                 config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"),
