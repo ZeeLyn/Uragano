@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageTags>Uragano,RPC,DotNetty,Microservice,MessagePack,DynamicProxy</PackageTags>
+    <PackageIconUrl>https://github.com/ww198643/Uragano/blob/master/icon.png?raw=true</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/ww198643/Uragano</PackageProjectUrl>
+    <Description>A simple, high performance RPC library.</Description>
+    <Version>0.0.1-preview.201</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotNetty.Handlers" Version="0.6.0" />
+    <PackageReference Include="DotNetty.Transport" Version="0.6.0" />
+    <PackageReference Include="DotNetty.Transport.Libuv" Version="0.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Uragano.Codec.MessagePack\Uragano.Codec.MessagePack.csproj" />
+  </ItemGroup>
+
+</Project>
