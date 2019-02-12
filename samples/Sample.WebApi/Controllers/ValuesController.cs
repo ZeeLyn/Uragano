@@ -31,12 +31,15 @@ namespace Sample.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-
+            var a = Guid.NewGuid().ToString();
             //var r = ServiceProvider.GetServices<IRemotingInvoke>();
-            return Ok(new
+            var r = await HelloService.SetMeta(("token", "bearer .....")).SayHello(a);
+            if (r.Message == a)
+                return Ok(r);
+            return BadRequest(new
             {
-                //count = r.Count(),
-                result = await HelloService.SetMeta(("token", "bearer .....")).SayHello(Guid.NewGuid().ToString()),
+                @in = a,
+                @out = r.Message
             });
         }
 

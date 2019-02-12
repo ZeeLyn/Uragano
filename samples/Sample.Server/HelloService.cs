@@ -19,7 +19,7 @@ namespace Sample.Server
 
         public async Task<ResultModel> SayHello(string name)
         {
-            TestLib.Exec();
+            //TestLib.Exec();
             // await Task.Delay(2000);
             return await Task.FromResult(new ResultModel { Message = name });
         }

@@ -181,9 +181,6 @@ namespace Uragano.Core
                     case "threadpool_completionportthreads":
                         UraganoOptions.SetOption(UraganoOptions.ThreadPool_CompletionPortThreads, configuration.GetValue<int>(section.Key));
                         break;
-                    case "client_loadbalancing":
-                        UraganoOptions.SetOption(UraganoOptions.Client_LoadBalancing, Type.GetType(configuration.GetValue<string>(section.Key)));
-                        break;
                     case "client_node_status_refresh_interval":
                         UraganoOptions.SetOption(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromMilliseconds(configuration.GetValue<int>(section.Key)));
                         break;
@@ -223,7 +220,6 @@ namespace Uragano.Core
                 DurationOfBreak = TimeSpan.FromMilliseconds(durationOfBreak)
             };
             RegisterSingletonService(typeof(ICircuitBreakerEvent), typeof(TCircuitBreakerEvent));
-            //RegisterSingletonService<ICircuitBreaker, PollyCircuitBreaker>();
         }
 
         public void AddCircuitBreaker(int timeout = 3000, int retry = 3, int exceptionsAllowedBeforeBreaking = 10,
@@ -236,7 +232,6 @@ namespace Uragano.Core
                 ExceptionsAllowedBeforeBreaking = exceptionsAllowedBeforeBreaking,
                 DurationOfBreak = TimeSpan.FromMilliseconds(durationOfBreak)
             };
-            //RegisterSingletonService<ICircuitBreaker, PollyCircuitBreaker>();
         }
 
         public void AddCircuitBreaker(IConfigurationSection configurationSection)
@@ -250,9 +245,8 @@ namespace Uragano.Core
             };
             if (!string.IsNullOrWhiteSpace(configurationSection.GetValue<string>("EventHandler")))
             {
-                var eventType = Type.GetType(configurationSection.GetValue<string>("EventHandler"));
-                if (eventType != null)
-                    RegisterSingletonService(typeof(ICircuitBreakerEvent), eventType);
+                var eventType = Type.GetType(configurationSection.GetValue<string>("EventHandler"), true);
+                RegisterSingletonService(typeof(ICircuitBreakerEvent), eventType);
             }
         }
 

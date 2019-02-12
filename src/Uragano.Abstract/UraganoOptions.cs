@@ -17,9 +17,6 @@ namespace Uragano.Abstractions
             return completion;
         });
 
-        public static UraganoOption<Type> Client_LoadBalancing { get; } =
-            new UraganoOption<Type>(typeof(ILoadBalancing));
-
         public static UraganoOption<TimeSpan> Client_Node_Status_Refresh_Interval { get; } =
             new UraganoOption<TimeSpan>(TimeSpan.FromSeconds(10));
 
