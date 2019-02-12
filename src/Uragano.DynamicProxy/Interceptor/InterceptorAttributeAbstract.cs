@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Uragano.Abstractions;
-using Uragano.Remoting;
 
 namespace Uragano.DynamicProxy.Interceptor
 {

@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Uragano.Abstractions;
 using Uragano.Abstractions.Exceptions;
-using Uragano.Codec.MessagePack;
 using Uragano.Remoting;
 using Uragano.Abstractions.CircuitBreaker;
 using System;
