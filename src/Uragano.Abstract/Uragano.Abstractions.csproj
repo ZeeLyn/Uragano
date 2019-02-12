@@ -9,6 +9,7 @@
     <PackageProjectUrl>https://github.com/ww198643/Uragano</PackageProjectUrl>
     <PackageTags>Uragano,RPC,DotNetty,Microservice,MessagePack,DynamicProxy</PackageTags>
     <PackageIconUrl>https://github.com/ww198643/Uragano/blob/master/icon.png?raw=true</PackageIconUrl>
+    <PackageLicenseUrl>https://github.com/ww198643/Uragano/blob/master/LICENSE</PackageLicenseUrl>
   </PropertyGroup>
 
   <ItemGroup>
