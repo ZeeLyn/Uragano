@@ -45,8 +45,6 @@ namespace Sample.Server
                 //config.Option(UraganoOptions.Server_DotNetty_Channel_SoBacklog, 100);
                 config.Options(Configuration.GetSection("Uragano:Options"));
             });
-
-            services.AddScoped<TestLib>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

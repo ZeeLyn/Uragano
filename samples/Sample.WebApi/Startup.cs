@@ -39,7 +39,6 @@ namespace Sample.WebApi
                 //config.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));
                 config.Options(Configuration.GetSection("Uragano:Options"));
             });
-            services.AddScoped<TestLib>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
