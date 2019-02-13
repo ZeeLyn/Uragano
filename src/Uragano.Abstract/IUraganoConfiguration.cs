@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.ServiceDiscovery;
 
@@ -7,7 +8,7 @@ namespace Uragano.Abstractions
 {
     public interface IUraganoConfiguration
     {
-
+        IServiceCollection ServiceCollection { get; }
         void IsDevelopment(bool isDevelopment = false);
 
         void AddServer(string ip, int port, int? weight = default);
@@ -77,6 +78,8 @@ namespace Uragano.Abstractions
         void AddCircuitBreaker(IConfigurationSection configurationSection);
 
         void AddCodec<TCodec>() where TCodec : ICodec;
+
+        void AddCaching<TCaching>(ICachingOptions cachingOptions) where TCaching : ICaching;
 
     }
 }

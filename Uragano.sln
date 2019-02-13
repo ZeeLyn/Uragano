@@ -27,7 +27,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uragano.Codec.MessagePack",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{E6A0D073-6D88-4C5C-A244-CDD2AEEFE3CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XUnitTest", "test\XUnitTest\XUnitTest.csproj", "{EBCAB686-FA72-42C3-95F9-BB2BC3BA32F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XUnitTest", "test\XUnitTest\XUnitTest.csproj", "{EBCAB686-FA72-42C3-95F9-BB2BC3BA32F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Uragano.Caching.Redis", "src\Uragano.Caching.Redis\Uragano.Caching.Redis.csproj", "{13CB019F-32D2-48A3-B454-5C103291CE0F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,10 @@ Global
 		{EBCAB686-FA72-42C3-95F9-BB2BC3BA32F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBCAB686-FA72-42C3-95F9-BB2BC3BA32F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBCAB686-FA72-42C3-95F9-BB2BC3BA32F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13CB019F-32D2-48A3-B454-5C103291CE0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13CB019F-32D2-48A3-B454-5C103291CE0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13CB019F-32D2-48A3-B454-5C103291CE0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13CB019F-32D2-48A3-B454-5C103291CE0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,6 +96,7 @@ Global
 		{AF570339-CD9D-4F22-A8F4-D784A713081A} = {439B6875-5A3E-4238-88B6-93EDA5EBA30E}
 		{B69CE08A-5216-4DC7-BE8E-4A3A784DD98D} = {439B6875-5A3E-4238-88B6-93EDA5EBA30E}
 		{EBCAB686-FA72-42C3-95F9-BB2BC3BA32F3} = {E6A0D073-6D88-4C5C-A244-CDD2AEEFE3CF}
+		{13CB019F-32D2-48A3-B454-5C103291CE0F} = {439B6875-5A3E-4238-88B6-93EDA5EBA30E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {05D6B99B-B158-41D5-A2C2-3C8206CB45B5}

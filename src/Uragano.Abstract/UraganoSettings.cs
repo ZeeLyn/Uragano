@@ -23,6 +23,8 @@ namespace Uragano.Abstractions
         public List<Type> ServerGlobalInterceptors { get; } = new List<Type>();
 
         public CircuitBreakerOptions CircuitBreakerOptions { get; set; }
+
+        public ICachingOptions CachingOptions { get; set; }
     }
 
 

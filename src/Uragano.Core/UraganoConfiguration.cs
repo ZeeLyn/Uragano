@@ -17,7 +17,7 @@ namespace Uragano.Core
 {
     public class UraganoConfiguration : IUraganoConfiguration
     {
-        internal IServiceCollection ServiceCollection { get; }
+        public IServiceCollection ServiceCollection { get; }
 
         internal UraganoSettings UraganoSettings { get; set; } = new UraganoSettings();
 
@@ -252,10 +252,24 @@ namespace Uragano.Core
 
         #endregion
 
+        #region Codec
         public void AddCodec<TCodec>() where TCodec : ICodec
         {
             RegisterSingletonService<ICodec, TCodec>();
         }
+
+        #endregion
+
+        #region Caching
+
+        public void AddCaching<TCaching>(ICachingOptions cachingOptions) where TCaching : ICaching
+        {
+            UraganoSettings.CachingOptions = cachingOptions;
+            ServiceCollection.AddSingleton(typeof(ICaching), typeof(TCaching));
+            ServiceCollection.AddSingleton(typeof(ICachingKeyGenerator), cachingOptions.KeyGenerator);
+        }
+
+        #endregion
 
         #region Private methods
 

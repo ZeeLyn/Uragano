@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Caching.CSRedis" Version="3.0.31" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Uragano.Abstract\Uragano.Abstractions.csproj" />
+    <ProjectReference Include="..\Uragano.Codec.MessagePack\Uragano.Codec.MessagePack.csproj" />
+  </ItemGroup>
+
+</Project>
