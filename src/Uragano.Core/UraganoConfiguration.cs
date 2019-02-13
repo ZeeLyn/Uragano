@@ -41,7 +41,7 @@ namespace Uragano.Core
 
         public void AddServer(string ip, int port, string certUrl, string certPwd, int? weight = default)
         {
-            RegisterSingletonService<IBootstrap, ServerBootstrap>();
+
             UraganoSettings.ServerSettings = new ServerSettings
             {
                 IP = IPAddress.Parse(ip.ReplaceIpPlaceholder()),
@@ -252,12 +252,18 @@ namespace Uragano.Core
 
         #endregion
 
+        public void AddCodec<TCodec>() where TCodec : ICodec
+        {
+            RegisterSingletonService<ICodec, TCodec>();
+        }
+
         #region Private methods
 
         private void RegisterServerServices()
         {
             if (!RegisterSingletonService<ServerDefaultInterceptor>())
                 return;
+            RegisterSingletonService<IBootstrap, ServerBootstrap>();
             var types = ReflectHelper.GetDependencyTypes();
             var services = types.Where(t => t.IsInterface && typeof(IService).IsAssignableFrom(t)).Select(@interface => new
             {

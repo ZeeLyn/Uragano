@@ -11,7 +11,7 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using DotNetty.Transport.Libuv;
 using Uragano.Abstractions;
-using Uragano.Codec.MessagePack;
+
 
 namespace Uragano.Remoting
 {
@@ -26,7 +26,7 @@ namespace Uragano.Remoting
         private static readonly AttributeKey<IMessageListener> MessageListenerAttributeKey = AttributeKey<IMessageListener>.ValueOf(typeof(ClientFactory), nameof(IMessageListener));
 
 
-        public ClientFactory()
+        public ClientFactory(ICodec codec)
         {
             IEventLoopGroup group;
 
@@ -57,8 +57,8 @@ namespace Uragano.Remoting
                     //pipeline.AddLast(new LoggingHandler("SRV-CONN"));
                     pipeline.AddLast(new LengthFieldPrepender(4));
                     pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
-                    pipeline.AddLast(new MessageDecoder<IServiceResult>());
-                    pipeline.AddLast(new MessageEncoder<InvokeMessage>());
+                    pipeline.AddLast(new MessageDecoder<IServiceResult>(codec));
+                    pipeline.AddLast(new MessageEncoder<IInvokeMessage>(codec));
                     pipeline.AddLast(new ClientMessageHandler(this));
                 }));
         }

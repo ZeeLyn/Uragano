@@ -76,5 +76,7 @@ namespace Uragano.Abstractions
 
         void AddCircuitBreaker(IConfigurationSection configurationSection);
 
+        void AddCodec<TCodec>() where TCodec : ICodec;
+
     }
 }

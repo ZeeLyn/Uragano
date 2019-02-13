@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using DotNetty.Transport.Channels;
 using Microsoft.Extensions.Logging;
@@ -30,7 +29,7 @@ namespace Uragano.Remoting
             Task.Run(async () =>
             {
                 var msg = message;
-                if (!(msg is TransportMessage<InvokeMessage> transportMessage))
+                if (!(msg is TransportMessage<IInvokeMessage> transportMessage))
                     throw new ArgumentNullException(nameof(message));
                 try
                 {

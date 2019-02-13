@@ -10,7 +10,7 @@ using DotNetty.Transport.Libuv;
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceInvoker;
-using Uragano.Codec.MessagePack;
+
 
 namespace Uragano.Remoting
 {
@@ -27,13 +27,16 @@ namespace Uragano.Remoting
 
         private ILogger Logger { get; }
 
-        public ServerBootstrap(IInvokerFactory invokerFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings, ILogger<ServerBootstrap> logger)
+        private ICodec Codec { get; }
+
+        public ServerBootstrap(IInvokerFactory invokerFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings, ILogger<ServerBootstrap> logger, ICodec codec)
         {
 
             InvokerFactory = invokerFactory;
             ServiceProvider = serviceProvider;
             ServerSettings = uraganoSettings.ServerSettings;
             Logger = logger;
+            Codec = codec;
         }
 
         public async Task StartAsync()
@@ -70,8 +73,8 @@ namespace Uragano.Remoting
                     //pipeline.AddLast(new LoggingHandler("SRV-CONN"));
                     pipeline.AddLast(new LengthFieldPrepender(4));
                     pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
-                    pipeline.AddLast(new MessageDecoder<InvokeMessage>());
-                    pipeline.AddLast(new MessageEncoder<IServiceResult>());
+                    pipeline.AddLast(new MessageDecoder<IInvokeMessage>(Codec));
+                    pipeline.AddLast(new MessageEncoder<IServiceResult>(Codec));
                     pipeline.AddLast(new ServerMessageHandler(InvokerFactory, ServiceProvider, Logger));
                 }));
             Logger.LogDebug($"Listening {ServerSettings.IP}:{ServerSettings.Port}");

@@ -9,7 +9,6 @@ using Uragano.Abstractions.ServiceInvoker;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
 using Uragano.Abstractions.CircuitBreaker;
-using Uragano.Codec.MessagePack;
 using Uragano.DynamicProxy.Interceptor;
 using ServiceDescriptor = Uragano.Abstractions.ServiceDescriptor;
 

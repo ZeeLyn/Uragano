@@ -33,9 +33,9 @@ namespace Uragano.Remoting
                 Console.WriteLine("Not found callback");
         }
 
-        public async Task<IServiceResult> SendAsync(InvokeMessage message)
+        public async Task<IServiceResult> SendAsync(IInvokeMessage message)
         {
-            var transportMessage = new TransportMessage<InvokeMessage>
+            var transportMessage = new TransportMessage<IInvokeMessage>
             {
                 Id = Guid.NewGuid().ToString(),
                 Body = message

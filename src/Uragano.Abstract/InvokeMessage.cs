@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using MessagePack;
-using Uragano.Codec.MessagePack;
 
-namespace Uragano.Remoting
+namespace Uragano.Abstractions
 {
     [MessagePackObject]
-    public class InvokeMessage
+    public class InvokeMessage : IInvokeMessage
     {
         public InvokeMessage()
         {

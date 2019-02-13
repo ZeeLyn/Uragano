@@ -18,21 +18,21 @@ namespace Uragano.Core
 
             ThreadPool.SetMinThreads(UraganoOptions.ThreadPool_MinThreads.Value, UraganoOptions.ThreadPool_CompletionPortThreads.Value);
 
-            var applicationLifetime = applicationBuilder.ApplicationServices.GetService<IApplicationLifetime>();
-            var uraganoSettings = applicationBuilder.ApplicationServices.GetService<UraganoSettings>();
+            var applicationLifetime = applicationBuilder.ApplicationServices.GetRequiredService<IApplicationLifetime>();
+            var uraganoSettings = applicationBuilder.ApplicationServices.GetRequiredService<UraganoSettings>();
 
             uraganoSettings.ClientGlobalInterceptors.Reverse();
             uraganoSettings.ServerGlobalInterceptors.Reverse();
 
             //build service proxy
-            var serviceBuilder = applicationBuilder.ApplicationServices.GetService<IServiceBuilder>();
+            var serviceBuilder = applicationBuilder.ApplicationServices.GetRequiredService<IServiceBuilder>();
             serviceBuilder.BuildService();
 
             //Start server and register service
             if (uraganoSettings.ServerSettings != null)
             {
                 var discovery = applicationBuilder.ApplicationServices.GetService<IServiceDiscovery>();
-                var bootstrap = applicationBuilder.ApplicationServices.GetService<IBootstrap>();
+                var bootstrap = applicationBuilder.ApplicationServices.GetRequiredService<IBootstrap>();
                 applicationLifetime.ApplicationStopping.Register(async () =>
                 {
                     CancellationTokenSource.Cancel();
