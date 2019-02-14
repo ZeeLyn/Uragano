@@ -5,7 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Uragano.Abstractions.CircuitBreaker;
-using Uragano.Abstractions.ServiceInvoker;
+using Uragano.Abstractions.Service;
 
 namespace Uragano.Core
 {
@@ -15,13 +15,11 @@ namespace Uragano.Core
 
         private IScriptInjection ScriptInjection { get; }
 
-        private IInvokerFactory InvokerFactory { get; }
+        private IServiceFactory InvokerFactory { get; }
 
         private static readonly ConcurrentDictionary<string, AsyncPolicy<object>> Policies = new ConcurrentDictionary<string, AsyncPolicy<object>>();
 
-        //private static readonly ConcurrentDictionary<string, AsyncPolicy> NoReturnValuePolicies = new ConcurrentDictionary<string, AsyncPolicy>();
-
-        public PollyCircuitBreaker(IServiceProvider serviceProvider, IScriptInjection scriptInjection, IInvokerFactory invokerFactory)
+        public PollyCircuitBreaker(IServiceProvider serviceProvider, IScriptInjection scriptInjection, IServiceFactory invokerFactory)
         {
             ServiceProvider = serviceProvider;
             ScriptInjection = scriptInjection;

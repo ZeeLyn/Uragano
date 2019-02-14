@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Uragano.Abstractions;
+using Uragano.Abstractions.Service;
 
 namespace Uragano.DynamicProxy.Interceptor
 {
@@ -10,25 +11,33 @@ namespace Uragano.DynamicProxy.Interceptor
         private ICachingKeyGenerator KeyGenerator { get; }
         private ICachingOptions CachingOptions { get; }
 
-        public CachingDefaultInterceptor(ICaching caching, ICachingKeyGenerator keyGenerator, UraganoSettings uraganoSettings)
+        private IServiceFactory ServiceFactory { get; }
+
+
+
+        public CachingDefaultInterceptor(ICaching caching, ICachingKeyGenerator keyGenerator, UraganoSettings uraganoSettings, IServiceFactory serviceFactory)
         {
             Caching = caching;
             KeyGenerator = keyGenerator;
             CachingOptions = uraganoSettings.CachingOptions;
+            ServiceFactory = serviceFactory;
         }
 
         public override async Task<IServiceResult> Intercept(IInterceptorContext context)
         {
+            var service = ServiceFactory.Get(context.ServiceRoute);
+            if (!service.CachingConfig.Enable) return await context.Next();
+            var key = KeyGenerator.ReplacePlaceholder(service.CachingConfig.Key, service.CachingConfig.CustomKey,
+                context.Args);
             if (!(context is InterceptorContext ctx))
                 throw new ArgumentNullException();
-            if (!ctx.CachingOption.Enable) return await context.Next();
-            var key = KeyGenerator.ReplacePlaceholder(ctx.CachingOption.Key, ctx.CachingOption.CustomKey,
-                context.Args);
-            var result = await Caching.Get<IServiceResult>(key);
-            if (result != null)
+            var (value, hasKey) = await Caching.Get(key, ctx.ReturnType);
+            if (hasKey)
+                return new ServiceResult(value);
+            var result = await context.Next();
+            if (result.Status != RemotingStatus.Ok)
                 return result;
-            result = await context.Next();
-            await Caching.Set(key, result, ctx.CachingOption.Expire);
+            await Caching.Set(key, result.Result, service.CachingConfig.Expire);
             return result;
         }
     }

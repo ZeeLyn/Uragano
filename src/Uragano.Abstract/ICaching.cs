@@ -7,9 +7,9 @@ namespace Uragano.Abstractions
     {
         Task Set<TValue>(string key, TValue value, TimeSpan? expire = default);
 
-        Task<object> Get(string key, Type type);
+        Task<(object value, bool hasKey)> Get(string key, Type type);
 
-        Task<TValue> Get<TValue>(string key);
+        Task<(TValue value, bool hasKey)> Get<TValue>(string key);
 
         Task Remove(params string[] keys);
     }

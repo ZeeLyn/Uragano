@@ -9,7 +9,7 @@ using DotNetty.Transport.Channels.Sockets;
 using DotNetty.Transport.Libuv;
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
-using Uragano.Abstractions.ServiceInvoker;
+using Uragano.Abstractions.Service;
 
 
 namespace Uragano.Remoting
@@ -19,7 +19,7 @@ namespace Uragano.Remoting
         private IChannel Channel { get; set; }
 
 
-        private IInvokerFactory InvokerFactory { get; }
+        private IServiceFactory InvokerFactory { get; }
 
         private ServerSettings ServerSettings { get; }
 
@@ -29,7 +29,7 @@ namespace Uragano.Remoting
 
         private ICodec Codec { get; }
 
-        public ServerBootstrap(IInvokerFactory invokerFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings, ILogger<ServerBootstrap> logger, ICodec codec)
+        public ServerBootstrap(IServiceFactory invokerFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings, ILogger<ServerBootstrap> logger, ICodec codec)
         {
 
             InvokerFactory = invokerFactory;

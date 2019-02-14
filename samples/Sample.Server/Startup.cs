@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sample.Service.Interfaces;
 using Uragano.Abstractions;
+using Uragano.Caching.Redis;
 using Uragano.Codec.MessagePack;
 using Uragano.Consul;
 using Uragano.Core;
@@ -43,6 +44,10 @@ namespace Sample.Server
                 //config.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
 
                 //config.Option(UraganoOptions.Server_DotNetty_Channel_SoBacklog, 100);
+                config.AddRedisCaching(new RedisOptions
+                {
+                    ConnectionStrings = new[] { new RedisConnection("192.168.1.254", 6379, "nihao123", false, 15) }
+                });
                 config.Options(Configuration.GetSection("Uragano:Options"));
             });
         }

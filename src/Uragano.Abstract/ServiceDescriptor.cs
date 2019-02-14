@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Uragano.Abstractions.CircuitBreaker;
-using Uragano.Abstractions.ServiceInvoker;
+using Uragano.Abstractions.Service;
 
 namespace Uragano.Abstractions
 {

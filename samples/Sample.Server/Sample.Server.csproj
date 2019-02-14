@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Uragano.Caching.Redis\Uragano.Caching.Redis.csproj" />
     <ProjectReference Include="..\..\src\Uragano.Core\Uragano.Core.csproj" />
     <ProjectReference Include="..\Sample.Service.Interfaces\Sample.Service.Interfaces.csproj" />
   </ItemGroup>

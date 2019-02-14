@@ -4,20 +4,20 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
-using Uragano.Abstractions.ServiceInvoker;
+using Uragano.Abstractions.Service;
 
 namespace Uragano.DynamicProxy
 {
     public class ServiceBuilder : IServiceBuilder
     {
-        private IInvokerFactory InvokerFactory { get; }
+        private IServiceFactory InvokerFactory { get; }
 
         private IServiceProvider ServiceProvider { get; }
 
         private UraganoSettings UraganoSettings { get; }
 
 
-        public ServiceBuilder(IInvokerFactory invokerFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings)
+        public ServiceBuilder(IServiceFactory invokerFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings)
         {
             InvokerFactory = invokerFactory;
             ServiceProvider = serviceProvider;

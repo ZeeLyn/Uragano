@@ -6,6 +6,6 @@ namespace Uragano.Caching.Redis
 {
     public interface IRedisPartitionPolicy
     {
-        string Policy(string key, IEnumerable<string> connectionStrings);
+        string Policy(string key, IEnumerable<RedisConnection> connectionStrings);
     }
 }

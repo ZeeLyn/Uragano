@@ -5,16 +5,16 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Uragano.Abstractions.Exceptions;
-using Uragano.Abstractions.ServiceInvoker;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
 using Uragano.Abstractions.CircuitBreaker;
+using Uragano.Abstractions.Service;
 using Uragano.DynamicProxy.Interceptor;
 using ServiceDescriptor = Uragano.Abstractions.ServiceDescriptor;
 
 namespace Uragano.DynamicProxy
 {
-    public class InvokerFactory : IInvokerFactory
+    public class ServiceFactory : IServiceFactory
     {
         private static readonly ConcurrentDictionary<string, ServiceDescriptor>
             ServiceInvokers = new ConcurrentDictionary<string, ServiceDescriptor>();
@@ -27,7 +27,7 @@ namespace Uragano.DynamicProxy
         private IScriptInjection ScriptInjection { get; }
 
 
-        public InvokerFactory(IServiceProvider serviceProvider, UraganoSettings uraganoSettings, IScriptInjection scriptInjection)
+        public ServiceFactory(IServiceProvider serviceProvider, UraganoSettings uraganoSettings, IScriptInjection scriptInjection)
         {
             ServiceProvider = serviceProvider;
             UraganoSettings = uraganoSettings;
@@ -122,6 +122,7 @@ namespace Uragano.DynamicProxy
                     Args = args,
                     Meta = meta,
                     MethodInfo = service.MethodInfo
+
                 };
                 context.Interceptors.Push(typeof(ServerDefaultInterceptor));
                 foreach (var interceptor in service.ServerInterceptors)

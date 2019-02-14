@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
 using Uragano.Abstractions.CircuitBreaker;
-using Uragano.Abstractions.ServiceInvoker;
+using Uragano.Abstractions.Service;
 using Uragano.Codec.MessagePack;
 using Uragano.Consul;
 using Uragano.DynamicProxy;
@@ -50,7 +50,7 @@ namespace Uragano.Core
         private static void AddBase(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<IServiceBuilder, ServiceBuilder>();
-            serviceCollection.AddSingleton<IInvokerFactory, InvokerFactory>();
+            serviceCollection.AddSingleton<IServiceFactory, ServiceFactory>();
             serviceCollection.AddSingleton<IScriptInjection, ScriptInjection>();
             serviceCollection.AddSingleton<ICodec, MessagePackCodec>();
         }

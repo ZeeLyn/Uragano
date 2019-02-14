@@ -19,7 +19,6 @@ namespace Uragano.DynamicProxy.Interceptor
         public IServiceProvider ServiceProvider { get; internal set; }
 
         public MethodInfo MethodInfo { get; internal set; }
-        public ICachingConfig CachingOption { get; internal set; }
 
         public Type ReturnType { get; internal set; }
 

@@ -15,7 +15,7 @@ namespace Uragano.Caching.Redis
             Cache = distributedCache;
         }
 
-        public async Task Set<TValue>(string key, TValue value, TimeSpan expire)
+        public async Task Set<TValue>(string key, TValue value, TimeSpan? expire)
         {
             await Cache.SetAsync(key, SerializerHelper.Serialize(value), new DistributedCacheEntryOptions
             {
@@ -23,17 +23,18 @@ namespace Uragano.Caching.Redis
             });
         }
 
-        public async Task<object> Get(string key, Type type)
+        public async Task<(object value, bool hasKey)> Get(string key, Type type)
         {
             var bytes = await Cache.GetAsync(key);
             if (bytes == null || bytes.LongLength == 0)
-                return null;
-            return SerializerHelper.Deserialize(bytes);
+                return (null, false);
+            return (SerializerHelper.Deserialize(bytes), true);
         }
 
-        public async Task<TValue> Get<TValue>(string key)
+        public async Task<(TValue value, bool hasKey)> Get<TValue>(string key)
         {
-            return (TValue)await Get(key, typeof(TValue));
+            var (value, hasKey) = await Get(key, typeof(TValue));
+            return (value == null ? default : (TValue)value, hasKey);
         }
 
         public async Task Remove(params string[] keys)

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Uragano.Abstractions.ServiceInvoker
+namespace Uragano.Abstractions.Service
 {
-    public interface IInvokerFactory
+    public interface IServiceFactory
     {
         void Create(string route, MethodInfo serverMethodInfo, MethodInfo clientMethodInfo, List<Type> serverInterceptors, List<Type> clientInterceptors);
 

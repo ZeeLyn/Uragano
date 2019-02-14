@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Sample.Service.Interfaces;
+using Uragano.Abstractions;
 using Uragano.Core;
 
 namespace Sample.Server.Controllers
@@ -14,15 +15,20 @@ namespace Sample.Server.Controllers
     {
         private IHelloService HelloService { get; }
 
-        public ValuesController(IHelloService helloService)
+        private ICaching Caching { get; }
+
+        public ValuesController(IHelloService helloService, ICaching caching)
         {
             HelloService = helloService;
+            Caching = caching;
         }
 
         // GET api/values
         [HttpGet]
         public async Task<IActionResult> Get()
         {
+            object v = null;
+            await Caching.Set("test", v);
             await HelloService.SayHello();
             return Ok(new
             {

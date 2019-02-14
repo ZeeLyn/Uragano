@@ -1,15 +1,15 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
-using Uragano.Abstractions.ServiceInvoker;
+using Uragano.Abstractions.Service;
 
 namespace Uragano.DynamicProxy.Interceptor
 {
     public sealed class ServerDefaultInterceptor : InterceptorAbstract
     {
-        private IInvokerFactory InvokerFactory { get; }
+        private IServiceFactory InvokerFactory { get; }
 
-        public ServerDefaultInterceptor(IInvokerFactory invokerFactory)
+        public ServerDefaultInterceptor(IServiceFactory invokerFactory)
         {
             InvokerFactory = invokerFactory;
         }

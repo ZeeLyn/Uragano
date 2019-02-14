@@ -2,22 +2,22 @@
 using System.Threading.Tasks;
 using DotNetty.Transport.Channels;
 using Microsoft.Extensions.Logging;
-using Uragano.Abstractions.ServiceInvoker;
 using Uragano.Abstractions;
 using Uragano.Abstractions.Exceptions;
+using Uragano.Abstractions.Service;
 
 namespace Uragano.Remoting
 {
     public class ServerMessageHandler : ChannelHandlerAdapter
     {
 
-        private IInvokerFactory InvokerFactory { get; }
+        private IServiceFactory InvokerFactory { get; }
 
         private IServiceProvider ServiceProvider { get; }
 
         private ILogger Logger { get; }
 
-        public ServerMessageHandler(IInvokerFactory invokerFactory, IServiceProvider serviceProvider, ILogger logger)
+        public ServerMessageHandler(IServiceFactory invokerFactory, IServiceProvider serviceProvider, ILogger logger)
         {
             InvokerFactory = invokerFactory;
             ServiceProvider = serviceProvider;
