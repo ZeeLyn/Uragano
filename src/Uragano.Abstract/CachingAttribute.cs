@@ -7,6 +7,6 @@ namespace Uragano.Abstractions
     {
         public string Key { get; set; }
 
-        public int? Expire { get; set; }
+        public int? ExpireSeconds { get; set; }
     }
 }

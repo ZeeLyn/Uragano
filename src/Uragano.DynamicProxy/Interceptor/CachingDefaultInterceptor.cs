@@ -10,7 +10,6 @@ namespace Uragano.DynamicProxy.Interceptor
         private ICaching Caching { get; }
         private ICachingKeyGenerator KeyGenerator { get; }
         private ICachingOptions CachingOptions { get; }
-
         private IServiceFactory ServiceFactory { get; }
 
 
@@ -37,7 +36,7 @@ namespace Uragano.DynamicProxy.Interceptor
             var result = await context.Next();
             if (result.Status != RemotingStatus.Ok)
                 return result;
-            await Caching.Set(key, result.Result, service.CachingConfig.Expire);
+            await Caching.Set(key, result.Result, service.CachingConfig.ExpireSeconds);
             return result;
         }
     }

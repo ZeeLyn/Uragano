@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Sample.Common;
 using Uragano.Abstractions;
 
 namespace Sample.Service.Interfaces
@@ -12,6 +13,7 @@ namespace Sample.Service.Interfaces
         //[ClientMethodInterceptor_1_]
         //[ClientMethodInterceptor_2_]
         [CircuitBreaker(FallbackExecuteScript = "return new ResultModel{Message=\"fallback\"};", ScriptUsingNameSpaces = new[] { "Sample.Service.Interfaces" })]
+        [Caching(Key = "customKey:{0}")]
         [ServiceRoute("say/async")]
         Task<ResultModel> SayHello(string name);
 

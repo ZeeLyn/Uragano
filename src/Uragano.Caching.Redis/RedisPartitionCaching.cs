@@ -15,12 +15,15 @@ namespace Uragano.Caching.Redis
             Cache = distributedCache;
         }
 
-        public async Task Set<TValue>(string key, TValue value, TimeSpan? expire)
+        public async Task Set<TValue>(string key, TValue value, int expireSeconds = -1)
         {
-            await Cache.SetAsync(key, SerializerHelper.Serialize(value), new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = expire
-            });
+            if (expireSeconds > 0)
+                await Cache.SetAsync(key, SerializerHelper.Serialize(value), new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = expireSeconds <= 0 ? default : TimeSpan.FromSeconds(expireSeconds)
+                });
+            else
+                await Cache.SetAsync(key, SerializerHelper.Serialize(value));
         }
 
         public async Task<(object value, bool hasKey)> Get(string key, Type type)

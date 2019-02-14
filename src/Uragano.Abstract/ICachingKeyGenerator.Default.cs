@@ -43,7 +43,7 @@ namespace Uragano.Abstractions
                 Enable = true,
                 Key = sb.ToString(),
                 CustomKey = attr != null && !string.IsNullOrWhiteSpace(attr.Key),
-                Expire = attr?.Expire != null ? TimeSpan.FromSeconds(attr.Expire.Value) : cachingOptions.Expire
+                ExpireSeconds = attr?.ExpireSeconds ?? cachingOptions.ExpireSeconds
             };
         }
 

@@ -6,6 +6,6 @@ namespace Uragano.Abstractions
     {
         Type KeyGenerator { get; set; }
         string KeyPrefix { get; set; }
-        TimeSpan? Expire { get; set; }
+        int ExpireSeconds { get; set; }
     }
 }

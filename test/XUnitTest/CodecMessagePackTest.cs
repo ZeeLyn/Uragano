@@ -4,7 +4,7 @@ using Xunit;
 
 namespace XUnitTest
 {
-    public class CodecTest
+    public class CodecMessagePackTest
     {
 
         [Theory]
@@ -14,6 +14,8 @@ namespace XUnitTest
         {
             var bytes = SerializerHelper.Serialize(obj);
             Assert.NotNull(bytes);
+            var codec = new MessagePackCodec();
+            Assert.NotNull(codec.Serialize(obj));
         }
 
         [Fact]
@@ -23,6 +25,16 @@ namespace XUnitTest
             var bytes = SerializerHelper.Serialize(entity);
             Assert.Same(typeof(TestCodecEntity), SerializerHelper.Deserialize(bytes).GetType());
             Assert.Same(typeof(TestCodecEntity), SerializerHelper.Deserialize<TestCodecEntity>(bytes).GetType());
+
+            Assert.Null(SerializerHelper.Deserialize(null));
+            Assert.Null(SerializerHelper.Deserialize<TestCodecEntity>(null));
+
+            var codec = new MessagePackCodec();
+            Assert.Same(typeof(TestCodecEntity), codec.Deserialize(bytes, typeof(TestCodecEntity)).GetType());
+            Assert.Same(typeof(TestCodecEntity), codec.Deserialize<TestCodecEntity>(bytes).GetType());
+
+            Assert.Null(codec.Deserialize(null, typeof(TestCodecEntity)));
+            Assert.Null(codec.Deserialize<TestCodecEntity>(null));
         }
 
         public static List<object[]> GetEntity()

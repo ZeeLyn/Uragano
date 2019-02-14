@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Uragano.Caching.Redis
 {
     public interface IRedisPartitionPolicy
     {
-        string Policy(string key, IEnumerable<RedisConnection> connectionStrings);
+        RedisConnection Policy(string key, IEnumerable<RedisConnection> connectionStrings);
     }
 }

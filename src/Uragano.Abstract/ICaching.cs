@@ -5,7 +5,7 @@ namespace Uragano.Abstractions
 {
     public interface ICaching
     {
-        Task Set<TValue>(string key, TValue value, TimeSpan? expire = default);
+        Task Set<TValue>(string key, TValue value, int expireSeconds = -1);
 
         Task<(object value, bool hasKey)> Get(string key, Type type);
 

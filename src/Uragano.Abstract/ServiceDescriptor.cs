@@ -33,7 +33,7 @@ namespace Uragano.Abstractions
 
         bool CustomKey { get; }
 
-        TimeSpan? Expire { get; }
+        int ExpireSeconds { get; }
     }
 
     public class CachingConfig : ICachingConfig
@@ -44,6 +44,6 @@ namespace Uragano.Abstractions
 
         public bool CustomKey { get; set; }
 
-        public TimeSpan? Expire { get; set; }
+        public int ExpireSeconds { get; set; } = -1;
     }
 }

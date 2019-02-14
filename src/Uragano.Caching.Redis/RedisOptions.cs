@@ -6,7 +6,7 @@ namespace Uragano.Caching.Redis
 {
     public class RedisOptions : ICachingOptions
     {
-        public TimeSpan? Expire { get; set; } = TimeSpan.FromHours(1);
+        public int ExpireSeconds { get; set; } = 3600;
 
         public string KeyPrefix { get; set; } = "Uragano";
 
@@ -15,10 +15,6 @@ namespace Uragano.Caching.Redis
         public IEnumerable<RedisConnection> ConnectionStrings { get; set; }
     }
 
-    public class RedisPartitionOptions : RedisOptions
-    {
-
-    }
 
     public class RedisConnection
     {
@@ -41,7 +37,7 @@ namespace Uragano.Caching.Redis
 
         public string Password { get; set; }
 
-        public int DefaultDatabase { get; set; } = 1;
+        public int DefaultDatabase { get; set; }
 
         public int PoolSize { get; set; } = 50;
 

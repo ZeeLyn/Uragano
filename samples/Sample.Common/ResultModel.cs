@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Sample.Service.Interfaces
+﻿namespace Sample.Common
 {
     public class ResultModel
     {

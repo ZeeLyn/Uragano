@@ -29,7 +29,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{E6A0D073-6
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XUnitTest", "test\XUnitTest\XUnitTest.csproj", "{EBCAB686-FA72-42C3-95F9-BB2BC3BA32F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Uragano.Caching.Redis", "src\Uragano.Caching.Redis\Uragano.Caching.Redis.csproj", "{13CB019F-32D2-48A3-B454-5C103291CE0F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uragano.Caching.Redis", "src\Uragano.Caching.Redis\Uragano.Caching.Redis.csproj", "{13CB019F-32D2-48A3-B454-5C103291CE0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Common", "samples\Sample.Common\Sample.Common.csproj", "{90F0D08B-4CDC-4A63-BD46-A6B58AABA6E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{13CB019F-32D2-48A3-B454-5C103291CE0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13CB019F-32D2-48A3-B454-5C103291CE0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13CB019F-32D2-48A3-B454-5C103291CE0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90F0D08B-4CDC-4A63-BD46-A6B58AABA6E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90F0D08B-4CDC-4A63-BD46-A6B58AABA6E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90F0D08B-4CDC-4A63-BD46-A6B58AABA6E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90F0D08B-4CDC-4A63-BD46-A6B58AABA6E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,6 +103,7 @@ Global
 		{B69CE08A-5216-4DC7-BE8E-4A3A784DD98D} = {439B6875-5A3E-4238-88B6-93EDA5EBA30E}
 		{EBCAB686-FA72-42C3-95F9-BB2BC3BA32F3} = {E6A0D073-6D88-4C5C-A244-CDD2AEEFE3CF}
 		{13CB019F-32D2-48A3-B454-5C103291CE0F} = {439B6875-5A3E-4238-88B6-93EDA5EBA30E}
+		{90F0D08B-4CDC-4A63-BD46-A6B58AABA6E7} = {37596B72-254F-41F3-AD1C-F7F421EB5F02}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {05D6B99B-B158-41D5-A2C2-3C8206CB45B5}

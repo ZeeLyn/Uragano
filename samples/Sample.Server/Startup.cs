@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sample.Common;
 using Sample.Service.Interfaces;
 using Uragano.Abstractions;
 using Uragano.Caching.Redis;
@@ -44,10 +45,11 @@ namespace Sample.Server
                 //config.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
 
                 //config.Option(UraganoOptions.Server_DotNetty_Channel_SoBacklog, 100);
-                config.AddRedisCaching(new RedisOptions
-                {
-                    ConnectionStrings = new[] { new RedisConnection("192.168.1.254", 6379, "nihao123", false, 15) }
-                });
+                //config.AddRedisPartitionCaching(new RedisOptions
+                //{
+                //    ConnectionStrings = new[] { new RedisConnection("192.168.1.254", 6379, "nihao123", false, 15), new RedisConnection("192.168.1.253", 6379, "nihao123", false, 15) }
+                //});
+                config.AddRedisPartitionCaching<RedisPartitionPolicy>(Configuration.GetSection("Uragano:Caching:Redis"));
                 config.Options(Configuration.GetSection("Uragano:Options"));
             });
         }
