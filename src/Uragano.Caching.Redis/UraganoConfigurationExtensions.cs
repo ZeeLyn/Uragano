@@ -6,7 +6,7 @@ using Uragano.Abstractions;
 
 namespace Uragano.Caching.Redis
 {
-    public static class IUraganoConfigurationExtensions
+    public static class UraganoConfigurationExtensions
     {
         public static void AddRedisCaching(this IUraganoConfiguration uraganoConfiguration, RedisOptions redisOptions)
         {

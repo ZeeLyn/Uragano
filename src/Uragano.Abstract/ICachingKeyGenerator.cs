@@ -4,6 +4,8 @@ namespace Uragano.Abstractions
 {
     public interface ICachingKeyGenerator
     {
-        string Generate(string route, MethodInfo methodInfo, object[] args);
+        CachingConfig GenerateKeyPlaceholder(ICachingOptions cachingOptions, string route, MethodInfo methodInfo);
+
+        string ReplacePlaceholder(string keyPlaceholder, bool customKey, object[] args);
     }
 }

@@ -17,7 +17,6 @@ namespace Uragano.DynamicProxy
         private UraganoSettings UraganoSettings { get; }
 
 
-
         public ServiceBuilder(IInvokerFactory invokerFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings)
         {
             InvokerFactory = invokerFactory;

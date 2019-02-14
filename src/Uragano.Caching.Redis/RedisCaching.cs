@@ -8,9 +8,9 @@ namespace Uragano.Caching.Redis
     public class RedisCaching : ICaching
     {
 
-        public async Task Set<TValue>(string key, TValue value, TimeSpan expire)
+        public async Task Set<TValue>(string key, TValue value, TimeSpan? expire = default)
         {
-            await RedisHelper.SetAsync(key, SerializerHelper.Serialize(value), (int)expire.TotalSeconds);
+            await RedisHelper.SetAsync(key, SerializerHelper.Serialize(value), expire.HasValue ? (int)expire.Value.TotalSeconds : -1);
         }
 
         public async Task<object> Get(string key, Type type)

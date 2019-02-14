@@ -26,6 +26,7 @@ namespace Uragano.DynamicProxy
 
         private IScriptInjection ScriptInjection { get; }
 
+
         public InvokerFactory(IServiceProvider serviceProvider, UraganoSettings uraganoSettings, IScriptInjection scriptInjection)
         {
             ServiceProvider = serviceProvider;
@@ -88,6 +89,13 @@ namespace Uragano.DynamicProxy
 
                     serviceDescriptor.ServiceCircuitBreakerOptions = breaker;
                 }
+            }
+            //Must have a method of returning a value.
+            if (UraganoSettings.CachingOptions != null && clientMethodInfo.ReturnType != typeof(Task))
+            {
+                var keyGenerator = ServiceProvider.GetRequiredService<ICachingKeyGenerator>();
+                var cacheOptions = keyGenerator.GenerateKeyPlaceholder(UraganoSettings.CachingOptions, route, clientMethodInfo);
+                serviceDescriptor.CachingConfig = cacheOptions;
             }
 
             ServiceInvokers.TryAdd(route, serviceDescriptor);

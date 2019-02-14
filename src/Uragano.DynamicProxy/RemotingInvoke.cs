@@ -27,6 +27,7 @@ namespace Uragano.DynamicProxy
             UraganoSettings = uraganoSettings;
             ServiceProvider = serviceProvider;
         }
+
         public async Task<T> InvokeAsync<T>(object[] args, string route, string serviceName, Dictionary<string, string> meta = default)
         {
             var service = InvokerFactory.Get(route);
@@ -41,10 +42,13 @@ namespace Uragano.DynamicProxy
                     Meta = meta,
                     MethodInfo = service.MethodInfo,
                     ReturnType = typeof(T),
-                    ServiceName = serviceName
+                    ServiceName = serviceName,
+                    CachingOption = service.CachingConfig
                 };
 
                 context.Interceptors.Push(typeof(ClientDefaultInterceptor));
+                if (service.CachingConfig.Enable)
+                    context.Interceptors.Push(typeof(CachingDefaultInterceptor));
                 foreach (var interceptor in service.ClientInterceptors)
                 {
                     context.Interceptors.Push(interceptor);

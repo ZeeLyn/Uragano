@@ -267,6 +267,7 @@ namespace Uragano.Core
             UraganoSettings.CachingOptions = cachingOptions;
             ServiceCollection.AddSingleton(typeof(ICaching), typeof(TCaching));
             ServiceCollection.AddSingleton(typeof(ICachingKeyGenerator), cachingOptions.KeyGenerator);
+            RegisterSingletonService<CachingDefaultInterceptor>();
         }
 
         #endregion

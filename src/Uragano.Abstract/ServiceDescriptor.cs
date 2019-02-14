@@ -21,5 +21,29 @@ namespace Uragano.Abstractions
         public List<Type> ClientInterceptors { get; set; }
 
         public ServiceCircuitBreakerOptions ServiceCircuitBreakerOptions { get; set; }
+
+        public ICachingConfig CachingConfig { get; set; } = new CachingConfig();
+    }
+
+    public interface ICachingConfig
+    {
+        bool Enable { get; }
+
+        string Key { get; }
+
+        bool CustomKey { get; }
+
+        TimeSpan? Expire { get; }
+    }
+
+    public class CachingConfig : ICachingConfig
+    {
+        public bool Enable { get; set; } = false;
+
+        public string Key { get; set; }
+
+        public bool CustomKey { get; set; }
+
+        public TimeSpan? Expire { get; set; }
     }
 }
