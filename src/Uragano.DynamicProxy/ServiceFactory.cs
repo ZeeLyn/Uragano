@@ -93,9 +93,18 @@ namespace Uragano.DynamicProxy
             //Must have a method of returning a value.
             if (UraganoSettings.CachingOptions != null && clientMethodInfo.ReturnType != typeof(Task))
             {
-                var keyGenerator = ServiceProvider.GetRequiredService<ICachingKeyGenerator>();
-                var cacheOptions = keyGenerator.GenerateKeyPlaceholder(UraganoSettings.CachingOptions, route, clientMethodInfo);
-                serviceDescriptor.CachingConfig = cacheOptions;
+                if (clientMethodInfo.GetCustomAttribute<NonCachingAttribute>() == null && clientMethodInfo.DeclaringType?.GetCustomAttribute<NonCachingAttribute>() == null)
+                {
+                    var attr = clientMethodInfo.GetCustomAttribute<CachingAttribute>();
+                    var keyGenerator = ServiceProvider.GetRequiredService<ICachingKeyGenerator>();
+                    var key = keyGenerator.GenerateKeyPlaceholder(UraganoSettings.CachingOptions.KeyPrefix, UraganoSettings.CachingOptions.ExpireSeconds, route, clientMethodInfo, attr);
+                    serviceDescriptor.CachingConfig = new CachingConfig
+                    {
+                        CustomKey = attr != null && !string.IsNullOrWhiteSpace(attr.Key),
+                        KeyPlaceholder = key,
+                        ExpireSeconds = string.IsNullOrWhiteSpace(attr?.ExpireSeconds) ? UraganoSettings.CachingOptions.ExpireSeconds : int.Parse(attr.ExpireSeconds)
+                    };
+                }
             }
 
             ServiceInvokers.TryAdd(route, serviceDescriptor);
@@ -122,7 +131,6 @@ namespace Uragano.DynamicProxy
                     Args = args,
                     Meta = meta,
                     MethodInfo = service.MethodInfo
-
                 };
                 context.Interceptors.Push(typeof(ServerDefaultInterceptor));
                 foreach (var interceptor in service.ServerInterceptors)

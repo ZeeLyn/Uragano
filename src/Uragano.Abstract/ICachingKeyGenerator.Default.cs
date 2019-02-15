@@ -17,34 +17,21 @@ namespace Uragano.Abstractions
 
         private const string LinkString = ":";
 
-        public CachingConfig GenerateKeyPlaceholder(ICachingOptions cachingOptions, string route, MethodInfo methodInfo)
+        public string GenerateKeyPlaceholder(string keyPrefix, int globalExpire, string route, MethodInfo methodInfo, CachingAttribute cachingAttribute = default)
         {
-            var noMethodCache = methodInfo.GetCustomAttribute<NonCachingAttribute>();
-            var noServiceCache = methodInfo.DeclaringType?.GetCustomAttribute<NonCachingAttribute>();
-            if (noMethodCache != null || noServiceCache != null)
-                return new CachingConfig();
-
-            var attr = methodInfo.GetCustomAttribute<CachingAttribute>();
             var sb = new StringBuilder();
-            if (!string.IsNullOrWhiteSpace(cachingOptions.KeyPrefix))
-                sb.AppendFormat("{0}{1}", cachingOptions.KeyPrefix, LinkString);
-            if (attr == null || string.IsNullOrWhiteSpace(attr.Key))
+            if (!string.IsNullOrWhiteSpace(keyPrefix))
+                sb.AppendFormat("{0}{1}", keyPrefix, LinkString);
+            if (cachingAttribute == null || string.IsNullOrWhiteSpace(cachingAttribute.Key))
             {
                 sb.AppendFormat("{0}", route);
                 if (methodInfo.GetParameters().Length > 0)
                     sb.Append(LinkString + "{0}");
-
             }
             else
-                sb.Append(attr.Key);
+                sb.Append(cachingAttribute.Key);
 
-            return new CachingConfig
-            {
-                Enable = true,
-                Key = sb.ToString(),
-                CustomKey = attr != null && !string.IsNullOrWhiteSpace(attr.Key),
-                ExpireSeconds = attr?.ExpireSeconds ?? cachingOptions.ExpireSeconds
-            };
+            return sb.ToString();
         }
 
         public string ReplacePlaceholder(string keyPlaceholder, bool customKey, object[] args)

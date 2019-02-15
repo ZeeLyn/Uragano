@@ -25,8 +25,8 @@ namespace Uragano.DynamicProxy.Interceptor
         public override async Task<IServiceResult> Intercept(IInterceptorContext context)
         {
             var service = ServiceFactory.Get(context.ServiceRoute);
-            if (!service.CachingConfig.Enable) return await context.Next();
-            var key = KeyGenerator.ReplacePlaceholder(service.CachingConfig.Key, service.CachingConfig.CustomKey,
+            if (service.CachingConfig == null) return await context.Next();
+            var key = KeyGenerator.ReplacePlaceholder(service.CachingConfig.KeyPlaceholder, service.CachingConfig.CustomKey,
                 context.Args);
             if (!(context is InterceptorContext ctx))
                 throw new ArgumentNullException();

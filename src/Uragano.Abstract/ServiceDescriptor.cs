@@ -22,25 +22,13 @@ namespace Uragano.Abstractions
 
         public ServiceCircuitBreakerOptions ServiceCircuitBreakerOptions { get; set; }
 
-        public ICachingConfig CachingConfig { get; set; } = new CachingConfig();
+        public CachingConfig CachingConfig { get; set; }
     }
 
-    public interface ICachingConfig
+
+    public class CachingConfig
     {
-        bool Enable { get; }
-
-        string Key { get; }
-
-        bool CustomKey { get; }
-
-        int ExpireSeconds { get; }
-    }
-
-    public class CachingConfig : ICachingConfig
-    {
-        public bool Enable { get; set; } = false;
-
-        public string Key { get; set; }
+        public string KeyPlaceholder { get; set; }
 
         public bool CustomKey { get; set; }
 

@@ -46,7 +46,7 @@ namespace Uragano.DynamicProxy
                 };
 
                 context.Interceptors.Push(typeof(ClientDefaultInterceptor));
-                if (service.CachingConfig.Enable)
+                if (service.CachingConfig != null)
                     context.Interceptors.Push(typeof(CachingDefaultInterceptor));
                 foreach (var interceptor in service.ClientInterceptors)
                 {
