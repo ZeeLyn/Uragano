@@ -17,6 +17,7 @@ using Uragano.Caching.Redis;
 using Uragano.Codec.MessagePack;
 using Uragano.Consul;
 using Uragano.Core;
+using Uragano.Logging.Exceptionless;
 
 namespace Sample.Server
 {
@@ -33,6 +34,7 @@ namespace Sample.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            //services.AddUragano(Configuration);
             services.AddUragano(config =>
             {
                 config.IsDevelopment(true);
@@ -49,6 +51,7 @@ namespace Sample.Server
                 //{
                 //    ConnectionStrings = new[] { new RedisConnection("192.168.1.254", 6379, "nihao123", false, 15), new RedisConnection("192.168.1.253", 6379, "nihao123", false, 15) }
                 //});
+                config.AddExceptionlessLogger(Configuration.GetSection("Uragano:Logging:Exceptionless"));
                 config.AddRedisPartitionCaching<RedisPartitionPolicy>(Configuration.GetSection("Uragano:Caching:Redis"));
                 config.Options(Configuration.GetSection("Uragano:Options"));
             });

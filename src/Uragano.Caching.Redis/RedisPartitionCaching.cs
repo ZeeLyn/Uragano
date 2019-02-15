@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
 using Uragano.Abstractions;
 using Uragano.Codec.MessagePack;
 
@@ -9,10 +11,25 @@ namespace Uragano.Caching.Redis
     public class RedisPartitionCaching : ICaching
     {
         private IDistributedCache Cache { get; }
-
-        public RedisPartitionCaching(IDistributedCache distributedCache)
+        public RedisPartitionCaching(IRedisPartitionPolicy redisPartitionPolicy, UraganoSettings uraganoSettings)
         {
-            Cache = distributedCache;
+            var redisOptions = (RedisOptions)uraganoSettings.CachingOptions;
+            string NodeRule(string key)
+            {
+                var connection = redisPartitionPolicy.Policy(key, redisOptions.ConnectionStrings);
+                return $"{connection.Host}:{connection.Port}/{connection.DefaultDatabase}";
+            }
+            RedisHelper.Initialization(new CSRedis.CSRedisClient(NodeRule, redisOptions.ConnectionStrings.Select(p => p.ToString()).ToArray()));
+            Cache = new Microsoft.Extensions.Caching.Redis.CSRedisCache(RedisHelper.Instance);
+        }
+
+        public RedisPartitionCaching()
+        {
+        }
+
+        public ICachingOptions ReadConfiguration(IConfigurationSection configurationSection)
+        {
+            return CommonMethods.ReadRedisConfiguration(configurationSection);
         }
 
         public async Task Set<TValue>(string key, TValue value, int expireSeconds = -1)

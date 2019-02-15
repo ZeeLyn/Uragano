@@ -7,6 +7,7 @@ using Uragano.Abstractions.ServiceDiscovery;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Uragano.Core
 {
@@ -20,6 +21,12 @@ namespace Uragano.Core
 
             var applicationLifetime = applicationBuilder.ApplicationServices.GetRequiredService<IApplicationLifetime>();
             var uraganoSettings = applicationBuilder.ApplicationServices.GetRequiredService<UraganoSettings>();
+
+            var loggerFactory = applicationBuilder.ApplicationServices.GetRequiredService<ILoggerFactory>();
+            foreach (var provider in uraganoSettings.LoggerProviders)
+            {
+                loggerFactory.AddProvider(provider);
+            }
 
             uraganoSettings.ClientGlobalInterceptors.Reverse();
             uraganoSettings.ServerGlobalInterceptors.Reverse();

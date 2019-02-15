@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.ServiceDiscovery;
 
@@ -19,6 +20,8 @@ namespace Uragano.Abstractions
 
         void AddClient<TLoadBalancing>() where TLoadBalancing : ILoadBalancing;
 
+        void AddClient(Type loadBalancing);
+
         void AddClient();
 
         void AddClientGlobalInterceptor<TInterceptor>() where TInterceptor : IInterceptor;
@@ -32,6 +35,9 @@ namespace Uragano.Abstractions
         /// <param name="serviceDiscoveryClientConfiguration"></param>
         void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration) where TServiceDiscovery : IServiceDiscovery;
 
+        void AddServiceDiscovery(Type serviceDiscovery,
+            IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration);
+
         /// <summary>
         /// For server
         /// </summary>
@@ -39,6 +45,9 @@ namespace Uragano.Abstractions
         /// <param name="serviceDiscoveryClientConfiguration"></param>
         /// <param name="serviceRegisterConfiguration"></param>
         void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, IServiceRegisterConfiguration serviceRegisterConfiguration) where TServiceDiscovery : IServiceDiscovery;
+
+        void AddServiceDiscovery(Type serviceDiscovery, IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration,
+            IServiceRegisterConfiguration serviceRegisterConfiguration);
 
 
         ///// <summary>
@@ -80,6 +89,10 @@ namespace Uragano.Abstractions
         void AddCodec<TCodec>() where TCodec : ICodec;
 
         void AddCaching<TCaching>(ICachingOptions cachingOptions) where TCaching : ICaching;
+
+        void AddCaching(Type caching, ICachingOptions cachingOptions);
+
+        void AddLogger(ILoggerProvider loggerProvider);
 
     }
 }

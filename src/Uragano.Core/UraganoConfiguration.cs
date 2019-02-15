@@ -5,6 +5,7 @@ using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.ServiceDiscovery;
@@ -73,6 +74,12 @@ namespace Uragano.Core
             RegisterClientServices();
         }
 
+        public void AddClient(Type loadBalancing)
+        {
+            RegisterSingletonService(typeof(ILoadBalancing), loadBalancing);
+            RegisterClientServices();
+        }
+
         public void AddClient()
         {
             AddClient<LoadBalancingPolling>();
@@ -106,8 +113,14 @@ namespace Uragano.Core
         /// <param name="serviceDiscoveryClientConfiguration"></param>
         public void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration) where TServiceDiscovery : IServiceDiscovery
         {
+            AddServiceDiscovery(typeof(TServiceDiscovery), serviceDiscoveryClientConfiguration);
+        }
+
+        public void AddServiceDiscovery(Type serviceDiscovery,
+            IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration)
+        {
             UraganoSettings.ServiceDiscoveryClientConfiguration = serviceDiscoveryClientConfiguration ?? throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
-            RegisterSingletonService(typeof(IServiceDiscovery), typeof(TServiceDiscovery));
+            ServiceCollection.AddSingleton(typeof(IServiceDiscovery), serviceDiscovery);
         }
 
         /// <summary>
@@ -119,13 +132,21 @@ namespace Uragano.Core
         public void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration,
             IServiceRegisterConfiguration serviceRegisterConfiguration) where TServiceDiscovery : IServiceDiscovery
         {
+            AddServiceDiscovery(typeof(TServiceDiscovery), serviceDiscoveryClientConfiguration, serviceRegisterConfiguration);
+        }
+
+        public void AddServiceDiscovery(Type serviceDiscovery,
+            IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration,
+            IServiceRegisterConfiguration serviceRegisterConfiguration)
+        {
             UraganoSettings.ServiceDiscoveryClientConfiguration = serviceDiscoveryClientConfiguration ?? throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
             UraganoSettings.ServiceRegisterConfiguration = serviceRegisterConfiguration ?? throw new ArgumentNullException(nameof(serviceRegisterConfiguration));
             if (string.IsNullOrWhiteSpace(serviceRegisterConfiguration.Name))
                 throw new ArgumentNullException(nameof(serviceRegisterConfiguration.Name));
 
-            RegisterSingletonService(typeof(IServiceDiscovery), typeof(TServiceDiscovery));
+            ServiceCollection.AddSingleton(typeof(IServiceDiscovery), serviceDiscovery);
         }
+
         #endregion
 
         #region
@@ -264,10 +285,20 @@ namespace Uragano.Core
 
         public void AddCaching<TCaching>(ICachingOptions cachingOptions) where TCaching : ICaching
         {
+            AddCaching(typeof(TCaching), cachingOptions);
+        }
+
+        public void AddCaching(Type caching, ICachingOptions cachingOptions)
+        {
             UraganoSettings.CachingOptions = cachingOptions;
-            ServiceCollection.AddSingleton(typeof(ICaching), typeof(TCaching));
+            ServiceCollection.AddSingleton(typeof(ICaching), caching);
             ServiceCollection.AddSingleton(typeof(ICachingKeyGenerator), cachingOptions.KeyGenerator);
             RegisterSingletonService<CachingDefaultInterceptor>();
+        }
+
+        public void AddLogger(ILoggerProvider loggerProvider)
+        {
+            UraganoSettings.LoggerProviders.Add(loggerProvider);
         }
 
         #endregion

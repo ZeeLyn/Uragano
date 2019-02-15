@@ -12,7 +12,7 @@ namespace Uragano.Caching.Redis
         public static void AddRedisCaching(this IUraganoConfiguration uraganoConfiguration, RedisOptions redisOptions)
         {
             uraganoConfiguration.AddCaching<RedisCaching>(redisOptions);
-            RedisHelper.Initialization(new CSRedis.CSRedisClient(redisOptions.ConnectionStrings.First().ToString()));
+
         }
 
         public static void AddRedisCaching(this IUraganoConfiguration uraganoConfiguration, IConfigurationSection configurationSection)
@@ -23,16 +23,10 @@ namespace Uragano.Caching.Redis
 
         public static void AddRedisPartitionCaching<TPartitionPolicy>(this IUraganoConfiguration uraganoConfiguration, RedisOptions redisOptions) where TPartitionPolicy : IRedisPartitionPolicy, new()
         {
-            var policy = Activator.CreateInstance<TPartitionPolicy>();
-
-            string NodeRule(string key)
-            {
-                var connection = policy.Policy(key, redisOptions.ConnectionStrings);
-                return $"{connection.Host}:{connection.Port}/{connection.DefaultDatabase}";
-            }
+            uraganoConfiguration.ServiceCollection.AddSingleton(typeof(IRedisPartitionPolicy), typeof(TPartitionPolicy));
             uraganoConfiguration.AddCaching<RedisPartitionCaching>(redisOptions);
-            RedisHelper.Initialization(new CSRedis.CSRedisClient(NodeRule, redisOptions.ConnectionStrings.Select(p => p.ToString()).ToArray()));
-            uraganoConfiguration.ServiceCollection.AddSingleton(typeof(IDistributedCache), new Microsoft.Extensions.Caching.Redis.CSRedisCache(RedisHelper.Instance));
+            //RedisHelper.Initialization(new CSRedis.CSRedisClient(NodeRule, redisOptions.ConnectionStrings.Select(p => p.ToString()).ToArray()));
+            //uraganoConfiguration.ServiceCollection.AddSingleton(typeof(IDistributedCache), new Microsoft.Extensions.Caching.Redis.CSRedisCache(RedisHelper.Instance));
         }
 
         public static void AddRedisPartitionCaching<TPartitionPolicy>(this IUraganoConfiguration uraganoConfiguration, IConfigurationSection configurationSection) where TPartitionPolicy : IRedisPartitionPolicy, new()
