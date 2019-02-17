@@ -102,7 +102,7 @@ namespace Uragano.Core
 
         private static void AddBase(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IServiceBuilder, ServiceBuilder>();
+            serviceCollection.AddSingleton<IStartUpTask, ServiceBuilder>();
             serviceCollection.AddSingleton<IServiceFactory, ServiceFactory>();
             serviceCollection.AddSingleton<IScriptInjection, ScriptInjection>();
             serviceCollection.AddSingleton<ICodec, MessagePackCodec>();

@@ -8,7 +8,7 @@ using Uragano.Abstractions.Service;
 
 namespace Uragano.DynamicProxy
 {
-    public class ServiceBuilder : IServiceBuilder
+    public class ServiceBuilder : IStartUpTask
     {
         private IServiceFactory InvokerFactory { get; }
 
@@ -24,7 +24,7 @@ namespace Uragano.DynamicProxy
             UraganoSettings = uraganoSettings;
         }
 
-        public void BuildService()
+        public void Execute()
         {
             var enableClient = ServiceProvider.GetService<ILoadBalancing>() != null;
             var enableServer = UraganoSettings.ServerSettings != null;
@@ -90,7 +90,6 @@ namespace Uragano.DynamicProxy
             }
         }
 
-
         private static bool IsImplementationMethod(MethodInfo serviceMethod, MethodInfo implementationMethod)
         {
             return serviceMethod.Name == implementationMethod.Name &&
@@ -107,5 +106,7 @@ namespace Uragano.DynamicProxy
             }
             return false;
         }
+
+
     }
 }

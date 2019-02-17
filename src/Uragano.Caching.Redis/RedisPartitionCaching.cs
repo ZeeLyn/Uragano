@@ -23,9 +23,10 @@ namespace Uragano.Caching.Redis
             Cache = new Microsoft.Extensions.Caching.Redis.CSRedisCache(RedisHelper.Instance);
         }
 
-        public RedisPartitionCaching()
-        {
-        }
+        //public RedisPartitionCaching(IDistributedCache distributedCache)
+        //{
+        //    Cache = distributedCache;
+        //}
 
         public ICachingOptions ReadConfiguration(IConfigurationSection configurationSection)
         {

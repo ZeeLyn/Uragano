@@ -31,9 +31,12 @@ namespace Uragano.Core
             uraganoSettings.ClientGlobalInterceptors.Reverse();
             uraganoSettings.ServerGlobalInterceptors.Reverse();
 
-            //build service proxy
-            var serviceBuilder = applicationBuilder.ApplicationServices.GetRequiredService<IServiceBuilder>();
-            serviceBuilder.BuildService();
+
+            var startUpTasks = applicationBuilder.ApplicationServices.GetServices<IStartUpTask>();
+            foreach (var task in startUpTasks)
+            {
+                task.Execute();
+            }
 
             //Start server and register service
             if (uraganoSettings.ServerSettings != null)

@@ -9,16 +9,14 @@ namespace Uragano.Caching.Redis
 {
     public class RedisCaching : ICaching
     {
-        public RedisCaching(UraganoSettings uraganoSettings)
-        {
-            var redisOptions = (RedisOptions)uraganoSettings.CachingOptions;
-            RedisHelper.Initialization(new CSRedis.CSRedisClient(redisOptions.ConnectionStrings.First().ToString()));
-        }
+        //public RedisCaching(UraganoSettings uraganoSettings)
+        //{
+        //    var redisOptions = (RedisOptions)uraganoSettings.CachingOptions;
+        //    RedisHelper.Initialization(new CSRedis.CSRedisClient(redisOptions.ConnectionStrings.First().ToString()));
+        //}
 
 
-        public RedisCaching()
-        {
-        }
+
 
         public ICachingOptions ReadConfiguration(IConfigurationSection configurationSection)
         {
