@@ -41,8 +41,8 @@ namespace Uragano.Caching.Redis
         public static void AddRedisPartitionCaching(this IUraganoConfiguration uraganoConfiguration, RedisOptions redisOptions)
         {
             uraganoConfiguration.AddCaching<RedisPartitionCaching>(redisOptions);
-            RedisHelper.Initialization(new CSRedis.CSRedisClient(null, connectionStrings: redisOptions.ConnectionStrings.Select(p => p.ToString()).ToArray()));
-            uraganoConfiguration.ServiceCollection.AddSingleton(typeof(IDistributedCache), new Microsoft.Extensions.Caching.Redis.CSRedisCache(RedisHelper.Instance));
+            //RedisHelper.Initialization(new CSRedis.CSRedisClient(null, connectionStrings: redisOptions.ConnectionStrings.Select(p => p.ToString()).ToArray()));
+            //uraganoConfiguration.ServiceCollection.AddSingleton(typeof(IDistributedCache), new Microsoft.Extensions.Caching.Redis.CSRedisCache(RedisHelper.Instance));
         }
 
         public static void AddRedisPartitionCaching(this IUraganoConfiguration uraganoConfiguration, IConfigurationSection configurationSection)

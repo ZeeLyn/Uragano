@@ -41,8 +41,8 @@ namespace Sample.Server
                 config.AddServer(Configuration.GetSection("Uragano:Server"));
                 config.AddClient();
 
-                config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"),
-                    Configuration.GetSection("Uragano:Consul:Service"));
+                config.AddConsul(Configuration.GetSection("Uragano:ServiceDiscovery:Consul:Client"),
+                    Configuration.GetSection("Uragano:ServiceDiscovery:Consul:Service"));
                 config.AddClientGlobalInterceptor<ClientGlobal_1_Interceptor>();
                 //config.AddClientGlobalInterceptor<ClientGlobal_2_Interceptor>();
                 //config.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
@@ -53,7 +53,7 @@ namespace Sample.Server
                 //    ConnectionStrings = new[] { new RedisConnection("192.168.1.254", 6379, "nihao123", false, 15), new RedisConnection("192.168.1.253", 6379, "nihao123", false, 15) }
                 //});
                 config.AddExceptionlessLogger(Configuration.GetSection("Uragano:Logging:Exceptionless"));
-                config.AddRedisPartitionCaching<RedisPartitionPolicy>(Configuration.GetSection("Uragano:Caching:Redis"));
+                //config.AddRedisPartitionCaching(Configuration.GetSection("Uragano:Caching:Redis"));
                 config.Options(Configuration.GetSection("Uragano:Options"));
             });
         }

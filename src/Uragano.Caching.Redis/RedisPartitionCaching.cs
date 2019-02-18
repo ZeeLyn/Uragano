@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
 using Uragano.Codec.MessagePack;
 
@@ -11,22 +12,32 @@ namespace Uragano.Caching.Redis
     public class RedisPartitionCaching : ICaching
     {
         private IDistributedCache Cache { get; }
-        public RedisPartitionCaching(IRedisPartitionPolicy redisPartitionPolicy, UraganoSettings uraganoSettings)
+        //private IServiceProvider ServiceProvider { get; }
+
+        public RedisPartitionCaching(UraganoSettings uraganoSettings, IServiceProvider serviceProvider)
         {
+            //ServiceProvider = serviceProvider;
+
             var redisOptions = (RedisOptions)uraganoSettings.CachingOptions;
-            string NodeRule(string key)
+            var policy = serviceProvider.GetService<IRedisPartitionPolicy>();
+            if (policy != null)
             {
-                var connection = redisPartitionPolicy.Policy(key, redisOptions.ConnectionStrings);
-                return $"{connection.Host}:{connection.Port}/{connection.DefaultDatabase}";
+                string NodeRule(string key)
+                {
+                    var connection = policy.Policy(key, redisOptions.ConnectionStrings);
+                    return $"{connection.Host}:{connection.Port}/{connection.DefaultDatabase}";
+                }
+
+                RedisHelper.Initialization(new CSRedis.CSRedisClient(NodeRule,
+                    redisOptions.ConnectionStrings.Select(p => p.ToString()).ToArray()));
             }
-            RedisHelper.Initialization(new CSRedis.CSRedisClient(NodeRule, redisOptions.ConnectionStrings.Select(p => p.ToString()).ToArray()));
+            else
+            {
+                RedisHelper.Initialization(new CSRedis.CSRedisClient(NodeRule: null, redisOptions.ConnectionStrings.Select(p => p.ToString()).ToArray()));
+            }
+
             Cache = new Microsoft.Extensions.Caching.Redis.CSRedisCache(RedisHelper.Instance);
         }
-
-        //public RedisPartitionCaching(IDistributedCache distributedCache)
-        //{
-        //    Cache = distributedCache;
-        //}
 
         public ICachingOptions ReadConfiguration(IConfigurationSection configurationSection)
         {

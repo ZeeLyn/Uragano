@@ -39,27 +39,29 @@ namespace Uragano.Remoting
             Codec = codec;
         }
 
+        private IEventLoopGroup BossGroup { get; set; }
+        private IEventLoopGroup WorkerGroup { get; set; }
+
         public async Task StartAsync()
         {
-            IEventLoopGroup bossGroup;
-            IEventLoopGroup workerGroup;
+
             var bootstrap = new DotNetty.Transport.Bootstrapping.ServerBootstrap();
             if (UraganoOptions.DotNetty_Enable_Libuv.Value)
             {
                 var dispatcher = new DispatcherEventLoopGroup();
-                bossGroup = dispatcher;
-                workerGroup = new WorkerEventLoopGroup(dispatcher);
+                BossGroup = dispatcher;
+                WorkerGroup = new WorkerEventLoopGroup(dispatcher);
                 bootstrap.Channel<TcpServerChannel>();
             }
             else
             {
-                bossGroup = new MultithreadEventLoopGroup(1);
-                workerGroup = new MultithreadEventLoopGroup(UraganoOptions.DotNetty_Event_Loop_Count.Value);
+                BossGroup = new MultithreadEventLoopGroup(1);
+                WorkerGroup = new MultithreadEventLoopGroup(UraganoOptions.DotNetty_Event_Loop_Count.Value);
                 bootstrap.Channel<TcpServerSocketChannel>();
             }
 
             bootstrap
-                .Group(bossGroup, workerGroup)
+                .Group(BossGroup, WorkerGroup)
                 .Option(ChannelOption.SoBacklog, UraganoOptions.Server_DotNetty_Channel_SoBacklog.Value)
                 .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
                 .ChildOption(ChannelOption.ConnectTimeout, UraganoOptions.DotNetty_Connect_Timeout.Value)
@@ -79,13 +81,17 @@ namespace Uragano.Remoting
                 }));
             Logger.LogDebug($"Listening {ServerSettings.IP}:{ServerSettings.Port}");
             Channel = await bootstrap.BindAsync(new IPEndPoint(ServerSettings.IP, ServerSettings.Port));
+
         }
 
 
         public async Task StopAsync()
         {
-            await Channel.EventLoop.ShutdownGracefullyAsync();
+            Logger.LogDebug("Stopping server...");
             await Channel.CloseAsync();
+            await BossGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
+            await WorkerGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
+            Logger.LogDebug("Stoped.");
         }
 
         public void Dispose()

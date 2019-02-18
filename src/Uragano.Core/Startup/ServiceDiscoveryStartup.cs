@@ -15,16 +15,14 @@ namespace Uragano.Core.Startup
 
         private UraganoSettings UraganoSettings { get; }
 
-        private IBootstrap Bootstrap { get; }
 
         private CancellationTokenSource CancellationTokenSource { get; }
 
-        public ServiceDiscoveryStartup(IApplicationLifetime applicationLifetime, IServiceDiscovery serviceDiscovery, UraganoSettings uraganoSettings, IBootstrap bootstrap, CancellationTokenSource cancellationTokenSource)
+        public ServiceDiscoveryStartup(IApplicationLifetime applicationLifetime, IServiceDiscovery serviceDiscovery, UraganoSettings uraganoSettings, CancellationTokenSource cancellationTokenSource)
         {
             ApplicationLifetime = applicationLifetime;
             ServiceDiscovery = serviceDiscovery;
             UraganoSettings = uraganoSettings;
-            Bootstrap = bootstrap;
             CancellationTokenSource = cancellationTokenSource;
         }
 
@@ -41,7 +39,6 @@ namespace Uragano.Core.Startup
                     CancellationTokenSource.Cancel();
                     if (!UraganoSettings.IsDevelopment)
                         await ServiceDiscovery.DeregisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration.Id);
-                    await Bootstrap.StopAsync();
                 });
             }
 

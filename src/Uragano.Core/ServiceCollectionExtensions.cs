@@ -7,7 +7,6 @@ using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.Service;
 using Uragano.Abstractions.ServiceDiscovery;
 using Uragano.Codec.MessagePack;
-using Uragano.Consul;
 using Uragano.DynamicProxy;
 
 namespace Uragano.Core
@@ -58,7 +57,7 @@ namespace Uragano.Core
                     throw new ArgumentNullException("ServiceDiscovery");
                 var sdType = ReflectHelper.Find(sd);
                 if (sdType == null)
-                    throw new TypeLoadException($"Cannot load type of {sd}");
+                    throw new TypeLoadException($"Cannot load type of {sd}.");
 
                 var instance = (IServiceDiscovery)Activator.CreateInstance(sdType);
                 var consulClient = consul.GetSection("Client");
@@ -91,7 +90,7 @@ namespace Uragano.Core
                     throw new ArgumentNullException("Caching");
                 var cachingType = ReflectHelper.Find(cachingTypeName);
                 if (cachingType == null)
-                    throw new TypeLoadException($"Cannot load type of {cachingTypeName}");
+                    throw new TypeLoadException($"Cannot load type of {cachingTypeName}.");
 
                 var instance = (ICaching)Activator.CreateInstance(cachingType);
                 config.AddCaching(cachingType, instance.ReadConfiguration(cachingRedis));

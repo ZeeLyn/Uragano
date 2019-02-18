@@ -16,20 +16,18 @@ namespace Sample.Server.Controllers
     {
         private IHelloService HelloService { get; }
 
-        private ICaching Caching { get; }
 
-        public ValuesController(IHelloService helloService, ICaching caching)
+        public ValuesController(IHelloService helloService)
         {
             HelloService = helloService;
-            Caching = caching;
+
         }
 
         // GET api/values
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            object v = new object();
-            await Caching.Set("test", v);
+
             await HelloService.SayHello();
             return Ok(new
             {

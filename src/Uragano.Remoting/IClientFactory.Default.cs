@@ -17,57 +17,23 @@ namespace Uragano.Remoting
 {
     public class ClientFactory : IClientFactory
     {
-        private Bootstrap Bootstrap { get; }
-
-        private readonly ConcurrentDictionary<(string, int), Lazy<Task<IClient>>> _clients = new ConcurrentDictionary<(string, int), Lazy<Task<IClient>>>();
+        private readonly ConcurrentDictionary<(string, int), Task<IClient>> _clients = new ConcurrentDictionary<(string, int), Task<IClient>>();
 
         private static readonly AttributeKey<TransportContext> TransportContextAttributeKey = AttributeKey<TransportContext>.ValueOf(typeof(ClientFactory), nameof(TransportContext));
 
         private static readonly AttributeKey<IMessageListener> MessageListenerAttributeKey = AttributeKey<IMessageListener>.ValueOf(typeof(ClientFactory), nameof(IMessageListener));
 
+        private ICodec Codec { get; }
 
         public ClientFactory(ICodec codec)
         {
-            IEventLoopGroup group;
-
-            Bootstrap = new Bootstrap();
-            if (UraganoOptions.DotNetty_Enable_Libuv.Value)
-            {
-                group = new EventLoopGroup();
-                Bootstrap.Channel<TcpChannel>();
-            }
-            else
-            {
-                group = new MultithreadEventLoopGroup();
-                Bootstrap.Channel<TcpSocketChannel>();
-            }
-
-            Bootstrap
-                .Group(group)
-                .Option(ChannelOption.TcpNodelay, true)
-                .Option(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
-                .Option(ChannelOption.ConnectTimeout, UraganoOptions.DotNetty_Connect_Timeout.Value)
-                .Handler(new ActionChannelInitializer<IChannel>(channel =>
-                {
-                    var pipeline = channel.Pipeline;
-                    //if (ServerSettings.X509Certificate2 != null)
-                    //{
-                    //pipeline.AddFirst(new TlsHandler(new ClientTlsSettings());
-                    //}
-                    //pipeline.AddLast(new LoggingHandler("SRV-CONN"));
-                    pipeline.AddLast(new LengthFieldPrepender(4));
-                    pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
-                    pipeline.AddLast(new MessageDecoder<IServiceResult>(codec));
-                    pipeline.AddLast(new MessageEncoder<IInvokeMessage>(codec));
-                    pipeline.AddLast(new ClientMessageHandler(this));
-                }));
+            Codec = codec;
         }
 
         public void RemoveClient(string host, int port)
         {
             if (!_clients.TryRemove((host, port), out var client)) return;
-            if (client.IsValueCreated)
-                client.Value.Dispose();
+            client.Result.Dispose();
         }
 
         public async Task<IClient> CreateClientAsync(string host, int port)
@@ -75,9 +41,41 @@ namespace Uragano.Remoting
             var key = (host, port);
             try
             {
-                return await _clients.GetOrAdd(key, new Lazy<Task<IClient>>(async () =>
+                return await _clients.GetOrAdd(key, async k =>
                 {
-                    var bootstrap = Bootstrap;
+                    IEventLoopGroup group;
+                    var bootstrap = new Bootstrap();
+                    if (UraganoOptions.DotNetty_Enable_Libuv.Value)
+                    {
+                        group = new EventLoopGroup();
+                        bootstrap.Channel<TcpChannel>();
+                    }
+                    else
+                    {
+                        group = new MultithreadEventLoopGroup();
+                        bootstrap.Channel<TcpSocketChannel>();
+                    }
+
+                    bootstrap
+                        .Group(group)
+                        .Option(ChannelOption.TcpNodelay, true)
+                        .Option(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
+                        .Option(ChannelOption.ConnectTimeout, UraganoOptions.DotNetty_Connect_Timeout.Value)
+                        .Handler(new ActionChannelInitializer<IChannel>(ch =>
+                        {
+                            var pipeline = ch.Pipeline;
+                            //if (ServerSettings.X509Certificate2 != null)
+                            //{
+                            //pipeline.AddFirst(new TlsHandler(new ClientTlsSettings());
+                            //}
+                            //pipeline.AddLast(new LoggingHandler("SRV-CONN"));
+                            pipeline.AddLast(new LengthFieldPrepender(4));
+                            pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
+                            pipeline.AddLast(new MessageDecoder<IServiceResult>(Codec));
+                            pipeline.AddLast(new MessageEncoder<IInvokeMessage>(Codec));
+                            pipeline.AddLast(new ClientMessageHandler(this));
+                        }));
+
                     EndPoint endPoint;
                     if (IPAddress.TryParse(host, out var ip))
                         endPoint = new IPEndPoint(ip, port);
@@ -91,8 +89,8 @@ namespace Uragano.Remoting
                     });
                     var listener = new MessageListener();
                     channel.GetAttribute(MessageListenerAttributeKey).Set(listener);
-                    return new Client(channel, listener);
-                })).Value;
+                    return new Client(channel, group, listener);
+                });
             }
             catch
             {
@@ -104,9 +102,9 @@ namespace Uragano.Remoting
 
         public void Dispose()
         {
-            foreach (var client in _clients.Values.Where(p => p.IsValueCreated))
+            foreach (var client in _clients.Values.Select(p => p.Result))
             {
-                client.Value.Dispose();
+                client.DisconnectAsync().GetAwaiter().GetResult();
             }
         }
 

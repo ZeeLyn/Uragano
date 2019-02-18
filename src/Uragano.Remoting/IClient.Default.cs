@@ -15,12 +15,14 @@ namespace Uragano.Remoting
 
         private IMessageListener MessageListener { get; }
 
-        public Client(IChannel channel, IMessageListener messageListener)
+        private IEventLoopGroup EventLoopGroup { get; }
+
+        public Client(IChannel channel, IEventLoopGroup eventLoopGroup, IMessageListener messageListener)
         {
             Channel = channel;
             MessageListener = messageListener;
             MessageListener.OnReceived += MessageListener_OnReceived;
-
+            EventLoopGroup = eventLoopGroup;
         }
 
         private void MessageListener_OnReceived(TransportMessage<IServiceResult> message)
@@ -59,6 +61,12 @@ namespace Uragano.Remoting
             }
         }
 
+        public async Task DisconnectAsync()
+        {
+
+            await Channel.DisconnectAsync();
+        }
+
 
         public void Dispose()
         {
@@ -67,8 +75,12 @@ namespace Uragano.Remoting
                 task.TrySetCanceled();
             }
 
-            Channel.DisconnectAsync();
-            Channel.CloseAsync();
+            _resultCallbackTask.Clear();
+
+            if (Channel.Open)
+                Channel.CloseAsync().Wait();
+            if (!EventLoopGroup.IsShutdown)
+                EventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1)).Wait();
         }
     }
 }

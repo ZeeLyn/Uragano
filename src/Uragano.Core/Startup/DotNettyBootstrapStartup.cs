@@ -30,7 +30,7 @@ namespace Uragano.Core.Startup
                 CancellationTokenSource.Cancel();
                 //if (!UraganoSettings.IsDevelopment)
                 //    await discovery.DeregisterAsync(uraganoSettings.ServiceDiscoveryClientConfiguration, uraganoSettings.ServiceRegisterConfiguration.Id);
-                await Bootstrap.StopAsync();
+                //await Bootstrap.StopAsync();
             });
             Bootstrap.StartAsync().Wait();
         }
