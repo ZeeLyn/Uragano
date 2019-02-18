@@ -10,103 +10,103 @@ using Uragano.Abstractions.ServiceDiscovery;
 
 namespace Uragano.Core
 {
-	public class ServiceStatusManageFactory : IServiceStatusManageFactory
-	{
-		private ILogger Logger { get; }
+    public class ServiceStatusManageFactory : IServiceStatusManageFactory
+    {
+        private ILogger Logger { get; }
 
-		private static readonly AsyncLock AsyncLock = new AsyncLock();
+        private static readonly AsyncLock AsyncLock = new AsyncLock();
 
-		private IServiceDiscovery ServiceDiscovery { get; }
+        private IServiceDiscovery ServiceDiscovery { get; }
 
-		private UraganoSettings UraganoSettings { get; }
+        private UraganoSettings UraganoSettings { get; }
 
-		private static readonly ConcurrentDictionary<string, List<ServiceNodeInfo>> ServiceNodes =
-			new ConcurrentDictionary<string, List<ServiceNodeInfo>>();
+        private static readonly ConcurrentDictionary<string, List<ServiceNodeInfo>> ServiceNodes =
+            new ConcurrentDictionary<string, List<ServiceNodeInfo>>();
 
 
-		public ServiceStatusManageFactory(ILogger<ServiceStatusManageFactory> logger, IServiceDiscovery serviceDiscovery, UraganoSettings uraganoSettings)
-		{
-			Logger = logger;
-			ServiceDiscovery = serviceDiscovery;
-			UraganoSettings = uraganoSettings;
-		}
+        public ServiceStatusManageFactory(ILogger<ServiceStatusManageFactory> logger, IServiceDiscovery serviceDiscovery, UraganoSettings uraganoSettings)
+        {
+            Logger = logger;
+            ServiceDiscovery = serviceDiscovery;
+            UraganoSettings = uraganoSettings;
+        }
 
-		public async Task<List<ServiceNodeInfo>> GetServiceNodes(string serviceName, bool alive = true)
-		{
-			if (ServiceNodes.TryGetValue(serviceName, out var result))
-				return result.FindAll(p => p.Alive == alive);
-			var serviceNodes = await ServiceDiscovery.QueryServiceAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, serviceName);
-			var nodes = serviceNodes.Select(p => new ServiceNodeInfo
-			{
-				Address = p.Address,
-				Port = p.Port,
-				Alive = true,
-				ServiceId = p.ServiceId,
-				Meta = p.Meta,
-				Weight = int.Parse(p.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0")
-			}).ToList();
+        public async Task<List<ServiceNodeInfo>> GetServiceNodes(string serviceName, bool alive = true)
+        {
+            if (ServiceNodes.TryGetValue(serviceName, out var result))
+                return result.FindAll(p => p.Alive == alive);
+            var serviceNodes = await ServiceDiscovery.QueryServiceAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, serviceName);
+            var nodes = serviceNodes.Select(p => new ServiceNodeInfo
+            {
+                Address = p.Address,
+                Port = p.Port,
+                Alive = true,
+                ServiceId = p.ServiceId,
+                Meta = p.Meta,
+                Weight = int.Parse(p.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0")
+            }).ToList();
 
-			if (ServiceNodes.TryAdd(serviceName, nodes))
-				return nodes;
-			throw new InvalidOperationException($"Get service[{serviceName}] failure.");
-		}
+            if (ServiceNodes.TryAdd(serviceName, nodes))
+                return nodes;
+            throw new InvalidOperationException($"Get service[{serviceName}] failure.");
+        }
 
-		public async Task Refresh(CancellationToken cancellationToken)
-		{
-			Logger.LogDebug("------------> Start refresh service status...");
-			Logger.LogDebug("------------> Waiting for locking...");
-			using (await AsyncLock.LockAsync(cancellationToken))
-			{
-				if (cancellationToken.IsCancellationRequested)
-					return;
-				Logger.LogDebug("------------> Refreshing...");
-				foreach (var service in ServiceNodes)
-				{
-					var healthNodes = await ServiceDiscovery.QueryServiceAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, service.Key, ServiceStatus.Alive, cancellationToken);
-					if (cancellationToken.IsCancellationRequested)
-						break;
+        public async Task Refresh(CancellationToken cancellationToken)
+        {
+            Logger.LogDebug("------------> Start refresh service status...");
+            Logger.LogDebug("------------> Waiting for locking...");
+            using (await AsyncLock.LockAsync(cancellationToken))
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+                Logger.LogDebug("------------> Refreshing...");
+                foreach (var service in ServiceNodes)
+                {
+                    var healthNodes = await ServiceDiscovery.QueryServiceAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, service.Key, ServiceStatus.Alive, cancellationToken);
+                    if (cancellationToken.IsCancellationRequested)
+                        break;
 
-					foreach (var node in service.Value)
-					{
-						if (cancellationToken.IsCancellationRequested)
-							break;
 
-						if (healthNodes.Any(p => node.Address == p.Address && node.Port == p.Port))
-						{
-							if (node.Alive) continue;
-							node.Alive = true;
-							Logger.LogDebug($"------------> The status of node {node.Address}:{node.Port} changes to alive.");
-						}
-						else
-						{
-							if (!node.Alive)
-								continue;
-							node.Alive = false;
-							node.CurrentWeight = 0;
-							Logger.LogDebug($"------------> The status of node {node.Address}:{node.Port} changes to dead.");
-						}
-					}
+                    foreach (var node in service.Value)
+                    {
+                        if (cancellationToken.IsCancellationRequested)
+                            break;
 
-					var newEndPoints = healthNodes.FindAll(p =>
-						!service.Value.Any(e => e.Address == p.Address && e.Port == p.Port)).Select(p => new ServiceNodeInfo
-						{
-							Address = p.Address,
-							Port = p.Port,
-							Alive = true,
-							Weight = int.Parse(p.Meta.FirstOrDefault(m => m.Key == "X-Weight").Value),
-							ServiceId = p.ServiceId,
-							Meta = p.Meta
-						}).ToList();
+                        if (healthNodes.Any(p => node.Address == p.Address && node.Port == p.Port))
+                        {
+                            if (node.Alive) continue;
+                            node.Alive = true;
+                            Logger.LogDebug($"------------> The status of node {node.Address}:{node.Port} changes to alive.");
+                        }
+                        else
+                        {
+                            if (!node.Alive)
+                                continue;
+                            node.Alive = false;
+                            node.CurrentWeight = 0;
+                            Logger.LogDebug($"------------> The status of node {node.Address}:{node.Port} changes to dead.");
+                        }
+                    }
 
-					if (newEndPoints.Any())
-					{
-						service.Value.AddRange(newEndPoints);
-						Logger.LogDebug($"------------> New nodes added:{string.Join(",", newEndPoints.Select(p => p.Address + ":" + p.Port))}");
-					}
+                    var newEndPoints = healthNodes.FindAll(p =>
+                        !service.Value.Any(e => e.Address == p.Address && e.Port == p.Port)).Select(p => new ServiceNodeInfo
+                        {
+                            Address = p.Address,
+                            Port = p.Port,
+                            Alive = true,
+                            Weight = int.Parse(p.Meta.FirstOrDefault(m => m.Key == "X-Weight").Value),
+                            ServiceId = p.ServiceId,
+                            Meta = p.Meta
+                        }).ToList();
 
-				}
-				Logger.LogDebug("------------> Complete refresh.");
-			}
-		}
-	}
+                    if (newEndPoints.Any())
+                    {
+                        service.Value.AddRange(newEndPoints);
+                        Logger.LogDebug($"------------> New nodes added:{string.Join(",", newEndPoints.Select(p => p.Address + ":" + p.Port))}");
+                    }
+                }
+                Logger.LogDebug("------------> Complete refresh.");
+            }
+        }
+    }
 }
