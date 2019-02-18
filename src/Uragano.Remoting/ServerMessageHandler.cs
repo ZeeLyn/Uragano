@@ -11,15 +11,15 @@ namespace Uragano.Remoting
     public class ServerMessageHandler : ChannelHandlerAdapter
     {
 
-        private IServiceFactory InvokerFactory { get; }
+        private IServiceFactory ServiceFactory { get; }
 
         private IServiceProvider ServiceProvider { get; }
 
         private ILogger Logger { get; }
 
-        public ServerMessageHandler(IServiceFactory invokerFactory, IServiceProvider serviceProvider, ILogger logger)
+        public ServerMessageHandler(IServiceFactory serviceFactory, IServiceProvider serviceProvider, ILogger logger)
         {
-            InvokerFactory = invokerFactory;
+            ServiceFactory = serviceFactory;
             ServiceProvider = serviceProvider;
             Logger = logger;
         }
@@ -35,7 +35,7 @@ namespace Uragano.Remoting
                 {
                     if (Logger.IsEnabled(LogLevel.Debug))
                         Logger.LogDebug($"Received the message:[route:{transportMessage.Body.Route};message id:{transportMessage.Id}]");
-                    var result = await InvokerFactory.Invoke(transportMessage.Body.Route, transportMessage.Body.Args,
+                    var result = await ServiceFactory.Invoke(transportMessage.Body.Route, transportMessage.Body.Args,
                         transportMessage.Body.Meta);
                     await context.WriteAndFlushAsync(new TransportMessage<IServiceResult>
                     {
