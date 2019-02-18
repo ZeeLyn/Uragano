@@ -37,9 +37,10 @@ namespace Sample.Server
             //services.AddUragano(Configuration);
             services.AddUragano(config =>
             {
-                config.IsDevelopment(true);
-                config.AddClient();
+                //config.IsDevelopment(true);
                 config.AddServer(Configuration.GetSection("Uragano:Server"));
+                config.AddClient();
+
                 config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"),
                     Configuration.GetSection("Uragano:Consul:Service"));
                 config.AddClientGlobalInterceptor<ClientGlobal_1_Interceptor>();

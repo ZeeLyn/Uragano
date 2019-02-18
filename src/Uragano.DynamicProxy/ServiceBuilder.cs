@@ -8,7 +8,7 @@ using Uragano.Abstractions.Service;
 
 namespace Uragano.DynamicProxy
 {
-    public class ServiceBuilder : IStartUpTask
+    public class ServiceBuilder : IStartupTask
     {
         private IServiceFactory InvokerFactory { get; }
 
@@ -26,6 +26,9 @@ namespace Uragano.DynamicProxy
 
         public void Execute()
         {
+            UraganoSettings.ClientGlobalInterceptors.Reverse();
+            UraganoSettings.ServerGlobalInterceptors.Reverse();
+
             var enableClient = ServiceProvider.GetService<ILoadBalancing>() != null;
             var enableServer = UraganoSettings.ServerSettings != null;
 

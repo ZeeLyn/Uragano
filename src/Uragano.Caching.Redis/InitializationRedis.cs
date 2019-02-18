@@ -3,7 +3,7 @@ using Uragano.Abstractions;
 
 namespace Uragano.Caching.Redis
 {
-    public class InitializationRedis : IStartUpTask
+    public class InitializationRedis : IStartupTask
     {
         private RedisOptions RedisOptions { get; }
 

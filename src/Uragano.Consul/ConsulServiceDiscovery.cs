@@ -17,9 +17,6 @@ namespace Uragano.Consul
         private ILogger Logger { get; }
         private UraganoSettings UraganoSettings { get; }
 
-        public ConsulServiceDiscovery()
-        {
-        }
 
         public ConsulServiceDiscovery(UraganoSettings uraganoSettings, ILogger<ConsulServiceDiscovery> logger)
         {

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.ServiceDiscovery;
+using Uragano.Core.Startup;
 using Uragano.DynamicProxy;
 using Uragano.DynamicProxy.Interceptor;
 using Uragano.Remoting;
@@ -22,10 +23,10 @@ namespace Uragano.Core
 
         internal UraganoSettings UraganoSettings { get; set; } = new UraganoSettings();
 
-
         public UraganoConfiguration(IServiceCollection serviceCollection)
         {
             ServiceCollection = serviceCollection;
+            AddStartUpTask<InfrastructureStartup>();
         }
 
         #region Server
@@ -56,6 +57,9 @@ namespace Uragano.Core
                 UraganoSettings.ServerSettings.X509Certificate2 =
                     new X509Certificate2(certUrl, certUrl);
             }
+
+            AddStartUpTask<DotNettyBootstrapStartUp>();
+
             RegisterServerServices();
         }
 
@@ -70,8 +74,7 @@ namespace Uragano.Core
 
         public void AddClient<TLoadBalancing>() where TLoadBalancing : ILoadBalancing
         {
-            RegisterSingletonService(typeof(ILoadBalancing), typeof(TLoadBalancing));
-            RegisterClientServices();
+            AddClient(typeof(TLoadBalancing));
         }
 
         public void AddClient(Type loadBalancing)
@@ -121,6 +124,7 @@ namespace Uragano.Core
         {
             UraganoSettings.ServiceDiscoveryClientConfiguration = serviceDiscoveryClientConfiguration ?? throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
             ServiceCollection.AddSingleton(typeof(IServiceDiscovery), serviceDiscovery);
+            AddStartUpTask<ServiceDiscoveryStartup>();
         }
 
         /// <summary>
@@ -145,43 +149,9 @@ namespace Uragano.Core
                 throw new ArgumentNullException(nameof(serviceRegisterConfiguration.Name));
 
             ServiceCollection.AddSingleton(typeof(IServiceDiscovery), serviceDiscovery);
+            AddStartUpTask<ServiceDiscoveryStartup>();
         }
 
-        #endregion
-
-        #region
-        public void DependencyService(string serviceName, string certificateUrl = "", string certificatePassword = "")
-        {
-            if (UraganoSettings.ClientInvokeServices == null)
-                UraganoSettings.ClientInvokeServices =
-                    new System.Collections.Generic.Dictionary<string,
-                        X509Certificate2>();
-            X509Certificate2 cert = null;
-            if (!string.IsNullOrWhiteSpace(certificateUrl))
-            {
-                if (!File.Exists(certificateUrl))
-                    throw new FileNotFoundException($"Certificate file {certificateUrl} not found.");
-                cert = new X509Certificate2(certificateUrl, certificatePassword);
-            }
-
-            UraganoSettings.ClientInvokeServices[serviceName] = cert;
-        }
-
-        public void DependencyServices(params (string SeriviceName, string CertificateUrl, string CertificatePassword)[] dependentServices)
-        {
-            foreach (var service in dependentServices)
-            {
-                DependencyService(service.SeriviceName, service.CertificateUrl, service.CertificatePassword);
-            }
-        }
-
-        public void DependencyServices(IConfigurationSection configurationSection)
-        {
-            foreach (var service in configurationSection.GetChildren())
-            {
-                DependencyService(service.Key, service.GetValue<string>("certificateUrl"), service.GetValue<string>("certificatePassword"));
-            }
-        }
         #endregion
 
         #region Option
@@ -276,7 +246,8 @@ namespace Uragano.Core
         #region Codec
         public void AddCodec<TCodec>() where TCodec : ICodec
         {
-            RegisterSingletonService<ICodec, TCodec>();
+            ServiceCollection.AddSingleton(typeof(ICodec), typeof(TCodec));
+
         }
 
         #endregion
@@ -296,11 +267,24 @@ namespace Uragano.Core
             RegisterSingletonService<CachingDefaultInterceptor>();
         }
 
+        #endregion
+
+        #region Logging
+
         public void AddLogger(ILoggerProvider loggerProvider)
         {
             UraganoSettings.LoggerProviders.Add(loggerProvider);
         }
 
+        #endregion
+
+        #region StartUp Task
+        public void AddStartUpTask<TStartUpTask>() where TStartUpTask : IStartupTask
+        {
+            if (ServiceCollection.Any(p => p.ServiceType == typeof(IStartupTask) && p.ImplementationType == typeof(TStartUpTask)))
+                return;
+            ServiceCollection.AddSingleton(typeof(IStartupTask), typeof(TStartUpTask));
+        }
         #endregion
 
         #region Private methods
@@ -332,6 +316,7 @@ namespace Uragano.Core
         {
             if (!RegisterSingletonService<IServiceStatusManageFactory, ServiceStatusManageFactory>())
                 return;
+            AddStartUpTask<ServiceStatusManageStartup>();
             RegisterSingletonService<ClientDefaultInterceptor>();
             RegisterSingletonService<IClientFactory, ClientFactory>();
             RegisterSingletonService<IRemotingInvoke, RemotingInvoke>();

@@ -49,31 +49,6 @@ namespace Uragano.Abstractions
         void AddServiceDiscovery(Type serviceDiscovery, IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration,
             IServiceRegisterConfiguration serviceRegisterConfiguration);
 
-
-        ///// <summary>
-        ///// Add client-dependent services
-        ///// </summary>
-        ///// <param name="serviceName"></param>
-        ///// <param name="certificateUrl"></param>
-        ///// <param name="certificatePassword"></param>
-        //void DependencyService(string serviceName, string certificateUrl = "", string certificatePassword = "");
-
-
-
-        ///// <summary>
-        ///// Add client-dependent services
-        ///// </summary>
-        ///// <param name="services"></param>
-        //void DependencyServices(params (string SeriviceName, string CertificateUrl, string CertificatePassword)[] services);
-
-        ///// <summary>
-        /////  Add client-dependent services
-        ///// </summary>
-        ///// <param name="configurationSection"></param>
-        //void DependencyServices(IConfigurationSection configurationSection);
-
-
-
         void Option<T>(UraganoOption<T> option, T value);
 
         void Options(IConfigurationSection configuration);
@@ -93,6 +68,8 @@ namespace Uragano.Abstractions
         void AddCaching(Type caching, ICachingOptions cachingOptions);
 
         void AddLogger(ILoggerProvider loggerProvider);
+
+        void AddStartUpTask<TStartUpTask>() where TStartUpTask : IStartupTask;
 
     }
 }

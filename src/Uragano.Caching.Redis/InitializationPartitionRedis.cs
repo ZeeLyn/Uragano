@@ -5,7 +5,7 @@ using Uragano.Abstractions;
 
 namespace Uragano.Caching.Redis
 {
-    public class InitializationPartitionRedis : IStartUpTask
+    public class InitializationPartitionRedis : IStartupTask
     {
         private IRedisPartitionPolicy RedisPartitionPolicy { get; }
         private RedisOptions RedisOptions { get; }

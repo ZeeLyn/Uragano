@@ -12,14 +12,14 @@ namespace Uragano.Caching.Redis
         public static void AddRedisCaching(this IUraganoConfiguration uraganoConfiguration, RedisOptions redisOptions)
         {
             uraganoConfiguration.AddCaching<RedisCaching>(redisOptions);
-            uraganoConfiguration.ServiceCollection.AddSingleton<IStartUpTask, InitializationRedis>();
+            uraganoConfiguration.ServiceCollection.AddSingleton<IStartupTask, InitializationRedis>();
         }
 
         public static void AddRedisCaching(this IUraganoConfiguration uraganoConfiguration, IConfigurationSection configurationSection)
         {
             var options = configurationSection.Get<RedisOptions>();
             uraganoConfiguration.AddRedisCaching(options);
-            uraganoConfiguration.ServiceCollection.AddSingleton<IStartUpTask, InitializationRedis>();
+            uraganoConfiguration.ServiceCollection.AddSingleton<IStartupTask, InitializationRedis>();
         }
 
         public static void AddRedisPartitionCaching<TPartitionPolicy>(this IUraganoConfiguration uraganoConfiguration, RedisOptions redisOptions) where TPartitionPolicy : IRedisPartitionPolicy, new()

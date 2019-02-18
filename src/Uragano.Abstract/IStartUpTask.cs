@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Uragano.Abstractions
+﻿namespace Uragano.Abstractions
 {
-    public interface IStartUpTask
+    public interface IStartupTask
     {
         void Execute();
     }

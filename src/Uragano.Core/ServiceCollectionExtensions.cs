@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
@@ -102,10 +103,11 @@ namespace Uragano.Core
 
         private static void AddBase(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IStartUpTask, ServiceBuilder>();
+            serviceCollection.AddSingleton<IStartupTask, ServiceBuilder>();
             serviceCollection.AddSingleton<IServiceFactory, ServiceFactory>();
             serviceCollection.AddSingleton<IScriptInjection, ScriptInjection>();
             serviceCollection.AddSingleton<ICodec, MessagePackCodec>();
+            serviceCollection.AddSingleton(new CancellationTokenSource());
         }
     }
 }
