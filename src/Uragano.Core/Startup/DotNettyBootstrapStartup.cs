@@ -5,7 +5,7 @@ using Uragano.Remoting;
 
 namespace Uragano.Core.Startup
 {
-    public class DotNettyBootstrapStartUp : IStartupTask
+    public class DotNettyBootstrapStartup : IStartupTask
     {
         private UraganoSettings UraganoSettings { get; }
         private IBootstrap Bootstrap { get; }
@@ -14,7 +14,7 @@ namespace Uragano.Core.Startup
 
         private CancellationTokenSource CancellationTokenSource { get; }
 
-        public DotNettyBootstrapStartUp(UraganoSettings uraganoSettings, IBootstrap bootstrap, IApplicationLifetime applicationLifetime, CancellationTokenSource cancellationTokenSource)
+        public DotNettyBootstrapStartup(UraganoSettings uraganoSettings, IBootstrap bootstrap, IApplicationLifetime applicationLifetime, CancellationTokenSource cancellationTokenSource)
         {
             UraganoSettings = uraganoSettings;
             Bootstrap = bootstrap;

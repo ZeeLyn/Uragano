@@ -58,7 +58,7 @@ namespace Uragano.Core
                     new X509Certificate2(certUrl, certUrl);
             }
 
-            AddStartUpTask<DotNettyBootstrapStartUp>();
+            AddStartUpTask<DotNettyBootstrapStartup>();
 
             RegisterServerServices();
         }
