@@ -9,6 +9,7 @@ namespace Uragano.Core.Startup
         private UraganoSettings UraganoSettings { get; }
         private ILoggerFactory LoggerFactory { get; }
 
+
         public InfrastructureStartup(UraganoSettings uraganoSettings, ILoggerFactory loggerFactory)
         {
             UraganoSettings = uraganoSettings;

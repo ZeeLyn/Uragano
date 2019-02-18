@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Threading;
 using Microsoft.AspNetCore.Hosting;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceDiscovery;
-using Uragano.Remoting;
 
 namespace Uragano.Core.Startup
 {
@@ -15,15 +13,11 @@ namespace Uragano.Core.Startup
 
         private UraganoSettings UraganoSettings { get; }
 
-
-        private CancellationTokenSource CancellationTokenSource { get; }
-
-        public ServiceDiscoveryStartup(IApplicationLifetime applicationLifetime, IServiceDiscovery serviceDiscovery, UraganoSettings uraganoSettings, CancellationTokenSource cancellationTokenSource)
+        public ServiceDiscoveryStartup(IApplicationLifetime applicationLifetime, IServiceDiscovery serviceDiscovery, UraganoSettings uraganoSettings)
         {
             ApplicationLifetime = applicationLifetime;
             ServiceDiscovery = serviceDiscovery;
             UraganoSettings = uraganoSettings;
-            CancellationTokenSource = cancellationTokenSource;
         }
 
         public void Execute()
@@ -36,7 +30,6 @@ namespace Uragano.Core.Startup
                 ServiceDiscovery.RegisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration, UraganoSettings.ServerSettings.Weight).Wait();
                 ApplicationLifetime.ApplicationStopping.Register(async () =>
                 {
-                    CancellationTokenSource.Cancel();
                     if (!UraganoSettings.IsDevelopment)
                         await ServiceDiscovery.DeregisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration.Id);
                 });

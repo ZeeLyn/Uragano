@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetty.Transport.Channels;
+using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 
 namespace Uragano.Remoting
@@ -17,12 +18,15 @@ namespace Uragano.Remoting
 
         private IEventLoopGroup EventLoopGroup { get; }
 
-        public Client(IChannel channel, IEventLoopGroup eventLoopGroup, IMessageListener messageListener)
+        private ILogger Logger { get; }
+
+        public Client(IChannel channel, IEventLoopGroup eventLoopGroup, IMessageListener messageListener, ILogger logger)
         {
             Channel = channel;
             MessageListener = messageListener;
             MessageListener.OnReceived += MessageListener_OnReceived;
             EventLoopGroup = eventLoopGroup;
+            Logger = logger;
         }
 
         private void MessageListener_OnReceived(TransportMessage<IServiceResult> message)
@@ -32,17 +36,18 @@ namespace Uragano.Remoting
                 task.TrySetResult(message.Body);
             }
             else
-                Console.WriteLine("Not found callback");
+                Logger.LogError($"Not found callback[message id:{message.Id}]");
         }
 
         public async Task<IServiceResult> SendAsync(IInvokeMessage message)
         {
             var transportMessage = new TransportMessage<IInvokeMessage>
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid().ToString("N"),
                 Body = message
             };
-
+            if (Logger.IsEnabled(LogLevel.Debug))
+                Logger.LogDebug($"Sending message.[message id:{transportMessage.Id}]");
             var tcs = new TaskCompletionSource<IServiceResult>(TaskCreationOptions.RunContinuationsAsynchronously);
             using (var ct = new CancellationTokenSource(UraganoOptions.Remoting_Invoke_CancellationTokenSource_Timeout.Value))
             {
@@ -51,6 +56,8 @@ namespace Uragano.Remoting
                 try
                 {
                     await Channel.WriteAndFlushAsync(transportMessage);
+                    if (Logger.IsEnabled(LogLevel.Debug))
+                        Logger.LogDebug($"Send completed, waiting for results.[message id:{transportMessage.Id}]");
                     return await tcs.Task;
                 }
                 finally
@@ -63,13 +70,13 @@ namespace Uragano.Remoting
 
         public async Task DisconnectAsync()
         {
-
             await Channel.DisconnectAsync();
         }
 
 
         public void Dispose()
         {
+            Logger.LogDebug($"Stopping dotnetty client.[{Channel.LocalAddress}]");
             foreach (var task in _resultCallbackTask.Values)
             {
                 task.TrySetCanceled();

@@ -303,7 +303,7 @@ namespace Uragano.Core
 
             foreach (var service in services)
             {
-                //此处不以接口来注册是防止同时启用服务器端和客户端冲突
+                //此处不使用接口来注册是避免同时启用服务器端和客户端冲突
                 RegisterScopedService(service.Implementation);
                 //RegisterScopedService(service.Interface, service.Implementation);
             }

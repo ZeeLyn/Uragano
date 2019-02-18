@@ -9,17 +9,14 @@ namespace Uragano.Core.Startup
     {
         private UraganoSettings UraganoSettings { get; }
         private IBootstrap Bootstrap { get; }
-
         private IApplicationLifetime ApplicationLifetime { get; }
 
-        private CancellationTokenSource CancellationTokenSource { get; }
 
-        public DotNettyBootstrapStartup(UraganoSettings uraganoSettings, IBootstrap bootstrap, IApplicationLifetime applicationLifetime, CancellationTokenSource cancellationTokenSource)
+        public DotNettyBootstrapStartup(UraganoSettings uraganoSettings, IBootstrap bootstrap, IApplicationLifetime applicationLifetime)
         {
             UraganoSettings = uraganoSettings;
             Bootstrap = bootstrap;
             ApplicationLifetime = applicationLifetime;
-            CancellationTokenSource = cancellationTokenSource;
         }
 
         public void Execute()
@@ -27,10 +24,7 @@ namespace Uragano.Core.Startup
             if (UraganoSettings.ServerSettings == null) return;
             ApplicationLifetime.ApplicationStopping.Register(async () =>
             {
-                CancellationTokenSource.Cancel();
-                //if (!UraganoSettings.IsDevelopment)
-                //    await discovery.DeregisterAsync(uraganoSettings.ServiceDiscoveryClientConfiguration, uraganoSettings.ServiceRegisterConfiguration.Id);
-                //await Bootstrap.StopAsync();
+                await Bootstrap.StopAsync();
             });
             Bootstrap.StartAsync().Wait();
         }

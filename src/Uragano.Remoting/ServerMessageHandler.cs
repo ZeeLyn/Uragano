@@ -33,7 +33,8 @@ namespace Uragano.Remoting
                     throw new ArgumentNullException(nameof(message));
                 try
                 {
-                    Logger.LogDebug($"Invoke route[{transportMessage.Body.Route}]");
+                    if (Logger.IsEnabled(LogLevel.Debug))
+                        Logger.LogDebug($"Received the message:[route:{transportMessage.Body.Route};message id:{transportMessage.Id}]");
                     var result = await InvokerFactory.Invoke(transportMessage.Body.Route, transportMessage.Body.Args,
                         transportMessage.Body.Meta);
                     await context.WriteAndFlushAsync(new TransportMessage<IServiceResult>
@@ -44,7 +45,7 @@ namespace Uragano.Remoting
                 }
                 catch (NotFoundRouteException e)
                 {
-                    Logger.LogError(e, e.Message);
+                    Logger.LogError(e, $"Message processing failed:{e.Message}.[route:{transportMessage.Body.Route};message id:{transportMessage.Id}]");
                     await context.WriteAndFlushAsync(new TransportMessage<IServiceResult>
                     {
                         Id = transportMessage.Id,
@@ -53,7 +54,7 @@ namespace Uragano.Remoting
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError(e, e.Message);
+                    Logger.LogError(e, $"Message processing failed:{e.Message}.[route:{transportMessage.Body.Route};message id:{transportMessage.Id}]");
                     await context.WriteAndFlushAsync(new TransportMessage<IServiceResult>
                     {
                         Id = transportMessage.Id,

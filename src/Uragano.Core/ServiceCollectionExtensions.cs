@@ -106,7 +106,6 @@ namespace Uragano.Core
             serviceCollection.AddSingleton<IServiceFactory, ServiceFactory>();
             serviceCollection.AddSingleton<IScriptInjection, ScriptInjection>();
             serviceCollection.AddSingleton<ICodec, MessagePackCodec>();
-            serviceCollection.AddSingleton(new CancellationTokenSource());
         }
     }
 }

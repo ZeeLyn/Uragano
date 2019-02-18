@@ -10,6 +10,7 @@ using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using DotNetty.Transport.Libuv;
+using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 
 
@@ -25,9 +26,12 @@ namespace Uragano.Remoting
 
         private ICodec Codec { get; }
 
-        public ClientFactory(ICodec codec)
+        private ILogger Logger { get; }
+
+        public ClientFactory(ICodec codec, ILogger<ClientFactory> logger)
         {
             Codec = codec;
+            Logger = logger;
         }
 
         public void RemoveClient(string host, int port)
@@ -89,7 +93,7 @@ namespace Uragano.Remoting
                     });
                     var listener = new MessageListener();
                     channel.GetAttribute(MessageListenerAttributeKey).Set(listener);
-                    return new Client(channel, group, listener);
+                    return new Client(channel, group, listener, Logger);
                 });
             }
             catch

@@ -1,23 +1,27 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceDiscovery;
+using System;
 
 namespace Uragano.Core.Startup
 {
-    public class ServiceStatusManageStartup : IStartupTask
+    public class ServiceStatusManageStartup : IStartupTask, IDisposable
     {
         private IServiceStatusManageFactory ServiceStatusManageFactory { get; }
 
-        private CancellationTokenSource CancellationTokenSource { get; }
+        private static readonly CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
 
         private UraganoSettings UraganoSettings { get; }
 
-        public ServiceStatusManageStartup(IServiceStatusManageFactory serviceStatusManageFactory, CancellationTokenSource cancellationTokenSource, UraganoSettings uraganoSettings)
+        private ILogger Logger { get; }
+
+        public ServiceStatusManageStartup(IServiceStatusManageFactory serviceStatusManageFactory, UraganoSettings uraganoSettings, ILogger<ServiceStatusManageStartup> logger)
         {
             ServiceStatusManageFactory = serviceStatusManageFactory;
-            CancellationTokenSource = cancellationTokenSource;
             UraganoSettings = uraganoSettings;
+            Logger = logger;
         }
 
         public void Execute()
@@ -29,18 +33,25 @@ namespace Uragano.Core.Startup
                     //NOTE:Replace with Timer
                     Task.Factory.StartNew(async () =>
                     {
-                        while (!CancellationTokenSource.Token.IsCancellationRequested)
+                        while (!CancellationTokenSource.IsCancellationRequested)
                         {
                             await ServiceStatusManageFactory.Refresh(CancellationTokenSource.Token);
-                            if (CancellationTokenSource.Token.IsCancellationRequested)
+                            if (CancellationTokenSource.IsCancellationRequested)
                                 break;
                             await Task.Delay(UraganoOptions.Client_Node_Status_Refresh_Interval.Value,
                                 CancellationTokenSource.Token);
-
                         }
+
+                        Logger.LogDebug("Stop refreshing service status.");
                     }, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            CancellationTokenSource.Cancel();
         }
     }
 }
