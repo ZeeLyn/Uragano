@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
@@ -49,7 +48,7 @@ namespace Uragano.Core
                 config.AddClient(type);
             }
 
-            var consul = section.GetSection("Consul");
+            var consul = section.GetSection("ServiceDiscovery:Consul");
             if (consul.Exists())
             {
                 var sd = consul.GetValue<string>("ServiceDiscovery");
