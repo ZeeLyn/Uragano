@@ -22,20 +22,16 @@ namespace Uragano.Core.Startup
 
         public void Execute()
         {
-            if (UraganoSettings.ServiceRegisterConfiguration != null && !UraganoSettings.IsDevelopment)
+            if (UraganoSettings.ServiceRegisterConfiguration == null || UraganoSettings.IsDevelopment) return;
+            if (UraganoSettings.ServiceDiscoveryClientConfiguration == null)
+                throw new ArgumentNullException(nameof(UraganoSettings.ServiceDiscoveryClientConfiguration));
+
+            ServiceDiscovery.RegisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration, UraganoSettings.ServerSettings.Weight).Wait();
+            ApplicationLifetime.ApplicationStopping.Register(async () =>
             {
-                if (UraganoSettings.ServiceDiscoveryClientConfiguration == null)
-                    throw new ArgumentNullException(nameof(UraganoSettings.ServiceDiscoveryClientConfiguration));
-
-                ServiceDiscovery.RegisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration, UraganoSettings.ServerSettings.Weight).Wait();
-                ApplicationLifetime.ApplicationStopping.Register(async () =>
-                {
-                    if (!UraganoSettings.IsDevelopment)
-                        await ServiceDiscovery.DeregisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration.Id);
-                });
-            }
-
-
+                if (!UraganoSettings.IsDevelopment)
+                    await ServiceDiscovery.DeregisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration.Id);
+            });
         }
     }
 }

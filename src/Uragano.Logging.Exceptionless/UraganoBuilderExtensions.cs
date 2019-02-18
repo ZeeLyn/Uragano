@@ -7,26 +7,26 @@ using Uragano.Abstractions;
 
 namespace Uragano.Logging.Exceptionless
 {
-    public static class UraganoConfigurationExtensions
+    public static class UraganoBuilderExtensions
     {
-        public static void AddExceptionlessLogger(this IUraganoConfiguration uraganoConfiguration, string apiKey, string serverUrl = "")
+        public static void AddExceptionlessLogger(this IUraganoBuilder builder, string apiKey, string serverUrl = "")
         {
-            uraganoConfiguration.AddLogger(new ExceptionlessLoggerProvider(ExceptionlessClient.Default));
+            builder.AddLogger(new ExceptionlessLoggerProvider(ExceptionlessClient.Default));
 
             ExceptionlessClient.Default.Configuration.ApiKey = apiKey;
             if (!string.IsNullOrWhiteSpace(serverUrl))
                 ExceptionlessClient.Default.Configuration.ConfigServerUrl = serverUrl;
         }
 
-        public static void AddExceptionlessLogger(this IUraganoConfiguration uraganoConfiguration, Action<ExceptionlessConfiguration> configure)
+        public static void AddExceptionlessLogger(this IUraganoBuilder builder, Action<ExceptionlessConfiguration> configure)
         {
-            uraganoConfiguration.AddLogger(new ExceptionlessLoggerProvider(configure));
+            builder.AddLogger(new ExceptionlessLoggerProvider(configure));
         }
 
-        public static void AddExceptionlessLogger(this IUraganoConfiguration uraganoConfiguration, IConfiguration configuration)
+        public static void AddExceptionlessLogger(this IUraganoBuilder builder, IConfiguration configuration)
         {
             ExceptionlessClient.Default.Configuration.ReadFromConfiguration(configuration);
-            uraganoConfiguration.AddLogger(new ExceptionlessLoggerProvider(ExceptionlessClient.Default));
+            builder.AddLogger(new ExceptionlessLoggerProvider(ExceptionlessClient.Default));
         }
 
         private static void ReadFromConfiguration(this ExceptionlessConfiguration config, IConfiguration settings)

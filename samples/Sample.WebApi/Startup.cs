@@ -28,16 +28,16 @@ namespace Sample.WebApi
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             //services.AddUragano(Configuration.GetSection("Uragano"));
-            services.AddUragano(config =>
+            services.AddUragano(builder =>
             {
-                config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"));
-                config.AddClient();
+                builder.AddConsul(Configuration.GetSection("Uragano:Consul:Client"));
+                builder.AddClient();
                 //config.AddCircuitBreaker<CircuitBreakerEvent>(1000);
-                config.AddCircuitBreaker(Configuration.GetSection("CircuitBreaker"));
+                builder.AddCircuitBreaker(Configuration.GetSection("CircuitBreaker"));
                 //config.DependencyServices(("RPC", "", ""));
                 //config.DependencyServices(Configuration.GetSection("Uragano:DependencyServices"));
                 //config.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));
-                config.Options(Configuration.GetSection("Uragano:Options"));
+                builder.Options(Configuration.GetSection("Uragano:Options"));
             });
         }
 

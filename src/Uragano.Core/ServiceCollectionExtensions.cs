@@ -12,11 +12,11 @@ namespace Uragano.Core
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddUragano(this IServiceCollection serviceCollection, Action<IUraganoConfiguration> configuration)
+        public static IServiceCollection AddUragano(this IServiceCollection serviceCollection, Action<IUraganoBuilder> builder)
         {
             serviceCollection.AddBase();
-            var config = new UraganoConfiguration(serviceCollection);
-            configuration(config);
+            var config = new UraganoBuilder(serviceCollection);
+            builder(config);
             serviceCollection.AddSingleton(config.UraganoSettings);
 
             return serviceCollection;
@@ -25,7 +25,7 @@ namespace Uragano.Core
         public static IServiceCollection AddUragano(this IServiceCollection serviceCollection, IConfiguration configuration)
         {
             serviceCollection.AddBase();
-            var config = new UraganoConfiguration(serviceCollection);
+            var config = new UraganoBuilder(serviceCollection);
             var section = configuration.GetSection("Uragano");
             if (!section.Exists())
                 throw new ArgumentNullException("Uragano");

@@ -35,26 +35,26 @@ namespace Sample.Server
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             //services.AddUragano(Configuration);
-            services.AddUragano(config =>
+            services.AddUragano(builder =>
             {
-                //config.IsDevelopment(true);
-                config.AddServer(Configuration.GetSection("Uragano:Server"));
-                config.AddClient();
+                //builder.IsDevelopment(true);
+                builder.AddServer(Configuration.GetSection("Uragano:Server"));
+                builder.AddClient();
 
-                config.AddConsul(Configuration.GetSection("Uragano:ServiceDiscovery:Consul:Client"),
+                builder.AddConsul(Configuration.GetSection("Uragano:ServiceDiscovery:Consul:Client"),
                     Configuration.GetSection("Uragano:ServiceDiscovery:Consul:Service"));
-                config.AddClientGlobalInterceptor<ClientGlobal_1_Interceptor>();
-                //config.AddClientGlobalInterceptor<ClientGlobal_2_Interceptor>();
-                //config.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
+                builder.AddClientGlobalInterceptor<ClientGlobal_1_Interceptor>();
+                //builder.AddClientGlobalInterceptor<ClientGlobal_2_Interceptor>();
+                //builder.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
 
-                //config.Option(UraganoOptions.Server_DotNetty_Channel_SoBacklog, 100);
-                //config.AddRedisPartitionCaching(new RedisOptions
+                //builder.Option(UraganoOptions.Server_DotNetty_Channel_SoBacklog, 100);
+                //builder.AddRedisPartitionCaching(new RedisOptions
                 //{
                 //    ConnectionStrings = new[] { new RedisConnection("192.168.1.254", 6379, "nihao123", false, 15), new RedisConnection("192.168.1.253", 6379, "nihao123", false, 15) }
                 //});
-                config.AddExceptionlessLogger(Configuration.GetSection("Uragano:Logging:Exceptionless"));
-                //config.AddRedisPartitionCaching(Configuration.GetSection("Uragano:Caching:Redis"));
-                config.Options(Configuration.GetSection("Uragano:Options"));
+                builder.AddExceptionlessLogger(Configuration.GetSection("Uragano:Logging:Exceptionless"));
+                builder.AddRedisPartitionCaching(Configuration.GetSection("Uragano:Caching:Redis"));
+                builder.Options(Configuration.GetSection("Uragano:Options"));
             });
         }
 

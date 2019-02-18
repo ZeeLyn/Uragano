@@ -7,7 +7,7 @@ using Uragano.Abstractions.ServiceDiscovery;
 
 namespace Uragano.Abstractions
 {
-    public interface IUraganoConfiguration
+    public interface IUraganoBuilder
     {
         IServiceCollection ServiceCollection { get; }
         void IsDevelopment(bool isDevelopment = false);

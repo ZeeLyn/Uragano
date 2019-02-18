@@ -106,7 +106,7 @@ namespace Uragano.Consul
                     throw new ConsulRequestException("Deregistration service failed.", result.StatusCode);
                 }
 
-                Logger.LogDebug("Deregistration consul complete.");
+                Logger.LogDebug("Deregistration consul has been completed.");
                 return result.StatusCode == HttpStatusCode.OK;
             }
         }

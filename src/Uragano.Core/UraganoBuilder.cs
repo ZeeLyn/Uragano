@@ -17,13 +17,13 @@ using Uragano.Remoting.LoadBalancing;
 
 namespace Uragano.Core
 {
-    public class UraganoConfiguration : IUraganoConfiguration
+    public class UraganoBuilder : IUraganoBuilder
     {
         public IServiceCollection ServiceCollection { get; }
 
         internal UraganoSettings UraganoSettings { get; set; } = new UraganoSettings();
 
-        public UraganoConfiguration(IServiceCollection serviceCollection)
+        public UraganoBuilder(IServiceCollection serviceCollection)
         {
             ServiceCollection = serviceCollection;
             AddStartUpTask<InfrastructureStartup>();

@@ -12,12 +12,9 @@ namespace Uragano.Caching.Redis
     public class RedisPartitionCaching : ICaching
     {
         private IDistributedCache Cache { get; }
-        //private IServiceProvider ServiceProvider { get; }
 
         public RedisPartitionCaching(UraganoSettings uraganoSettings, IServiceProvider serviceProvider)
         {
-            //ServiceProvider = serviceProvider;
-
             var redisOptions = (RedisOptions)uraganoSettings.CachingOptions;
             var policy = serviceProvider.GetService<IRedisPartitionPolicy>();
             if (policy != null)
