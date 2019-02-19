@@ -1,37 +1,38 @@
 ﻿using System;
-using Microsoft.AspNetCore.Hosting;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceDiscovery;
 
+
 namespace Uragano.Core.Startup
 {
-    public class ServiceDiscoveryStartup : IStartupTask
+    public class ServiceDiscoveryStartup : IHostedService
     {
-        private IApplicationLifetime ApplicationLifetime { get; }
-
         private IServiceDiscovery ServiceDiscovery { get; }
 
         private UraganoSettings UraganoSettings { get; }
 
-        public ServiceDiscoveryStartup(IApplicationLifetime applicationLifetime, IServiceDiscovery serviceDiscovery, UraganoSettings uraganoSettings)
+        public ServiceDiscoveryStartup(IServiceDiscovery serviceDiscovery, UraganoSettings uraganoSettings)
         {
-            ApplicationLifetime = applicationLifetime;
             ServiceDiscovery = serviceDiscovery;
             UraganoSettings = uraganoSettings;
         }
 
-        public void Execute()
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             if (UraganoSettings.ServiceRegisterConfiguration == null || UraganoSettings.IsDevelopment) return;
             if (UraganoSettings.ServiceDiscoveryClientConfiguration == null)
                 throw new ArgumentNullException(nameof(UraganoSettings.ServiceDiscoveryClientConfiguration));
 
-            ServiceDiscovery.RegisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration, UraganoSettings.ServerSettings.Weight).Wait();
-            ApplicationLifetime.ApplicationStopping.Register(async () =>
-            {
-                if (!UraganoSettings.IsDevelopment)
-                    await ServiceDiscovery.DeregisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration.Id);
-            });
+            await ServiceDiscovery.RegisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration, UraganoSettings.ServerSettings.Weight, cancellationToken);
+        }
+
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            if (!UraganoSettings.IsDevelopment)
+                await ServiceDiscovery.DeregisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration.Id, cancellationToken);
         }
     }
 }

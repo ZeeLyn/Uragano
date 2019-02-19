@@ -22,11 +22,11 @@ namespace Uragano.Core
             //}
 
 
-            var startupTasks = applicationBuilder.ApplicationServices.GetServices<IStartupTask>();
-            foreach (var task in startupTasks)
-            {
-                task.Execute();
-            }
+            //var startupTasks = applicationBuilder.ApplicationServices.GetServices<IStartupTask>();
+            //foreach (var task in startupTasks)
+            //{
+            //    task.Execute();
+            //}
 
             //Start server and register service
             //if (uraganoSettings.ServerSettings != null)

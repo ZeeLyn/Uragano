@@ -28,6 +28,11 @@ namespace Uragano.Logging.Exceptionless
             ExceptionlessClient.Default.Configuration.ReadFromConfiguration(configuration);
             builder.AddLogger(new ExceptionlessLoggerProvider(ExceptionlessClient.Default));
         }
+        public static void AddExceptionlessLogger(this IUraganoSampleBuilder builder)
+        {
+            ExceptionlessClient.Default.Configuration.ReadFromConfiguration(builder.Configuration.GetSection("Uragano:Logging:Exceptionless"));
+            builder.AddLogger(new ExceptionlessLoggerProvider(ExceptionlessClient.Default));
+        }
 
         private static void ReadFromConfiguration(this ExceptionlessConfiguration config, IConfiguration settings)
         {

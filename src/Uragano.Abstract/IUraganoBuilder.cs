@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.ServiceDiscovery;
@@ -69,7 +70,18 @@ namespace Uragano.Abstractions
 
         void AddLogger(ILoggerProvider loggerProvider);
 
-        void AddStartUpTask<TStartUpTask>() where TStartUpTask : IStartupTask;
+        void AddStartUpTask<TStartUpTask>() where TStartUpTask : IHostedService;
 
+    }
+
+    public interface IUraganoSampleBuilder : IUraganoBuilder
+    {
+        IConfiguration Configuration { get; }
+
+        void AddServer();
+
+        void Options();
+
+        void AddCircuitBreaker();
     }
 }

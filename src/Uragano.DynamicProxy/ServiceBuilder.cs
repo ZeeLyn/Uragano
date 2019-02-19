@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Uragano.Abstractions;
 using Uragano.Abstractions.Service;
 
 namespace Uragano.DynamicProxy
 {
-    public class ServiceBuilder : IStartupTask
+    public class ServiceBuilder : IHostedService
     {
         private IServiceFactory InvokerFactory { get; }
 
@@ -24,7 +27,25 @@ namespace Uragano.DynamicProxy
             UraganoSettings = uraganoSettings;
         }
 
-        public void Execute()
+        private static bool IsImplementationMethod(MethodInfo serviceMethod, MethodInfo implementationMethod)
+        {
+            return serviceMethod.Name == implementationMethod.Name &&
+                   serviceMethod.ReturnType == implementationMethod.ReturnType &&
+                   serviceMethod.ContainsGenericParameters == implementationMethod.ContainsGenericParameters &&
+                   SameParameters(serviceMethod.GetParameters(), implementationMethod.GetParameters());
+        }
+
+        private static bool SameParameters(IReadOnlyCollection<ParameterInfo> parameters1, IReadOnlyList<ParameterInfo> parameters2)
+        {
+            if (parameters1.Count == parameters2.Count)
+            {
+                return !parameters1.Where((t, i) => t.ParameterType != parameters2[i].ParameterType || t.IsOptional != parameters2[i].IsOptional || t.Position != parameters2[i].Position || t.HasDefaultValue != parameters2[i].HasDefaultValue).Any();
+            }
+            return false;
+        }
+
+
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             UraganoSettings.ClientGlobalInterceptors.Reverse();
             UraganoSettings.ServerGlobalInterceptors.Reverse();
@@ -91,25 +112,13 @@ namespace Uragano.DynamicProxy
                     InvokerFactory.Create(route, serverMethod, interfaceMethod, serverInterceptors, clientInterceptors);
                 }
             }
+
+            await Task.CompletedTask;
         }
 
-        private static bool IsImplementationMethod(MethodInfo serviceMethod, MethodInfo implementationMethod)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            return serviceMethod.Name == implementationMethod.Name &&
-                   serviceMethod.ReturnType == implementationMethod.ReturnType &&
-                   serviceMethod.ContainsGenericParameters == implementationMethod.ContainsGenericParameters &&
-                   SameParameters(serviceMethod.GetParameters(), implementationMethod.GetParameters());
+            await Task.CompletedTask;
         }
-
-        private static bool SameParameters(IReadOnlyCollection<ParameterInfo> parameters1, IReadOnlyList<ParameterInfo> parameters2)
-        {
-            if (parameters1.Count == parameters2.Count)
-            {
-                return !parameters1.Where((t, i) => t.ParameterType != parameters2[i].ParameterType || t.IsOptional != parameters2[i].IsOptional || t.Position != parameters2[i].Position || t.HasDefaultValue != parameters2[i].HasDefaultValue).Any();
-            }
-            return false;
-        }
-
-
     }
 }

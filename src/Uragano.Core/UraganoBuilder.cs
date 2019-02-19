@@ -5,6 +5,7 @@ using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 using Uragano.Abstractions.CircuitBreaker;
@@ -279,11 +280,11 @@ namespace Uragano.Core
         #endregion
 
         #region StartUp Task
-        public void AddStartUpTask<TStartUpTask>() where TStartUpTask : IStartupTask
+        public void AddStartUpTask<TStartUpTask>() where TStartUpTask : IHostedService
         {
-            if (ServiceCollection.Any(p => p.ServiceType == typeof(IStartupTask) && p.ImplementationType == typeof(TStartUpTask)))
+            if (ServiceCollection.Any(p => p.ServiceType == typeof(IHostedService) && p.ImplementationType == typeof(TStartUpTask)))
                 return;
-            ServiceCollection.AddSingleton(typeof(IStartupTask), typeof(TStartUpTask));
+            ServiceCollection.AddSingleton(typeof(IHostedService), typeof(TStartUpTask));
         }
         #endregion
 
@@ -417,6 +418,29 @@ namespace Uragano.Core
         #endregion
     }
 
+    public class UraganoSampleBuilder : UraganoBuilder, IUraganoSampleBuilder
+    {
+        public IConfiguration Configuration { get; }
 
+        public UraganoSampleBuilder(IServiceCollection serviceCollection, IConfiguration configuration) : base(serviceCollection)
+        {
+            Configuration = configuration;
+        }
+
+        public void AddServer()
+        {
+            AddServer(Configuration.GetSection("Uragano:Server"));
+        }
+
+        public void Options()
+        {
+            Options(Configuration.GetSection("Uragano:Options"));
+        }
+
+        public void AddCircuitBreaker()
+        {
+            AddCircuitBreaker(Configuration.GetSection("Uragano:CircuitBreaker:Polly"));
+        }
+    }
 }
 

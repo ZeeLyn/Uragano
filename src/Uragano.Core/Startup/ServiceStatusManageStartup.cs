@@ -2,15 +2,14 @@
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceDiscovery;
-using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 
 namespace Uragano.Core.Startup
 {
-    public class ServiceStatusManageStartup : IStartupTask, IDisposable
+    public class ServiceStatusManageStartup : IHostedService
     {
         private IServiceStatusManageFactory ServiceStatusManageFactory { get; }
-
-        private static readonly CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
 
         private static System.Timers.Timer Timer { get; set; }
 
@@ -25,7 +24,8 @@ namespace Uragano.Core.Startup
             Logger = logger;
         }
 
-        public void Execute()
+
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             if (!UraganoSettings.IsDevelopment)
             {
@@ -34,7 +34,7 @@ namespace Uragano.Core.Startup
                     Timer = new System.Timers.Timer(UraganoOptions.Client_Node_Status_Refresh_Interval.Value.TotalMilliseconds);
                     Timer.Elapsed += async (sender, args) =>
                     {
-                        await ServiceStatusManageFactory.Refresh(CancellationTokenSource.Token);
+                        await ServiceStatusManageFactory.Refresh(cancellationToken);
                     };
                     Timer.Enabled = true;
                     //NOTE:Replace with Timer
@@ -54,14 +54,15 @@ namespace Uragano.Core.Startup
 
                 }
             }
+            await Task.CompletedTask;
         }
 
-        public void Dispose()
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            CancellationTokenSource.Cancel();
             Timer.Enabled = false;
             Timer.Dispose();
             Logger.LogDebug("Stop refreshing service status.");
+            await Task.CompletedTask;
         }
     }
 }

@@ -33,7 +33,7 @@ namespace Sample.WebApi
                 builder.AddConsul(Configuration.GetSection("Uragano:Consul:Client"));
                 builder.AddClient();
                 //config.AddCircuitBreaker<CircuitBreakerEvent>(1000);
-                builder.AddCircuitBreaker(Configuration.GetSection("CircuitBreaker"));
+                builder.AddCircuitBreaker(Configuration.GetSection("Uragano:CircuitBreaker:Polly"));
                 //config.DependencyServices(("RPC", "", ""));
                 //config.DependencyServices(Configuration.GetSection("Uragano:DependencyServices"));
                 //config.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));

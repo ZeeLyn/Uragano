@@ -25,5 +25,11 @@ namespace Uragano.Caching.Memory
             var config = configurationSection.Get<MemoryCachingOptions>();
             builder.AddMemoryCaching(config);
         }
+
+        public static void AddMemoryCaching(this IUraganoSampleBuilder builder)
+        {
+            var config = builder.Configuration.GetSection("Uragano:Caching:Memory").Get<MemoryCachingOptions>();
+            builder.AddMemoryCaching(config);
+        }
     }
 }

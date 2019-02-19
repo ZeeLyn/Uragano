@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sample.Common;
@@ -19,6 +20,7 @@ using Uragano.Codec.MessagePack;
 using Uragano.Consul;
 using Uragano.Core;
 using Uragano.Logging.Exceptionless;
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace Sample.Server
 {
@@ -35,29 +37,19 @@ namespace Sample.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            //services.AddUragano(Configuration);
-            services.AddUragano(builder =>
-            {
-                //builder.IsDevelopment(true);
-                builder.AddServer(Configuration.GetSection("Uragano:Server"));
-                builder.AddClient();
+            services.AddUragano(Configuration, builder =>
+             {
+                 //builder.IsDevelopment(true);
+                 builder.AddClient();
+                 builder.AddServer();
 
-                builder.AddConsul(Configuration.GetSection("Uragano:ServiceDiscovery:Consul:Client"),
-                    Configuration.GetSection("Uragano:ServiceDiscovery:Consul:Service"));
-                builder.AddClientGlobalInterceptor<ClientGlobal_1_Interceptor>();
-                //builder.AddClientGlobalInterceptor<ClientGlobal_2_Interceptor>();
-                //builder.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
-
-                //builder.Option(UraganoOptions.Server_DotNetty_Channel_SoBacklog, 100);
-                //builder.AddRedisPartitionCaching(new RedisOptions
-                //{
-                //    ConnectionStrings = new[] { new RedisConnection("192.168.1.254", 6379, "nihao123", false, 15), new RedisConnection("192.168.1.253", 6379, "nihao123", false, 15) }
-                //});
-                builder.AddExceptionlessLogger(Configuration.GetSection("Uragano:Logging:Exceptionless"));
-                //builder.AddRedisPartitionCaching(Configuration.GetSection("Uragano:Caching:Redis"));
-                builder.AddMemoryCaching(Configuration.GetSection("Uragano:Caching:Memory"));
-                builder.Options(Configuration.GetSection("Uragano:Options"));
-            });
+                 builder.AddConsul();
+                 builder.AddClientGlobalInterceptor<ClientGlobal_1_Interceptor>();
+                 builder.AddExceptionlessLogger();
+                 builder.AddRedisPartitionCaching();
+                 //builder.AddMemoryCaching();
+                 builder.Options();
+             });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -69,7 +61,6 @@ namespace Sample.Server
             }
 
             app.UseMvc();
-            app.UseUragano();
         }
     }
 }
