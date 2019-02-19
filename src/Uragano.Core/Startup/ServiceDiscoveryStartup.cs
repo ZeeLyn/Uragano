@@ -22,6 +22,8 @@ namespace Uragano.Core.Startup
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            if (UraganoSettings.ServerSettings == null)
+                return;
             if (UraganoSettings.ServiceRegisterConfiguration == null || UraganoSettings.IsDevelopment) return;
             if (UraganoSettings.ServiceDiscoveryClientConfiguration == null)
                 throw new ArgumentNullException(nameof(UraganoSettings.ServiceDiscoveryClientConfiguration));

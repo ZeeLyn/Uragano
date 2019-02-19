@@ -70,12 +70,6 @@ namespace Uragano.Remoting
 
         public async Task DisconnectAsync()
         {
-            await Channel.DisconnectAsync();
-        }
-
-
-        public void Dispose()
-        {
             Logger.LogDebug($"Stopping dotnetty client.[{Channel.LocalAddress}]");
             foreach (var task in _resultCallbackTask.Values)
             {
@@ -83,11 +77,13 @@ namespace Uragano.Remoting
             }
 
             _resultCallbackTask.Clear();
-
             if (Channel.Open)
-                Channel.CloseAsync().Wait();
-            if (!EventLoopGroup.IsShutdown)
-                EventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1)).Wait();
+            {
+                await Channel.CloseAsync();
+                await EventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
+            }
+
+            Logger.LogDebug($"The dotnetty client[{Channel.LocalAddress}] has stopped.");
         }
     }
 }

@@ -235,9 +235,12 @@ namespace Uragano.Core
                 ExceptionsAllowedBeforeBreaking = configurationSection.GetValue<int>("ExceptionsAllowedBeforeBreaking"),
                 DurationOfBreak = TimeSpan.FromMilliseconds(configurationSection.GetValue<int>("DurationOfBreak"))
             };
-            if (!string.IsNullOrWhiteSpace(configurationSection.GetValue<string>("EventHandler")))
+            var eventTypeName = configurationSection.GetValue<string>("EventHandler");
+            if (!string.IsNullOrWhiteSpace(eventTypeName))
             {
-                var eventType = Type.GetType(configurationSection.GetValue<string>("EventHandler"), true);
+                var eventType = ReflectHelper.Find(eventTypeName);
+                if (eventType == null)
+                    throw new TypeLoadException($"Cannot load type of {eventTypeName}.");
                 RegisterSingletonService(typeof(ICircuitBreakerEvent), eventType);
             }
         }
@@ -318,6 +321,7 @@ namespace Uragano.Core
             if (!RegisterSingletonService<IServiceStatusManageFactory, ServiceStatusManageFactory>())
                 return;
             AddStartUpTask<ServiceStatusManageStartup>();
+            AddStartUpTask<RemotingClientStartup>();
             RegisterSingletonService<ClientDefaultInterceptor>();
             RegisterSingletonService<IClientFactory, ClientFactory>();
             RegisterSingletonService<IRemotingInvoke, RemotingInvoke>();

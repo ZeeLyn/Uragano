@@ -14,7 +14,7 @@ using Uragano.Abstractions.Service;
 
 namespace Uragano.Remoting
 {
-    public class ServerBootstrap : IBootstrap, IDisposable
+    public class ServerBootstrap : IBootstrap
     {
         private IChannel Channel { get; set; }
 
@@ -92,11 +92,6 @@ namespace Uragano.Remoting
             await BossGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
             await WorkerGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
             Logger.LogDebug("The dotnetty server has stopped.");
-        }
-
-        public void Dispose()
-        {
-            StopAsync().Wait();
         }
     }
 }

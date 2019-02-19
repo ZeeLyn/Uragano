@@ -34,10 +34,18 @@ namespace Uragano.Remoting
             Logger = logger;
         }
 
-        public void RemoveClient(string host, int port)
+        public async Task RemoveClient(string host, int port)
         {
             if (!_clients.TryRemove((host, port), out var client)) return;
-            client.Result.Dispose();
+            await client.Result.DisconnectAsync();
+        }
+
+        public async Task RemoveAllClient()
+        {
+            foreach (var (host, port) in _clients.Keys)
+            {
+                await RemoveClient(host, port);
+            }
         }
 
         public async Task<IClient> CreateClientAsync(string host, int port)
@@ -103,15 +111,6 @@ namespace Uragano.Remoting
             }
         }
 
-
-        public void Dispose()
-        {
-            foreach (var client in _clients.Values.Select(p => p.Result))
-            {
-                client.DisconnectAsync().GetAwaiter().GetResult();
-            }
-        }
-
         internal class ClientMessageHandler : ChannelHandlerAdapter
         {
 
@@ -133,7 +132,7 @@ namespace Uragano.Remoting
             public override void ChannelInactive(IChannelHandlerContext context)
             {
                 var ctx = context.Channel.GetAttribute(TransportContextAttributeKey).Get();
-                ClientFactory.RemoveClient(ctx.Host, ctx.Port);
+                ClientFactory.RemoveClient(ctx.Host, ctx.Port).GetAwaiter().GetResult();
             }
         }
     }
