@@ -59,8 +59,6 @@ namespace Uragano.Core
                     new X509Certificate2(certUrl, certUrl);
             }
 
-            AddStartUpTask<DotNettyBootstrapStartup>();
-
             RegisterServerServices();
         }
 
@@ -298,6 +296,7 @@ namespace Uragano.Core
             if (!RegisterSingletonService<ServerDefaultInterceptor>())
                 return;
             RegisterSingletonService<IBootstrap, ServerBootstrap>();
+            AddStartUpTask<DotNettyBootstrapStartup>();
             var types = ReflectHelper.GetDependencyTypes();
             var services = types.Where(t => t.IsInterface && typeof(IService).IsAssignableFrom(t)).Select(@interface => new
             {
