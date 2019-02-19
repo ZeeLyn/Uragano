@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Sample.Common;
 using Sample.Service.Interfaces;
 using Uragano.Abstractions;
+using Uragano.Caching.Memory;
 using Uragano.Caching.Redis;
 using Uragano.Codec.MessagePack;
 using Uragano.Consul;
@@ -53,7 +54,8 @@ namespace Sample.Server
                 //    ConnectionStrings = new[] { new RedisConnection("192.168.1.254", 6379, "nihao123", false, 15), new RedisConnection("192.168.1.253", 6379, "nihao123", false, 15) }
                 //});
                 builder.AddExceptionlessLogger(Configuration.GetSection("Uragano:Logging:Exceptionless"));
-                builder.AddRedisPartitionCaching(Configuration.GetSection("Uragano:Caching:Redis"));
+                //builder.AddRedisPartitionCaching(Configuration.GetSection("Uragano:Caching:Redis"));
+                builder.AddMemoryCaching(Configuration.GetSection("Uragano:Caching:Memory"));
                 builder.Options(Configuration.GetSection("Uragano:Options"));
             });
         }
