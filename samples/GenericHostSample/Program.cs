@@ -33,13 +33,13 @@ namespace GenericHostSample
                     {
                         builder.AddServer();
                         builder.AddClient();
+                        builder.AddCircuitBreaker();
                         builder.AddConsul();
                     });
                 }).ConfigureLogging((context, builder) =>
                 {
                     builder.AddConfiguration(context.Configuration.GetSection("Logging"));
                     builder.AddConsole();
-                    builder.AddDebug();
                 });
             await hostBuilder.RunConsoleAsync();
         }

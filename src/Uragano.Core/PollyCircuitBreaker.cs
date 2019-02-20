@@ -15,15 +15,15 @@ namespace Uragano.Core
 
         private IScriptInjection ScriptInjection { get; }
 
-        private IServiceFactory InvokerFactory { get; }
+        private IServiceFactory ServiceFactory { get; }
 
         private static readonly ConcurrentDictionary<string, AsyncPolicy<object>> Policies = new ConcurrentDictionary<string, AsyncPolicy<object>>();
 
-        public PollyCircuitBreaker(IServiceProvider serviceProvider, IScriptInjection scriptInjection, IServiceFactory invokerFactory)
+        public PollyCircuitBreaker(IServiceProvider serviceProvider, IScriptInjection scriptInjection, IServiceFactory serviceFactory)
         {
             ServiceProvider = serviceProvider;
             ScriptInjection = scriptInjection;
-            InvokerFactory = invokerFactory;
+            ServiceFactory = serviceFactory;
         }
 
         public async Task<object> ExecuteAsync(string route, Func<Task<object>> action, Type returnValueType)
@@ -46,13 +46,12 @@ namespace Uragano.Core
         {
             return Policies.GetOrAdd(route, (key) =>
             {
-                var service = InvokerFactory.Get(route);
+                var service = ServiceFactory.Get(route);
                 var serviceCircuitBreakerOptions = service.ServiceCircuitBreakerOptions;
                 var circuitBreakerEvent = ServiceProvider.GetService<ICircuitBreakerEvent>();
                 AsyncPolicy<object> policy = Policy<object>.Handle<Exception>().FallbackAsync(
                      async ct =>
                      {
-
                          if (circuitBreakerEvent != null)
                              await circuitBreakerEvent.OnFallback(route, service.MethodInfo);
                          if (returnValueType == null)
@@ -98,7 +97,6 @@ namespace Uragano.Core
                             if (circuitBreakerEvent != null)
                                 await circuitBreakerEvent.OnTimeOut(route, service.MethodInfo, ex);
                         }));
-
                 }
                 return policy;
             });

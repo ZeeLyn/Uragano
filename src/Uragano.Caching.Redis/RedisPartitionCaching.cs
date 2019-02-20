@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
 using Uragano.Codec.MessagePack;
@@ -34,11 +33,6 @@ namespace Uragano.Caching.Redis
             }
 
             Cache = new Microsoft.Extensions.Caching.Redis.CSRedisCache(RedisHelper.Instance);
-        }
-
-        public ICachingOptions ReadConfiguration(IConfigurationSection configurationSection)
-        {
-            return CommonMethods.ReadRedisConfiguration(configurationSection);
         }
 
         public async Task Set<TValue>(string key, TValue value, int expireSeconds = -1)

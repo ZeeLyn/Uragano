@@ -59,9 +59,9 @@ namespace Uragano.Core.Startup
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
+            Logger.LogDebug("Stop refreshing service status.");
             Timer.Enabled = false;
             Timer.Dispose();
-            Logger.LogDebug("Stop refreshing service status.");
             await Task.CompletedTask;
         }
     }

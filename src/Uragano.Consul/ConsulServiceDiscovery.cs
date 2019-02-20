@@ -5,7 +5,6 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Consul;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceDiscovery;
@@ -22,16 +21,6 @@ namespace Uragano.Consul
         {
             UraganoSettings = uraganoSettings;
             Logger = logger;
-        }
-
-        public IServiceDiscoveryClientConfiguration ReadClientConfiguration(IConfigurationSection clientConfigurationSection)
-        {
-            return CommonMethods.ReadConsulClientConfigure(clientConfigurationSection);
-        }
-
-        public IServiceRegisterConfiguration ReadServiceRegisterConfiguration(IConfigurationSection serviceConfigurationSection)
-        {
-            return CommonMethods.ReadRegisterServiceConfiguration(serviceConfigurationSection);
         }
 
         public async Task<bool> RegisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, IServiceRegisterConfiguration serviceRegisterConfiguration, int? weight = default, CancellationToken cancellationToken = default)

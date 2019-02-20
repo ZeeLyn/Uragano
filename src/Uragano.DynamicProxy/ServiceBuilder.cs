@@ -13,16 +13,16 @@ namespace Uragano.DynamicProxy
 {
     public class ServiceBuilder : IHostedService
     {
-        private IServiceFactory InvokerFactory { get; }
+        private IServiceFactory ServiceFactory { get; }
 
         private IServiceProvider ServiceProvider { get; }
 
         private UraganoSettings UraganoSettings { get; }
 
 
-        public ServiceBuilder(IServiceFactory invokerFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings)
+        public ServiceBuilder(IServiceFactory serviceFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings)
         {
-            InvokerFactory = invokerFactory;
+            ServiceFactory = serviceFactory;
             ServiceProvider = serviceProvider;
             UraganoSettings = uraganoSettings;
         }
@@ -63,8 +63,6 @@ namespace Uragano.DynamicProxy
             foreach (var service in services)
             {
                 var imp = service.Implementation;
-                //if (imp == null && enableServer)
-                //    continue;
 
                 var routeAttr = service.Interface.GetCustomAttribute<ServiceRouteAttribute>();
                 var routePrefix = routeAttr == null ? $"{service.Interface.Namespace}/{service.Interface.Name}" : routeAttr.Route;
@@ -109,7 +107,7 @@ namespace Uragano.DynamicProxy
                         clientInterceptors.Reverse();
                     }
 
-                    InvokerFactory.Create(route, serverMethod, interfaceMethod, serverInterceptors, clientInterceptors);
+                    ServiceFactory.Create(route, serverMethod, interfaceMethod, serverInterceptors, clientInterceptors);
                 }
             }
 

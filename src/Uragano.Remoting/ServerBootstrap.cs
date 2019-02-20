@@ -19,7 +19,7 @@ namespace Uragano.Remoting
         private IChannel Channel { get; set; }
 
 
-        private IServiceFactory InvokerFactory { get; }
+        private IServiceFactory ServiceFactory { get; }
 
         private ServerSettings ServerSettings { get; }
 
@@ -29,10 +29,10 @@ namespace Uragano.Remoting
 
         private ICodec Codec { get; }
 
-        public ServerBootstrap(IServiceFactory invokerFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings, ILogger<ServerBootstrap> logger, ICodec codec)
+        public ServerBootstrap(IServiceFactory serviceFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings, ILogger<ServerBootstrap> logger, ICodec codec)
         {
 
-            InvokerFactory = invokerFactory;
+            ServiceFactory = serviceFactory;
             ServiceProvider = serviceProvider;
             ServerSettings = uraganoSettings.ServerSettings;
             Logger = logger;
@@ -77,7 +77,7 @@ namespace Uragano.Remoting
                     pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
                     pipeline.AddLast(new MessageDecoder<IInvokeMessage>(Codec));
                     pipeline.AddLast(new MessageEncoder<IServiceResult>(Codec));
-                    pipeline.AddLast(new ServerMessageHandler(InvokerFactory, ServiceProvider, Logger));
+                    pipeline.AddLast(new ServerMessageHandler(ServiceFactory, ServiceProvider, Logger));
                 }));
             Logger.LogDebug($"DotNetty listening {ServerSettings.IP}:{ServerSettings.Port}");
             Channel = await bootstrap.BindAsync(new IPEndPoint(ServerSettings.IP, ServerSettings.Port));
