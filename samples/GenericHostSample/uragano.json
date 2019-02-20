@@ -1,7 +1,9 @@
 {
   "Logging": {
     "LogLevel": {
-      "Default": "Warning"
+      "Default": "Debug",
+      "System": "Information",
+      "Microsoft": "Information"
     }
   },
   "AllowedHosts": "*",
@@ -25,7 +27,7 @@
         },
         "Service": {
           "Id": null,
-          "Name": "RPC",
+          "Name": "PersionService",
           "tags": null,
           "EnableTagOverride": false,
           "meta": null,

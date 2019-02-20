@@ -333,7 +333,7 @@ namespace Uragano.Core
             var proxies = ProxyGenerator.GenerateProxy(services);
             foreach (var service in services)
             {
-                //Register proxy class
+                //Register proxy class,For support meta data using scope.
                 RegisterScopedService(service, proxies.FirstOrDefault(p => service.IsAssignableFrom(p)));
             }
 

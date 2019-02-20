@@ -58,13 +58,13 @@ namespace Uragano.DynamicProxy
             {
                 Interface = @interface,
                 Implementation = types.FirstOrDefault(p => p.IsClass && p.IsPublic && !p.IsAbstract && !p.Name.EndsWith("_____UraganoClientProxy") && @interface.IsAssignableFrom(p))
-            });
+            }).ToList();
 
             foreach (var service in services)
             {
                 var imp = service.Implementation;
-                if (imp == null && enableServer)
-                    continue;
+                //if (imp == null && enableServer)
+                //    continue;
 
                 var routeAttr = service.Interface.GetCustomAttribute<ServiceRouteAttribute>();
                 var routePrefix = routeAttr == null ? $"{service.Interface.Namespace}/{service.Interface.Name}" : routeAttr.Route;
@@ -73,14 +73,14 @@ namespace Uragano.DynamicProxy
                 var interfaceMethods = service.Interface.GetMethods();
 
                 List<MethodInfo> implementationMethods = null;
-                if (enableServer)
+                if (enableServer && imp != null)
                     implementationMethods = imp.GetMethods().ToList();
 
                 var clientClassInterceptors = service.Interface.GetCustomAttributes(true).Where(p => p is IInterceptor)
                     .Select(p => p.GetType()).ToList();
 
                 List<Type> serverClassInterceptors = null;
-                if (enableServer)
+                if (enableServer && imp != null)
                     serverClassInterceptors = imp.GetCustomAttributes(true).Where(p => p is IInterceptor).Select(p => p.GetType()).ToList();
 
                 foreach (var interfaceMethod in interfaceMethods)
@@ -90,7 +90,7 @@ namespace Uragano.DynamicProxy
                     var route = idAttr == null ? $"{routePrefix}/{interfaceMethod.Name}" : $"{routePrefix}/{idAttr.Route}";
 
                     var serverInterceptors = new List<Type>();
-                    if (enableServer)
+                    if (enableServer && imp != null)
                     {
                         serverMethod = implementationMethods.First(p => IsImplementationMethod(interfaceMethod, p));
                         serverInterceptors.AddRange(serverClassInterceptors.ToList());
