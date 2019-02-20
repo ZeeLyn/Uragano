@@ -7,11 +7,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Uragano.Logging.Log4Net
 {
-    public class Log4NetAdapter : ILogger
+    public class Log4NetLogger : ILogger
     {
         private readonly ILog Logger;
 
-        public Log4NetAdapter(string name, XmlElement config)
+        public Log4NetLogger(string name, XmlElement config)
         {
             var repository = LogManager.CreateRepository(
                 Assembly.GetEntryAssembly(),
@@ -77,7 +77,7 @@ namespace Uragano.Logging.Log4Net
 
         public IDisposable BeginScope<TState>(TState state)
         {
-            throw new NotImplementedException();
+            return null;
         }
     }
 }

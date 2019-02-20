@@ -47,7 +47,7 @@ namespace Uragano.Remoting
                 Body = message
             };
             if (Logger.IsEnabled(LogLevel.Debug))
-                Logger.LogDebug($"Sending message.[message id:{transportMessage.Id}]");
+                Logger.LogTrace($"Sending message.[message id:{transportMessage.Id}]");
             var tcs = new TaskCompletionSource<IServiceResult>(TaskCreationOptions.RunContinuationsAsynchronously);
             using (var ct = new CancellationTokenSource(UraganoOptions.Remoting_Invoke_CancellationTokenSource_Timeout.Value))
             {
@@ -57,7 +57,7 @@ namespace Uragano.Remoting
                 {
                     await Channel.WriteAndFlushAsync(transportMessage);
                     if (Logger.IsEnabled(LogLevel.Debug))
-                        Logger.LogDebug($"Send completed, waiting for results.[message id:{transportMessage.Id}]");
+                        Logger.LogTrace($"Send completed, waiting for results.[message id:{transportMessage.Id}]");
                     return await tcs.Task;
                 }
                 finally
@@ -70,7 +70,7 @@ namespace Uragano.Remoting
 
         public async Task DisconnectAsync()
         {
-            Logger.LogDebug($"Stopping dotnetty client.[{Channel.LocalAddress}]");
+            Logger.LogTrace($"Stopping dotnetty client.[{Channel.LocalAddress}]");
             foreach (var task in _resultCallbackTask.Values)
             {
                 task.TrySetCanceled();
@@ -83,7 +83,7 @@ namespace Uragano.Remoting
                 await EventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
             }
 
-            Logger.LogDebug($"The dotnetty client[{Channel.LocalAddress}] has stopped.");
+            Logger.LogTrace($"The dotnetty client[{Channel.LocalAddress}] has stopped.");
         }
     }
 }

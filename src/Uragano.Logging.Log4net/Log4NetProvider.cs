@@ -7,8 +7,8 @@ namespace Uragano.Logging.Log4Net
 {
     public class Log4NetProvider : ILoggerProvider
     {
-        private readonly ConcurrentDictionary<string, Log4NetAdapter> _loggers =
-            new ConcurrentDictionary<string, Log4NetAdapter>();
+        private readonly ConcurrentDictionary<string, Log4NetLogger> _loggers =
+            new ConcurrentDictionary<string, Log4NetLogger>();
 
         private static XmlElement XmlElement { get; set; }
 
@@ -26,7 +26,7 @@ namespace Uragano.Logging.Log4Net
 
         public ILogger CreateLogger(string categoryName)
         {
-            return _loggers.GetOrAdd(categoryName, new Log4NetAdapter(categoryName, ReadConfigFile(ConfigXmlFile)));
+            return _loggers.GetOrAdd(categoryName, new Log4NetLogger(categoryName, ReadConfigFile(ConfigXmlFile)));
         }
         private static XmlElement ReadConfigFile(string filename)
         {

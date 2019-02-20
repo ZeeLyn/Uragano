@@ -79,7 +79,7 @@ namespace Uragano.Remoting
                     pipeline.AddLast(new MessageEncoder<IServiceResult>(Codec));
                     pipeline.AddLast(new ServerMessageHandler(ServiceFactory, ServiceProvider, Logger));
                 }));
-            Logger.LogDebug($"DotNetty listening {ServerSettings.IP}:{ServerSettings.Port}");
+            Logger.LogTrace($"DotNetty listening {ServerSettings.IP}:{ServerSettings.Port}");
             Channel = await bootstrap.BindAsync(new IPEndPoint(ServerSettings.IP, ServerSettings.Port));
 
         }
@@ -87,11 +87,11 @@ namespace Uragano.Remoting
 
         public async Task StopAsync()
         {
-            Logger.LogDebug("Stopping dotnetty server...");
+            Logger.LogTrace("Stopping dotnetty server...");
             await Channel.CloseAsync();
             await BossGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
             await WorkerGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
-            Logger.LogDebug("The dotnetty server has stopped.");
+            Logger.LogTrace("The dotnetty server has stopped.");
         }
     }
 }

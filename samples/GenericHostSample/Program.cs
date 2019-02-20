@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Uragano.Consul;
 using Uragano.Core;
+using Uragano.Logging.Exceptionless;
 
 namespace GenericHostSample
 {
@@ -34,6 +35,7 @@ namespace GenericHostSample
                         builder.AddServer();
                         builder.AddClient();
                         builder.AddCircuitBreaker();
+                        builder.AddExceptionlessLogger();
                         builder.AddConsul();
                     });
                 }).ConfigureLogging((context, builder) =>

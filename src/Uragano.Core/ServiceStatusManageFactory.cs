@@ -53,13 +53,13 @@ namespace Uragano.Core
 
         public async Task Refresh(CancellationToken cancellationToken)
         {
-            Logger.LogDebug("------------> Start refresh service status...");
-            Logger.LogDebug("------------> Waiting for locking...");
+            Logger.LogTrace("------------> Start refresh service status...");
+            Logger.LogTrace("------------> Waiting for locking...");
             using (await AsyncLock.LockAsync(cancellationToken))
             {
                 if (cancellationToken.IsCancellationRequested)
                     return;
-                Logger.LogDebug("------------> Refreshing...");
+                Logger.LogTrace("------------> Refreshing...");
                 foreach (var service in ServiceNodes)
                 {
                     var healthNodes = await ServiceDiscovery.QueryServiceAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, service.Key, ServiceStatus.Alive, cancellationToken);
@@ -76,7 +76,7 @@ namespace Uragano.Core
                         {
                             if (node.Alive) continue;
                             node.Alive = true;
-                            Logger.LogDebug($"------------> The status of node {node.Address}:{node.Port} changes to alive.");
+                            Logger.LogTrace($"------------> The status of node {node.Address}:{node.Port} changes to alive.");
                         }
                         else
                         {
@@ -84,7 +84,7 @@ namespace Uragano.Core
                                 continue;
                             node.Alive = false;
                             node.CurrentWeight = 0;
-                            Logger.LogDebug($"------------> The status of node {node.Address}:{node.Port} changes to dead.");
+                            Logger.LogTrace($"------------> The status of node {node.Address}:{node.Port} changes to dead.");
                         }
                     }
 
@@ -102,10 +102,10 @@ namespace Uragano.Core
                     if (newEndPoints.Any())
                     {
                         service.Value.AddRange(newEndPoints);
-                        Logger.LogDebug($"------------> New nodes added:{string.Join(",", newEndPoints.Select(p => p.Address + ":" + p.Port))}");
+                        Logger.LogTrace($"------------> New nodes added:{string.Join(",", newEndPoints.Select(p => p.Address + ":" + p.Port))}");
                     }
                 }
-                Logger.LogDebug("------------> Complete refresh.");
+                Logger.LogTrace("------------> Complete refresh.");
             }
         }
     }

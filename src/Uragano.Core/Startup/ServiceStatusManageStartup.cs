@@ -49,7 +49,7 @@ namespace Uragano.Core.Startup
                     //            CancellationTokenSource.Token);
                     //    }
 
-                    //    Logger.LogDebug("Stop refreshing service status.");
+                    //    Logger.LogTrace("Stop refreshing service status.");
                     //}, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
                 }
@@ -59,7 +59,7 @@ namespace Uragano.Core.Startup
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            Logger.LogDebug("Stop refreshing service status.");
+            Logger.LogTrace("Stop refreshing service status.");
             Timer.Enabled = false;
             Timer.Dispose();
             await Task.CompletedTask;

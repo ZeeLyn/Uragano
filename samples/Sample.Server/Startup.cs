@@ -21,6 +21,7 @@ using Uragano.Consul;
 using Uragano.Core;
 using Uragano.Logging.Exceptionless;
 using Uragano.Logging.Log4Net;
+using Uragano.Logging.NLog;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace Sample.Server
@@ -47,7 +48,8 @@ namespace Sample.Server
                  builder.AddConsul();
                  builder.AddClientGlobalInterceptor<ClientGlobal_1_Interceptor>();
                  builder.AddExceptionlessLogger();
-                 builder.AddLog4Net();
+                 //builder.AddLog4NetLogger();
+                 //builder.AddNLogLogger();
                  builder.AddRedisPartitionCaching();
                  //builder.AddMemoryCaching();
                  builder.Options();

@@ -18,32 +18,32 @@ namespace Sample.Service.Interfaces
         }
         public async Task OnFallback(string route, MethodInfo methodInfo)
         {
-            Logger.LogDebug("Raise OnFallback");
+            Logger.LogTrace("Raise OnFallback");
         }
 
         public async Task OnBreak(string route, MethodInfo methodInfo, Exception exception, TimeSpan time)
         {
-            Logger.LogDebug($"Raise OnBreak;{exception.Message}");
+            Logger.LogTrace($"Raise OnBreak;{exception.Message}");
         }
 
         public async Task OnRest(string route, MethodInfo methodInfo)
         {
-            Logger.LogDebug("Raise OnRest");
+            Logger.LogTrace("Raise OnRest");
         }
 
         public async Task OnHalfOpen(string route, MethodInfo methodInfo)
         {
-            Logger.LogDebug("Raise OnHalfOpen");
+            Logger.LogTrace("Raise OnHalfOpen");
         }
 
         public async Task OnTimeOut(string route, MethodInfo methodInfo, Exception exception)
         {
-            Logger.LogDebug($"Raise OnTimeOut;{exception.Message}");
+            Logger.LogTrace($"Raise OnTimeOut;{exception.Message}");
         }
 
         public async Task OnRetry(string route, MethodInfo methodInfo, Exception exception, int retryTimes)
         {
-            Logger.LogDebug($"Raise OnRetry;{exception.Message};{retryTimes}");
+            Logger.LogTrace($"Raise OnRetry;{exception.Message};{retryTimes}");
         }
     }
 }

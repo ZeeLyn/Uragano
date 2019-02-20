@@ -29,7 +29,7 @@ namespace Uragano.Consul
                 return false;
             if (!(serviceRegisterConfiguration is ConsulRegisterServiceConfiguration service))
                 throw new ArgumentNullException(nameof(UraganoSettings.ServiceRegisterConfiguration));
-            Logger.LogDebug("Start registration consul...");
+            Logger.LogTrace("Start registration consul...");
             using (var consul = new ConsulClient(conf =>
             {
                 conf.Address = client.Address;
@@ -68,7 +68,7 @@ namespace Uragano.Consul
                     Logger.LogError("--------------->  Registration service failed:{0}", result.StatusCode);
                     throw new ConsulRequestException("Registration service failed.", result.StatusCode);
                 }
-                Logger.LogDebug("---------------> Consul service registration completed");
+                Logger.LogTrace("---------------> Consul service registration completed");
                 return result.StatusCode != HttpStatusCode.OK;
             }
         }
@@ -79,7 +79,7 @@ namespace Uragano.Consul
                 throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
             if (string.IsNullOrWhiteSpace(serviceId))
                 throw new ArgumentNullException(nameof(serviceId));
-            Logger.LogDebug("Start deregistration consul...");
+            Logger.LogTrace("Start deregistration consul...");
             using (var consul = new ConsulClient(conf =>
             {
                 conf.Address = client.Address;
@@ -95,7 +95,7 @@ namespace Uragano.Consul
                     throw new ConsulRequestException("Deregistration service failed.", result.StatusCode);
                 }
 
-                Logger.LogDebug("Deregistration consul has been completed.");
+                Logger.LogTrace("Deregistration consul has been completed.");
                 return result.StatusCode == HttpStatusCode.OK;
             }
         }
