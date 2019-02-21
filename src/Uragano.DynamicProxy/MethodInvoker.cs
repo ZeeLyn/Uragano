@@ -26,12 +26,6 @@ namespace Uragano.DynamicProxy
                 await Invoker(instance, args);
                 return null;
             }
-            //else if (MethodInfo.ReturnType == typeof(void))
-            //{
-            //	Invoker(instance, args);
-            //	return null;
-            //}
-
             return await Invoker(instance, args);
         }
 
@@ -44,7 +38,7 @@ namespace Uragano.DynamicProxy
 
             var argsExpressions = methodInfo.GetParameters().Select((item, index) => Expression.Convert(Expression.ArrayIndex(argsParameter, Expression.Constant(index)), item.ParameterType));
 
-            var instanceObj = methodInfo.IsStatic ? null : Expression.Convert(instanceParameter, methodInfo.DeclaringType);
+            var instanceObj = methodInfo.IsStatic ? null : Expression.Convert(instanceParameter, methodInfo.DeclaringType ?? throw new InvalidOperationException());
             var methodCaller = Expression.Call(instanceObj, methodInfo, argsExpressions);
             if (methodCaller.Type == typeof(Task))
             {
