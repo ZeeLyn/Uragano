@@ -42,57 +42,59 @@ namespace Uragano.DynamicProxy
             var serviceDescriptor = new ServiceDescriptor
             {
                 Route = route,
-                MethodInfo = serverMethodInfo,
-                ArgsType = serverMethodInfo == null ? null : serverMethodInfo.GetParameters().Select(p => p.ParameterType).ToArray(),
+                ServerMethodInfo = serverMethodInfo,
+                ClientMethodInfo = clientMethodInfo,
                 MethodInvoker = serverMethodInfo == null ? null : new MethodInvoker(serverMethodInfo),
                 ServerInterceptors = serverInterceptors,
                 ClientInterceptors = clientInterceptors
             };
-            var nonCircuitBreakerAttr = clientMethodInfo.GetCustomAttribute<NonCircuitBreakerAttribute>();
-            if (nonCircuitBreakerAttr == null)
+            if (enableClient)
             {
-                var circuitBreakerAttr = clientMethodInfo.GetCustomAttribute<CircuitBreakerAttribute>();
-                var globalCircuitBreaker = UraganoSettings.CircuitBreakerOptions;
-                if (globalCircuitBreaker != null || circuitBreakerAttr != null)
+                #region Circuit breaker
+                var nonCircuitBreakerAttr = clientMethodInfo.GetCustomAttribute<NonCircuitBreakerAttribute>();
+                if (nonCircuitBreakerAttr == null)
                 {
-                    var breaker = new ServiceCircuitBreakerOptions();
-                    if (globalCircuitBreaker != null)
+                    var circuitBreakerAttr = clientMethodInfo.GetCustomAttribute<CircuitBreakerAttribute>();
+                    var globalCircuitBreaker = UraganoSettings.CircuitBreakerOptions;
+                    if (globalCircuitBreaker != null || circuitBreakerAttr != null)
                     {
-                        breaker.Timeout = globalCircuitBreaker.Timeout;
-                        breaker.Retry = globalCircuitBreaker.Retry;
-                        breaker.ExceptionsAllowedBeforeBreaking = globalCircuitBreaker.ExceptionsAllowedBeforeBreaking;
-                        breaker.DurationOfBreak = globalCircuitBreaker.DurationOfBreak;
-                    }
-
-                    if (circuitBreakerAttr != null)
-                    {
-                        if (circuitBreakerAttr.Timeout.HasValue)
-                            breaker.Timeout = circuitBreakerAttr.Timeout.Value;
-                        if (circuitBreakerAttr.Retry.HasValue)
-                            breaker.Retry = circuitBreakerAttr.Retry.Value;
-                        if (circuitBreakerAttr.ExceptionsAllowedBeforeBreaking.HasValue)
-                            breaker.ExceptionsAllowedBeforeBreaking =
-                                circuitBreakerAttr.ExceptionsAllowedBeforeBreaking.Value;
-                        if (circuitBreakerAttr.DurationOfBreak.HasValue)
-                            breaker.DurationOfBreak = circuitBreakerAttr.DurationOfBreak.Value;
-                        if (!string.IsNullOrWhiteSpace(circuitBreakerAttr.FallbackExecuteScript))
+                        var breaker = new ServiceCircuitBreakerOptions();
+                        if (globalCircuitBreaker != null)
                         {
-                            breaker.HasInjection = true;
-                            if (enableClient)
+                            breaker.Timeout = globalCircuitBreaker.Timeout;
+                            breaker.Retry = globalCircuitBreaker.Retry;
+                            breaker.ExceptionsAllowedBeforeBreaking =
+                                globalCircuitBreaker.ExceptionsAllowedBeforeBreaking;
+                            breaker.DurationOfBreak = globalCircuitBreaker.DurationOfBreak;
+                        }
+
+                        if (circuitBreakerAttr != null)
+                        {
+                            if (circuitBreakerAttr.Timeout.HasValue)
+                                breaker.Timeout = circuitBreakerAttr.Timeout.Value;
+                            if (circuitBreakerAttr.Retry.HasValue)
+                                breaker.Retry = circuitBreakerAttr.Retry.Value;
+                            if (circuitBreakerAttr.ExceptionsAllowedBeforeBreaking.HasValue)
+                                breaker.ExceptionsAllowedBeforeBreaking =
+                                    circuitBreakerAttr.ExceptionsAllowedBeforeBreaking.Value;
+                            if (circuitBreakerAttr.DurationOfBreak.HasValue)
+                                breaker.DurationOfBreak = circuitBreakerAttr.DurationOfBreak.Value;
+                            if (!string.IsNullOrWhiteSpace(circuitBreakerAttr.FallbackExecuteScript))
                             {
+                                breaker.HasInjection = true;
                                 ScriptInjection.AddScript(route, circuitBreakerAttr.FallbackExecuteScript,
                                     circuitBreakerAttr.ScriptUsingNameSpaces);
                             }
                         }
-                    }
 
-                    serviceDescriptor.ServiceCircuitBreakerOptions = breaker;
+                        serviceDescriptor.ServiceCircuitBreakerOptions = breaker;
+                    }
                 }
-            }
-            //Must have a method of returning a value.
-            if (UraganoSettings.CachingOptions != null && clientMethodInfo.ReturnType != typeof(Task))
-            {
-                if (clientMethodInfo.GetCustomAttribute<NonCachingAttribute>() == null && clientMethodInfo.DeclaringType?.GetCustomAttribute<NonCachingAttribute>() == null)
+                #endregion
+
+                #region Caching
+                //Must have a method of returning a value.
+                if (UraganoSettings.CachingOptions != null && clientMethodInfo.ReturnType != typeof(Task) && clientMethodInfo.GetCustomAttribute<NonCachingAttribute>() == null && clientMethodInfo.DeclaringType?.GetCustomAttribute<NonCachingAttribute>() == null)
                 {
                     var attr = clientMethodInfo.GetCustomAttribute<CachingAttribute>();
                     var keyGenerator = ServiceProvider.GetRequiredService<ICachingKeyGenerator>();
@@ -104,8 +106,8 @@ namespace Uragano.DynamicProxy
                         ExpireSeconds = string.IsNullOrWhiteSpace(attr?.ExpireSeconds) ? UraganoSettings.CachingOptions.ExpireSeconds : int.Parse(attr.ExpireSeconds)
                     };
                 }
+                #endregion
             }
-
             ServiceInvokers.TryAdd(route, serviceDescriptor);
         }
 
@@ -117,10 +119,9 @@ namespace Uragano.DynamicProxy
         }
 
 
-        public async Task<IServiceResult> Invoke(string route, object[] args, Dictionary<string, string> meta)
+        public async Task<IServiceResult> InvokeAsync(string route, object[] args, Dictionary<string, string> meta)
         {
-            if (!ServiceInvokers.TryGetValue(route, out var service))
-                throw new NotFoundRouteException(route);
+            var service = Get(route);
             using (var scope = ServiceProvider.CreateScope())
             {
                 var context = new InterceptorContext
@@ -129,7 +130,7 @@ namespace Uragano.DynamicProxy
                     ServiceProvider = scope.ServiceProvider,
                     Args = args,
                     Meta = meta,
-                    MethodInfo = service.MethodInfo
+                    MethodInfo = service.ServerMethodInfo
                 };
                 context.Interceptors.Push(typeof(ServerDefaultInterceptor));
                 foreach (var interceptor in service.ServerInterceptors)

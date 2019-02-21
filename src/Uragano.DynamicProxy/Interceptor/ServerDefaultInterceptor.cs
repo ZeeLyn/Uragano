@@ -17,8 +17,8 @@ namespace Uragano.DynamicProxy.Interceptor
         public override async Task<IServiceResult> Intercept(IInterceptorContext context)
         {
             var service = ServiceFactory.Get(context.ServiceRoute);
-            var instance = context.ServiceProvider.GetRequiredService(service.MethodInfo.DeclaringType);
-            return new ServiceResult(await service.MethodInvoker.Invoke(instance, context.Args));
+            var instance = context.ServiceProvider.GetRequiredService(service.ServerMethodInfo.DeclaringType);
+            return new ServiceResult(await service.MethodInvoker.InvokeAsync(instance, context.Args));
         }
     }
 }

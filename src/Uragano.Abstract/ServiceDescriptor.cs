@@ -10,9 +10,9 @@ namespace Uragano.Abstractions
     {
         public string Route { get; set; }
 
-        public MethodInfo MethodInfo { get; set; }
+        public MethodInfo ServerMethodInfo { get; set; }
 
-        public Type[] ArgsType { get; set; }
+        public MethodInfo ClientMethodInfo { get; set; }
 
         public IMethodInvoker MethodInvoker { get; set; }
 

@@ -19,7 +19,7 @@ namespace Uragano.DynamicProxy
             Invoker = BuildInvoker(methodInfo);
         }
 
-        public async Task<object> Invoke(object instance, params object[] args)
+        public async Task<object> InvokeAsync(object instance, params object[] args)
         {
             if (MethodInfo.ReturnType == typeof(Task))
             {

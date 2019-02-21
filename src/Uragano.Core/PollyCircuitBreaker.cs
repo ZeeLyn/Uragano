@@ -53,7 +53,7 @@ namespace Uragano.Core
                      async ct =>
                      {
                          if (circuitBreakerEvent != null)
-                             await circuitBreakerEvent.OnFallback(route, service.MethodInfo);
+                             await circuitBreakerEvent.OnFallback(route, service.ClientMethodInfo);
                          if (returnValueType == null)
                              return null;
                          if (service.ServiceCircuitBreakerOptions.HasInjection)
@@ -66,17 +66,17 @@ namespace Uragano.Core
                         async (ex, state, ts, ctx) =>
                         {
                             if (circuitBreakerEvent != null)
-                                await circuitBreakerEvent.OnBreak(route, service.MethodInfo, ex, ts);
+                                await circuitBreakerEvent.OnBreak(route, service.ClientMethodInfo, ex, ts);
                         },
                         async ctx =>
                         {
                             if (circuitBreakerEvent != null)
-                                await circuitBreakerEvent.OnRest(route, service.MethodInfo);
+                                await circuitBreakerEvent.OnRest(route, service.ClientMethodInfo);
                         },
                         async () =>
                         {
                             if (circuitBreakerEvent != null)
-                                await circuitBreakerEvent.OnHalfOpen(route, service.MethodInfo);
+                                await circuitBreakerEvent.OnHalfOpen(route, service.ClientMethodInfo);
                         }));
                 }
                 if (serviceCircuitBreakerOptions.Retry > 0)
@@ -85,7 +85,7 @@ namespace Uragano.Core
                         async (ex, times) =>
                         {
                             if (circuitBreakerEvent != null)
-                                await circuitBreakerEvent.OnRetry(route, service.MethodInfo, ex, times);
+                                await circuitBreakerEvent.OnRetry(route, service.ClientMethodInfo, ex, times);
                         }));
                 }
 
@@ -95,7 +95,7 @@ namespace Uragano.Core
                         async (ctx, ts, task, ex) =>
                         {
                             if (circuitBreakerEvent != null)
-                                await circuitBreakerEvent.OnTimeOut(route, service.MethodInfo, ex);
+                                await circuitBreakerEvent.OnTimeOut(route, service.ClientMethodInfo, ex);
                         }));
                 }
                 return policy;

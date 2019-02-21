@@ -35,7 +35,7 @@ namespace Uragano.Remoting
                 {
                     if (Logger.IsEnabled(LogLevel.Debug))
                         Logger.LogTrace($"Received the message:[route:{transportMessage.Body.Route};message id:{transportMessage.Id}]");
-                    var result = await ServiceFactory.Invoke(transportMessage.Body.Route, transportMessage.Body.Args,
+                    var result = await ServiceFactory.InvokeAsync(transportMessage.Body.Route, transportMessage.Body.Args,
                         transportMessage.Body.Meta);
                     await context.WriteAndFlushAsync(new TransportMessage<IServiceResult>
                     {

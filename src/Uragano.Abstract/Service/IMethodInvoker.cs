@@ -4,6 +4,6 @@ namespace Uragano.Abstractions.Service
 {
     public interface IMethodInvoker
     {
-        Task<object> Invoke(object instance, params object[] args);
+        Task<object> InvokeAsync(object instance, params object[] args);
     }
 }

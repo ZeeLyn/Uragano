@@ -40,7 +40,7 @@ namespace Uragano.DynamicProxy
                     Args = args,
                     ServiceRoute = route,
                     Meta = meta,
-                    MethodInfo = service.MethodInfo,
+                    MethodInfo = service.ClientMethodInfo,
                     ReturnType = typeof(T),
                     ServiceName = serviceName
                 };
@@ -81,7 +81,7 @@ namespace Uragano.DynamicProxy
                     Args = args,
                     ServiceRoute = route,
                     Meta = meta,
-                    MethodInfo = service.MethodInfo,
+                    MethodInfo = service.ClientMethodInfo,
                     ServiceName = serviceName
                 };
 

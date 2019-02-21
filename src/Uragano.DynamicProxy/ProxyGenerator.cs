@@ -15,7 +15,7 @@ namespace Uragano.DynamicProxy
 {
     public class ProxyGenerator
     {
-        public static List<Type> GenerateProxy(IEnumerable<Type> interfaces)
+        public static List<Type> GenerateProxy(List<Type> interfaces)
         {
             if (interfaces.Any(p => !p.IsInterface && !typeof(IService).IsAssignableFrom(p)))
                 throw new ArgumentException("The proxy object must be an interface and inherit IService.", nameof(interfaces));
