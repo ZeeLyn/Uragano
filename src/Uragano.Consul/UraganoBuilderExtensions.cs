@@ -29,12 +29,6 @@ namespace Uragano.Consul
             IConfigurationSection serviceConfigurationSection)
         {
             var service = CommonMethods.ReadRegisterServiceConfiguration(serviceConfigurationSection);
-
-            if (string.IsNullOrWhiteSpace(service.Id))
-            {
-                service.Id = Guid.NewGuid().ToString("N");
-            }
-
             builder.AddServiceDiscovery<ConsulServiceDiscovery>(CommonMethods.ReadConsulClientConfigure(clientConfigurationSection), service);
         }
 

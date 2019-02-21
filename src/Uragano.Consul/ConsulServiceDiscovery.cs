@@ -50,7 +50,7 @@ namespace Uragano.Consul
                 {
                     Address = UraganoSettings.ServerSettings.IP.ToString(),
                     Port = UraganoSettings.ServerSettings.Port,
-                    ID = service.Id,
+                    ID = string.IsNullOrWhiteSpace(service.Id) ? $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}" : service.Id,
                     Name = string.IsNullOrWhiteSpace(service.Name) ? $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}" : service.Name,
                     EnableTagOverride = service.EnableTagOverride,
                     Meta = service.Meta,
@@ -69,7 +69,7 @@ namespace Uragano.Consul
                     throw new ConsulRequestException("Registration service failed.", result.StatusCode);
                 }
                 Logger.LogTrace("---------------> Consul service registration completed");
-                return result.StatusCode != HttpStatusCode.OK;
+                return result.StatusCode == HttpStatusCode.OK;
             }
         }
 
