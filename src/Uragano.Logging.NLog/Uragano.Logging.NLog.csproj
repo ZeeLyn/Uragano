@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
+    <Version>0.0.1-preview.209</Version>
+    <Authors>Owen</Authors>
+    <Company>Owen</Company>
+    <Description>A simple, high performance RPC library.</Description>
+    <PackageLicenseUrl>https://github.com/ww198643/Uragano/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/ww198643/Uragano</PackageProjectUrl>
+    <PackageIconUrl>https://github.com/ww198643/Uragano/blob/master/icon.png?raw=true</PackageIconUrl>
+    <PackageTags>Uragano,RPC,DotNetty,Microservice,MessagePack,DynamicProxy</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
