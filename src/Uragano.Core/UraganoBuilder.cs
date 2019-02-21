@@ -44,7 +44,6 @@ namespace Uragano.Core
 
         public void AddServer(string ip, int port, string certUrl, string certPwd, int? weight = default)
         {
-
             UraganoSettings.ServerSettings = new ServerSettings
             {
                 IP = IPAddress.Parse(ip.ReplaceIpPlaceholder()),

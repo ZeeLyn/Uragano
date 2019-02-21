@@ -17,7 +17,7 @@ namespace Uragano.DynamicProxy
     public class ServiceFactory : IServiceFactory
     {
         private static readonly ConcurrentDictionary<string, ServiceDescriptor>
-            ServiceInvokers = new ConcurrentDictionary<string, ServiceDescriptor>();
+            ServiceInvokers = new ConcurrentDictionary<string, ServiceDescriptor>(StringComparer.OrdinalIgnoreCase);
 
 
         private IServiceProvider ServiceProvider { get; }
@@ -36,7 +36,6 @@ namespace Uragano.DynamicProxy
 
         public void Create(string route, MethodInfo serverMethodInfo, MethodInfo clientMethodInfo, List<Type> serverInterceptors, List<Type> clientInterceptors)
         {
-            route = route.ToLower();
             if (ServiceInvokers.ContainsKey(route))
                 throw new DuplicateRouteException(route);
             var enableClient = ServiceProvider.GetService<ILoadBalancing>() != null;
@@ -112,7 +111,7 @@ namespace Uragano.DynamicProxy
 
         public ServiceDescriptor Get(string route)
         {
-            if (ServiceInvokers.TryGetValue(route.ToLower(), out var value))
+            if (ServiceInvokers.TryGetValue(route, out var value))
                 return value;
             throw new NotFoundRouteException(route);
         }

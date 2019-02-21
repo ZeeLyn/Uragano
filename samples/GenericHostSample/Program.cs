@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Uragano.Configuration.Consul;
 using Uragano.Consul;
 using Uragano.Core;
 using Uragano.Logging.Exceptionless;
@@ -22,8 +23,8 @@ namespace GenericHostSample
                     builder.SetBasePath(Directory.GetCurrentDirectory());
                     //builder.AddJsonFile("appsettings.json", true, true);
                     builder.AddJsonFile("uragano.json", true, true);
-                    builder.AddCommandLine(args);
                     builder.AddEnvironmentVariables("uragano");
+                    builder.AddCommandLine(args);
                 }).ConfigureAppConfiguration((context, builder) =>
                 {
 

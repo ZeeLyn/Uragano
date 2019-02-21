@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Sample.Common;
 using Sample.Service.Interfaces;
 using Uragano.Abstractions;
@@ -16,11 +18,12 @@ namespace Sample.Server.Controllers
     {
         private IHelloService HelloService { get; }
 
+        private IConfigurationBuilder ConfigurationBuilder { get; }
 
-        public ValuesController(IHelloService helloService)
+        public ValuesController(IHelloService helloService, IServiceProvider serviceProvider)
         {
             HelloService = helloService;
-
+            var s = serviceProvider.GetServices<IConfigurationSource>();
         }
 
         // GET api/values
