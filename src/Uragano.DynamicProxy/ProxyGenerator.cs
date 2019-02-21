@@ -30,8 +30,6 @@ namespace Uragano.DynamicProxy
             }
 
             var trees = interfaces.Select(GenerateProxyTree).ToList();
-            //var text = trees.First().GetText();
-            //File.WriteAllText(@"F:\Imp.cs", text.ToString());
             using (var stream = CompileClientProxy(trees,
                 assemblies.Select(x => MetadataReference.CreateFromFile(x.Location))
                     .Concat(new[]
@@ -106,7 +104,7 @@ namespace Uragano.DynamicProxy
         private static MemberDeclarationSyntax GenerateMethod(string routePrefix, MethodInfo methodInfo, string serviceName)
         {
             if (methodInfo.ReturnType.Namespace != typeof(Task).Namespace)
-                throw new InvalidOperationException("Only support proxy asynchronous methods.");
+                throw new NotSupportedException($"Only support proxy asynchronous methods.[{methodInfo.DeclaringType?.Namespace}.{methodInfo.DeclaringType?.Name}.{methodInfo.Name}]");
 
             var methodAttr = methodInfo.GetCustomAttribute<ServiceRouteAttribute>();
             var serviceRoute = $"{routePrefix}/{(methodAttr == null ? methodInfo.Name : methodAttr.Route)}";
@@ -249,14 +247,14 @@ namespace Uragano.DynamicProxy
 
         private static MemoryStream CompileClientProxy(IEnumerable<SyntaxTree> trees, IEnumerable<MetadataReference> references)
         {
-            var assemblys = new[]
+            var assemblies = new[]
             {
                 "System.Runtime",
                 "mscorlib",
                 "System.Threading.Tasks",
                 "System.Collections"
             };
-            references = assemblys.Select(i => MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName(i)).Location)).Concat(references);
+            references = assemblies.Select(i => MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName(i)).Location)).Concat(references);
 
             references = references.Concat(new[]
             {

@@ -9,17 +9,17 @@ using DotNetty.Transport.Channels.Sockets;
 using DotNetty.Transport.Libuv;
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
-using Uragano.Abstractions.ServiceInvoker;
-using Uragano.Codec.MessagePack;
+using Uragano.Abstractions.Service;
+
 
 namespace Uragano.Remoting
 {
-    public class ServerBootstrap : IBootstrap, IDisposable
+    public class ServerBootstrap : IBootstrap
     {
         private IChannel Channel { get; set; }
 
 
-        private IInvokerFactory InvokerFactory { get; }
+        private IServiceFactory ServiceFactory { get; }
 
         private ServerSettings ServerSettings { get; }
 
@@ -27,36 +27,41 @@ namespace Uragano.Remoting
 
         private ILogger Logger { get; }
 
-        public ServerBootstrap(IInvokerFactory invokerFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings, ILogger<ServerBootstrap> logger)
+        private ICodec Codec { get; }
+
+        public ServerBootstrap(IServiceFactory serviceFactory, IServiceProvider serviceProvider, UraganoSettings uraganoSettings, ILogger<ServerBootstrap> logger, ICodec codec)
         {
 
-            InvokerFactory = invokerFactory;
+            ServiceFactory = serviceFactory;
             ServiceProvider = serviceProvider;
             ServerSettings = uraganoSettings.ServerSettings;
             Logger = logger;
+            Codec = codec;
         }
+
+        private IEventLoopGroup BossGroup { get; set; }
+        private IEventLoopGroup WorkerGroup { get; set; }
 
         public async Task StartAsync()
         {
-            IEventLoopGroup bossGroup;
-            IEventLoopGroup workerGroup;
+
             var bootstrap = new DotNetty.Transport.Bootstrapping.ServerBootstrap();
             if (UraganoOptions.DotNetty_Enable_Libuv.Value)
             {
                 var dispatcher = new DispatcherEventLoopGroup();
-                bossGroup = dispatcher;
-                workerGroup = new WorkerEventLoopGroup(dispatcher);
+                BossGroup = dispatcher;
+                WorkerGroup = new WorkerEventLoopGroup(dispatcher);
                 bootstrap.Channel<TcpServerChannel>();
             }
             else
             {
-                bossGroup = new MultithreadEventLoopGroup(1);
-                workerGroup = new MultithreadEventLoopGroup(UraganoOptions.DotNetty_Event_Loop_Count.Value);
+                BossGroup = new MultithreadEventLoopGroup(1);
+                WorkerGroup = new MultithreadEventLoopGroup(UraganoOptions.DotNetty_Event_Loop_Count.Value);
                 bootstrap.Channel<TcpServerSocketChannel>();
             }
 
             bootstrap
-                .Group(bossGroup, workerGroup)
+                .Group(BossGroup, WorkerGroup)
                 .Option(ChannelOption.SoBacklog, UraganoOptions.Server_DotNetty_Channel_SoBacklog.Value)
                 .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
                 .ChildOption(ChannelOption.ConnectTimeout, UraganoOptions.DotNetty_Connect_Timeout.Value)
@@ -70,24 +75,23 @@ namespace Uragano.Remoting
                     //pipeline.AddLast(new LoggingHandler("SRV-CONN"));
                     pipeline.AddLast(new LengthFieldPrepender(4));
                     pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
-                    pipeline.AddLast(new MessageDecoder<InvokeMessage>());
-                    pipeline.AddLast(new MessageEncoder<IServiceResult>());
-                    pipeline.AddLast(new ServerMessageHandler(InvokerFactory, ServiceProvider, Logger));
+                    pipeline.AddLast(new MessageDecoder<IInvokeMessage>(Codec));
+                    pipeline.AddLast(new MessageEncoder<IServiceResult>(Codec));
+                    pipeline.AddLast(new ServerMessageHandler(ServiceFactory, ServiceProvider, Logger));
                 }));
-            Logger.LogDebug($"Listening {ServerSettings.IP}:{ServerSettings.Port}");
+            Logger.LogTrace($"DotNetty listening {ServerSettings.IP}:{ServerSettings.Port}");
             Channel = await bootstrap.BindAsync(new IPEndPoint(ServerSettings.IP, ServerSettings.Port));
+
         }
 
 
         public async Task StopAsync()
         {
-            await Channel.EventLoop.ShutdownGracefullyAsync();
+            Logger.LogTrace("Stopping dotnetty server...");
             await Channel.CloseAsync();
-        }
-
-        public void Dispose()
-        {
-            StopAsync().Wait();
+            await BossGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
+            await WorkerGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
+            Logger.LogTrace("The dotnetty server has stopped.");
         }
     }
 }

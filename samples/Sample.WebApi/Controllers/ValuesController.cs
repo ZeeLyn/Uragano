@@ -19,18 +19,20 @@ namespace Sample.WebApi.Controllers
 
         private IServiceProvider ServiceProvider { get; }
 
+        private IPersonService PersonService { get; }
 
-        public ValuesController(IHelloService helloService, IServiceProvider serviceProvider)
+        public ValuesController(IHelloService helloService, IServiceProvider serviceProvider, IPersonService personService)
         {
             HelloService = helloService;
             ServiceProvider = serviceProvider;
-
+            PersonService = personService;
         }
 
         // GET api/values
         [HttpGet]
         public async Task<IActionResult> Get()
         {
+            return Ok(await PersonService.GetName(1));
             var a = Guid.NewGuid().ToString();
             //var r = ServiceProvider.GetServices<IRemotingInvoke>();
             var r = await HelloService.SetMeta(("token", "bearer .....")).SayHello(a);

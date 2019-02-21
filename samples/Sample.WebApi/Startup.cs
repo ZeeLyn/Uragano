@@ -28,18 +28,17 @@ namespace Sample.WebApi
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             //services.AddUragano(Configuration.GetSection("Uragano"));
-            services.AddUragano(config =>
-            {
-                config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"));
-                config.AddClient();
-                //config.AddCircuitBreaker<CircuitBreakerEvent>(1000);
-                config.AddCircuitBreaker(Configuration.GetSection("CircuitBreaker"));
-                //config.DependencyServices(("RPC", "", ""));
-                //config.DependencyServices(Configuration.GetSection("Uragano:DependencyServices"));
-                //config.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));
-                config.Options(Configuration.GetSection("Uragano:Options"));
-            });
-            services.AddScoped<TestLib>();
+            services.AddUragano(Configuration, builder =>
+             {
+                 builder.AddConsul();
+                 builder.AddClient();
+                 //builder.AddCircuitBreaker<CircuitBreakerEvent>(1000);
+                 builder.AddCircuitBreaker();
+                 //builder.DependencyServices(("RPC", "", ""));
+                 //builder.DependencyServices(Configuration.GetSection("Uragano:DependencyServices"));
+                 //builder.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));
+                 builder.Options();
+             });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,7 +50,6 @@ namespace Sample.WebApi
             }
 
             app.UseMvc();
-            app.UseUragano();
         }
     }
 }

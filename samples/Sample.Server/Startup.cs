@@ -8,13 +8,21 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sample.Common;
 using Sample.Service.Interfaces;
 using Uragano.Abstractions;
+using Uragano.Caching.Memory;
+using Uragano.Caching.Redis;
 using Uragano.Codec.MessagePack;
 using Uragano.Consul;
 using Uragano.Core;
+using Uragano.Logging.Exceptionless;
+using Uragano.Logging.Log4Net;
+using Uragano.Logging.NLog;
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace Sample.Server
 {
@@ -31,22 +39,21 @@ namespace Sample.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            services.AddUragano(config =>
-            {
-                //config.IsDevelopment(true);
-                config.AddClient();
-                config.AddServer(Configuration.GetSection("Uragano:Server"));
-                config.AddConsul(Configuration.GetSection("Uragano:Consul:Client"),
-                    Configuration.GetSection("Uragano:Consul:Service"));
-                config.AddClientGlobalInterceptor<ClientGlobal_1_Interceptor>();
-                //config.AddClientGlobalInterceptor<ClientGlobal_2_Interceptor>();
-                //config.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
+            services.AddUragano(Configuration, builder =>
+             {
+                 //builder.IsDevelopment(true);
+                 builder.AddClient();
+                 builder.AddServer();
 
-                //config.Option(UraganoOptions.Server_DotNetty_Channel_SoBacklog, 100);
-                config.Options(Configuration.GetSection("Uragano:Options"));
-            });
-
-            services.AddScoped<TestLib>();
+                 builder.AddConsul();
+                 builder.AddClientGlobalInterceptor<ClientGlobal_1_Interceptor>();
+                 builder.AddExceptionlessLogger();
+                 //builder.AddLog4NetLogger();
+                 //builder.AddNLogLogger();
+                 builder.AddRedisPartitionCaching();
+                 //builder.AddMemoryCaching();
+                 builder.Options();
+             });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,7 +65,6 @@ namespace Sample.Server
             }
 
             app.UseMvc();
-            app.UseUragano();
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Logging;
 using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.ServiceDiscovery;
 
@@ -23,6 +24,10 @@ namespace Uragano.Abstractions
         public List<Type> ServerGlobalInterceptors { get; } = new List<Type>();
 
         public CircuitBreakerOptions CircuitBreakerOptions { get; set; }
+
+        public ICachingOptions CachingOptions { get; set; }
+
+        public List<ILoggerProvider> LoggerProviders { get; set; } = new List<ILoggerProvider>();
     }
 
 

@@ -6,8 +6,10 @@ namespace Uragano.Remoting
 {
 
 
-    public interface IClient : IDisposable
+    public interface IClient
     {
-        Task<IServiceResult> SendAsync(InvokeMessage message);
+        Task<IServiceResult> SendAsync(IInvokeMessage message);
+
+        Task DisconnectAsync();
     }
 }

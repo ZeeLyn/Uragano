@@ -1,0 +1,74 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Debug",
+      "System": "Information",
+      "Microsoft": "Information"
+    }
+  },
+  "AllowedHosts": "*",
+  "Uragano": {
+    "Server": {
+      "ip": "{LocalIP}",
+      "port": 5002,
+      "certUrl": "",
+      "certPwd": "",
+      "weight": 1
+    },
+    "Client": {
+      "LoadBalancing": "Uragano.Remoting.LoadBalancing.LoadBalancingPolling"
+    },
+    "ServiceDiscovery": {
+      "Consul": {
+        "ServiceDiscovery": "Uragano.Consul.ConsulServiceDiscovery",
+        "Client": {
+          "Address": "http://192.168.1.133:8500",
+          "Token": ""
+        },
+        "Service": {
+          "Id": null,
+          "Name": "PersionService",
+          "tags": null,
+          "EnableTagOverride": false,
+          "meta": null,
+          "HealthCheckInterval": 10
+        }
+      }
+    },
+    "Caching": {
+      "Redis": {
+        "Caching": "Uragano.Caching.Redis.RedisPartitionCaching",
+        "KeyPrefix": "Uragano",
+        "ExpireSeconds": 60,
+        "KeyGenerator": null,
+        "ConnectionStrings": [
+          {
+            "Host": "192.168.1.254",
+            "Port": 6379,
+            "Password": "nihao123",
+            "DefaultDatabase": 13,
+            "PoolSize": 50,
+            "SSL": false,
+            "ConnectionTimeout": -1,
+            "PreHeat": true,
+            "WriteBuffer": 10240,
+            "TryIt": 0,
+            "Name": ""
+          }
+        ]
+      },
+      "Memory": {
+        "ExpireSeconds": 60
+      }
+    },
+    "Logging": {
+      "Exceptionless": {
+        "apiKey": "avtkum3kDogGmLjMCQim9wgC8zHDbcrzQEpDNNJ7"
+      }
+    },
+    "Options": {
+      "ThreadPool_MinThreads": 100,
+      "DotNetty_Event_Loop_Count": 100
+    }
+  }
+}

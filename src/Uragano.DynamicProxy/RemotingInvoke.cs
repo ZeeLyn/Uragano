@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
 using Uragano.Abstractions.Exceptions;
-using Uragano.Abstractions.ServiceInvoker;
+using Uragano.Abstractions.Service;
 using Uragano.DynamicProxy.Interceptor;
 using Uragano.Remoting;
 
@@ -15,21 +15,22 @@ namespace Uragano.DynamicProxy
     {
         private ILoadBalancing LoadBalancing { get; }
         private IClientFactory ClientFactory { get; }
-        private IInvokerFactory InvokerFactory { get; }
+        private IServiceFactory ServiceFactory { get; }
         private UraganoSettings UraganoSettings { get; }
         private IServiceProvider ServiceProvider { get; }
 
-        public RemotingInvoke(ILoadBalancing loadBalancing, IClientFactory clientFactory, IInvokerFactory invokerFactory, UraganoSettings uraganoSettings, IServiceProvider serviceProvider)
+        public RemotingInvoke(ILoadBalancing loadBalancing, IClientFactory clientFactory, IServiceFactory serviceFactory, UraganoSettings uraganoSettings, IServiceProvider serviceProvider)
         {
             LoadBalancing = loadBalancing;
             ClientFactory = clientFactory;
-            InvokerFactory = invokerFactory;
+            ServiceFactory = serviceFactory;
             UraganoSettings = uraganoSettings;
             ServiceProvider = serviceProvider;
         }
+
         public async Task<T> InvokeAsync<T>(object[] args, string route, string serviceName, Dictionary<string, string> meta = default)
         {
-            var service = InvokerFactory.Get(route);
+            var service = ServiceFactory.Get(route);
 
             using (var scope = ServiceProvider.CreateScope())
             {
@@ -45,6 +46,8 @@ namespace Uragano.DynamicProxy
                 };
 
                 context.Interceptors.Push(typeof(ClientDefaultInterceptor));
+                if (service.CachingConfig != null)
+                    context.Interceptors.Push(typeof(CachingDefaultInterceptor));
                 foreach (var interceptor in service.ClientInterceptors)
                 {
                     context.Interceptors.Push(interceptor);
@@ -61,15 +64,14 @@ namespace Uragano.DynamicProxy
                 var result = await ((IInterceptor)scope.ServiceProvider.GetRequiredService(context.Interceptors.Pop())).Intercept(context);
                 if (result.Status != RemotingStatus.Ok)
                     throw new RemoteInvokeException(route, result.Result?.ToString(), result.Status);
-                if (result.Result == null)
-                    return default;
-                return (T)result.Result;
+
+                return result.Result == null ? default : (T)result.Result;
             }
         }
 
         public async Task InvokeAsync(object[] args, string route, string serviceName, Dictionary<string, string> meta = default)
         {
-            var service = InvokerFactory.Get(route);
+            var service = ServiceFactory.Get(route);
 
             using (var scope = ServiceProvider.CreateScope())
             {

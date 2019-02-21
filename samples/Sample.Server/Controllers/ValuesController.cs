@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Sample.Common;
 using Sample.Service.Interfaces;
+using Uragano.Abstractions;
 using Uragano.Core;
 
 namespace Sample.Server.Controllers
@@ -14,21 +18,25 @@ namespace Sample.Server.Controllers
     {
         private IHelloService HelloService { get; }
 
-        public ValuesController(IHelloService helloService)
+        private IConfigurationBuilder ConfigurationBuilder { get; }
+
+        public ValuesController(IHelloService helloService, IServiceProvider serviceProvider)
         {
             HelloService = helloService;
+            var s = serviceProvider.GetServices<IConfigurationSource>();
         }
 
         // GET api/values
         [HttpGet]
         public async Task<IActionResult> Get()
         {
+
             await HelloService.SayHello();
             return Ok(new
             {
-                name = await HelloService.SetMeta(("token", "bearer .....")).SayHello(Guid.NewGuid().ToString()),
+                //name = await HelloService.SetMeta(("token", "bearer .....")).SayHello(Guid.NewGuid().ToString()),
                 age = await HelloService.Age(),
-                entity = await HelloService.SayHello(new TestModel { Id = 1, Name = "owen" })
+                //entity = await HelloService.SayHello(new TestModel { Id = 1, Name = "owen" })
             });
         }
 

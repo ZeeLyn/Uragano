@@ -7,9 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="nunit" Version="3.11.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.12.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Uragano.Codec.MessagePack\Uragano.Codec.MessagePack.csproj" />
+    <ProjectReference Include="..\..\src\Uragano.Consul\Uragano.Consul.csproj" />
+    <ProjectReference Include="..\..\src\Uragano.Core\Uragano.Core.csproj" />
+    <ProjectReference Include="..\..\src\Uragano.DynamicProxy\Uragano.DynamicProxy.csproj" />
+    <ProjectReference Include="..\..\src\Uragano.Remoting\Uragano.Remoting.csproj" />
   </ItemGroup>
 
 </Project>

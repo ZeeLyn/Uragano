@@ -22,7 +22,7 @@ namespace Sample.Service.Interfaces
         }
         public override async Task<IServiceResult> Intercept(IInterceptorContext context)
         {
-            Logger.LogDebug("\n------------------>Server Interceptor attribute\n");
+            Logger.LogTrace("\n------------------>Server Interceptor attribute\n");
             var r = await context.Next();
             return r;
             r.Status = RemotingStatus.Forbidden;

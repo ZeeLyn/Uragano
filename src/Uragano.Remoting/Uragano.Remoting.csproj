@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Uragano.Codec.MessagePack\Uragano.Codec.MessagePack.csproj" />
+    <ProjectReference Include="..\Uragano.Abstract\Uragano.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Uragano.Abstractions.CircuitBreaker;
-using Uragano.Abstractions.ServiceInvoker;
+using Uragano.Abstractions.Service;
 
 namespace Uragano.Abstractions
 {
@@ -21,5 +21,17 @@ namespace Uragano.Abstractions
         public List<Type> ClientInterceptors { get; set; }
 
         public ServiceCircuitBreakerOptions ServiceCircuitBreakerOptions { get; set; }
+
+        public CachingConfig CachingConfig { get; set; }
+    }
+
+
+    public class CachingConfig
+    {
+        public string KeyPlaceholder { get; set; }
+
+        public bool CustomKey { get; set; }
+
+        public int ExpireSeconds { get; set; } = -1;
     }
 }

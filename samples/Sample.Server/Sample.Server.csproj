@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     <UserSecretsId>a309b84e-3fcf-40ea-a807-a76a4def865a</UserSecretsId>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,8 +13,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Uragano.Caching.Memory\Uragano.Caching.Memory.csproj" />
+    <ProjectReference Include="..\..\src\Uragano.Caching.Redis\Uragano.Caching.Redis.csproj" />
+    <ProjectReference Include="..\..\src\Uragano.Consul\Uragano.Consul.csproj" />
     <ProjectReference Include="..\..\src\Uragano.Core\Uragano.Core.csproj" />
+    <ProjectReference Include="..\..\src\Uragano.Logging.Exceptionless\Uragano.Logging.Exceptionless.csproj" />
+    <ProjectReference Include="..\..\src\Uragano.Logging.Log4net\Uragano.Logging.Log4Net.csproj" />
+    <ProjectReference Include="..\..\src\Uragano.Logging.NLog\Uragano.Logging.NLog.csproj" />
     <ProjectReference Include="..\Sample.Service.Interfaces\Sample.Service.Interfaces.csproj" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>
