@@ -22,7 +22,7 @@ namespace Uragano.Core
     {
         public IServiceCollection ServiceCollection { get; }
 
-        internal UraganoSettings UraganoSettings { get; set; } = new UraganoSettings();
+        internal UraganoSettings UraganoSettings { get; } = new UraganoSettings();
 
         public UraganoBuilder(IServiceCollection serviceCollection)
         {
@@ -37,12 +37,7 @@ namespace Uragano.Core
             UraganoSettings.IsDevelopment = isDevelopment;
         }
 
-        public void AddServer(string ip, int port, int? weight = default)
-        {
-            AddServer(ip, port, "", "", weight);
-        }
-
-        public void AddServer(string ip, int port, string certUrl, string certPwd, int? weight = default)
+        public void AddServer(string ip, int port = 5730, string certUrl = "", string certPwd = "", int? weight = default)
         {
             UraganoSettings.ServerSettings = new ServerSettings
             {
@@ -55,7 +50,7 @@ namespace Uragano.Core
                 if (!File.Exists(certUrl))
                     throw new FileNotFoundException($"Certificate file {certUrl} not found.");
                 UraganoSettings.ServerSettings.X509Certificate2 =
-                    new X509Certificate2(certUrl, certUrl);
+                    new X509Certificate2(certUrl, certPwd);
             }
 
             RegisterServerServices();
@@ -63,7 +58,30 @@ namespace Uragano.Core
 
         public void AddServer(IConfigurationSection configurationSection)
         {
-            AddServer(configurationSection.GetValue<string>("ip").ReplaceIpPlaceholder(), configurationSection.GetValue<int>("port"), configurationSection.GetValue<string>("certurl"), configurationSection.GetValue<string>("certpwd"), configurationSection.GetValue<int>("weight"));
+            UraganoSettings.ServerSettings = new ServerSettings();
+            if (configurationSection.Exists())
+            {
+                var ipSection = configurationSection.GetSection("ip");
+                if (ipSection.Exists())
+                    UraganoSettings.ServerSettings.IP = IPAddress.Parse(ipSection.Value.ReplaceIpPlaceholder());
+
+                var portSection = configurationSection.GetSection("port");
+                if (portSection.Exists())
+                    UraganoSettings.ServerSettings.Port = int.Parse(portSection.Value);
+
+                var weightSection = configurationSection.GetSection("weight");
+                if (weightSection.Exists())
+                    UraganoSettings.ServerSettings.Weight = int.Parse(weightSection.Value);
+
+                var certUrlSection = configurationSection.GetSection("certurl");
+                if (certUrlSection.Exists() && !string.IsNullOrWhiteSpace(certUrlSection.Value))
+                {
+                    if (!File.Exists(certUrlSection.Value))
+                        throw new FileNotFoundException($"Certificate file {certUrlSection.Value} not found.");
+                    UraganoSettings.ServerSettings.X509Certificate2 = new X509Certificate2(certUrlSection.Value, configurationSection.GetValue<string>("certpwd"));
+                }
+            }
+            RegisterServerServices();
         }
 
         #endregion
@@ -295,7 +313,7 @@ namespace Uragano.Core
             if (!RegisterSingletonService<ServerDefaultInterceptor>())
                 return;
             RegisterSingletonService<IBootstrap, ServerBootstrap>();
-            AddStartUpTask<DotNettyBootstrapStartup>();
+            AddStartUpTask<BootstrapStartup>();
             var types = ReflectHelper.GetDependencyTypes();
             var services = types.Where(t => t.IsInterface && typeof(IService).IsAssignableFrom(t)).Select(@interface => new
             {

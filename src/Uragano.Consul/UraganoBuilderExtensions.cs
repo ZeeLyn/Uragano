@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Uragano.Abstractions;
 
 namespace Uragano.Consul
@@ -18,10 +17,6 @@ namespace Uragano.Consul
 
         public static void AddConsul(this IUraganoBuilder builder, ConsulClientConfigure consulClientConfiguration, ConsulRegisterServiceConfiguration consulAgentServiceConfiguration)
         {
-            if (string.IsNullOrWhiteSpace(consulAgentServiceConfiguration.Id))
-            {
-                consulAgentServiceConfiguration.Id = Guid.NewGuid().ToString("N");
-            }
             builder.AddServiceDiscovery<ConsulServiceDiscovery>(consulClientConfiguration, consulAgentServiceConfiguration);
         }
 
@@ -35,14 +30,8 @@ namespace Uragano.Consul
         public static void AddConsul(this IUraganoSampleBuilder builder)
         {
             var client = builder.Configuration.GetSection("Uragano:ServiceDiscovery:Consul:Client");
-            if (!client.Exists())
-                throw new ArgumentNullException("Uragano:ServiceDiscovery:Consul:Client");
-
             var service = builder.Configuration.GetSection("Uragano:ServiceDiscovery:Consul:Service");
-            if (service.Exists())
-                builder.AddConsul(client, service);
-            else
-                builder.AddConsul(client);
+            builder.AddConsul(client, service);
         }
     }
 }

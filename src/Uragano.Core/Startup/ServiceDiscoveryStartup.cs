@@ -28,6 +28,17 @@ namespace Uragano.Core.Startup
             if (UraganoSettings.ServiceDiscoveryClientConfiguration == null)
                 throw new ArgumentNullException(nameof(UraganoSettings.ServiceDiscoveryClientConfiguration));
 
+            if (string.IsNullOrWhiteSpace(UraganoSettings.ServiceRegisterConfiguration.Id))
+            {
+                UraganoSettings.ServiceRegisterConfiguration.Id =
+                    $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}";
+            }
+
+            if (string.IsNullOrWhiteSpace(UraganoSettings.ServiceRegisterConfiguration.Name))
+            {
+                UraganoSettings.ServiceRegisterConfiguration.Name = $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}";
+            }
+
             await ServiceDiscovery.RegisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration, UraganoSettings.ServerSettings.Weight, cancellationToken);
         }
 

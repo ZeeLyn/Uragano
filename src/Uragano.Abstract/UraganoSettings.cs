@@ -17,8 +17,6 @@ namespace Uragano.Abstractions
 
         public IServiceRegisterConfiguration ServiceRegisterConfiguration { get; set; }
 
-        public Dictionary<string, X509Certificate2> ClientInvokeServices { get; set; }
-
         public List<Type> ClientGlobalInterceptors { get; } = new List<Type>();
 
         public List<Type> ServerGlobalInterceptors { get; } = new List<Type>();
@@ -33,13 +31,17 @@ namespace Uragano.Abstractions
 
     public class ServerSettings
     {
-        public IPAddress IP { get; set; }
+        public IPAddress IP { get; set; } = Environment.GetEnvironmentVariable("uragano-ip") == null
+            ? IpHelper.GetLocalInternetIp()
+            : IPAddress.Parse(Environment.GetEnvironmentVariable("uragano-ip") ?? "127.0.0.1");
 
-        public int Port { get; set; }
+        public int Port { get; set; } = int.Parse(Environment.GetEnvironmentVariable("uragano-port") ?? "5730");
 
         public X509Certificate2 X509Certificate2 { get; set; }
 
-        public int? Weight { get; set; }
+        public int? Weight { get; set; } = Environment.GetEnvironmentVariable("uragano-weight") == null
+            ? default
+            : int.Parse(Environment.GetEnvironmentVariable("uragano-weight") ?? "0");
     }
 
 }

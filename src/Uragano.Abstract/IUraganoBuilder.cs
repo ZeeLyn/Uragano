@@ -13,9 +13,7 @@ namespace Uragano.Abstractions
         IServiceCollection ServiceCollection { get; }
         void IsDevelopment(bool isDevelopment = false);
 
-        void AddServer(string ip, int port, int? weight = default);
-
-        void AddServer(string ip, int port, string certUrl, string certPwd, int? weight = default);
+        void AddServer(string ip, int port = 5730, string certUrl = "", string certPwd = "", int? weight = default);
 
         void AddServer(IConfigurationSection configurationSection);
 

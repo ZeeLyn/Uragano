@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
-using Uragano.Abstractions;
 
 namespace Uragano.Consul
 {
@@ -9,31 +8,44 @@ namespace Uragano.Consul
     {
         internal static ConsulClientConfigure ReadConsulClientConfigure(IConfigurationSection configurationSection)
         {
-            return new ConsulClientConfigure
+            var client = new ConsulClientConfigure();
+            if (configurationSection.Exists())
             {
-                Address = new Uri(configurationSection.GetValue<string>("address").ReplaceIpPlaceholder()),
-                Token = configurationSection.GetValue<string>("token"),
-                Datacenter = configurationSection.GetValue<string>("datacenter"),
-                WaitTime = string.IsNullOrWhiteSpace(configurationSection.GetValue<string>("waittime"))
+                var addressSection = configurationSection.GetSection("address");
+                if (addressSection.Exists())
+                    client.Address = new Uri(addressSection.Value);
+                var tokenSection = configurationSection.GetSection("token");
+                if (tokenSection.Exists())
+                    client.Token = tokenSection.Value;
+                var dcSection = configurationSection.GetSection("datacenter");
+                if (dcSection.Exists())
+                    client.Datacenter = dcSection.Value;
+                client.WaitTime = string.IsNullOrWhiteSpace(configurationSection.GetValue<string>("waittime"))
                     ? default
-                    : TimeSpan.FromMilliseconds(configurationSection.GetValue<int>("waittime"))
-            };
+                    : TimeSpan.FromMilliseconds(configurationSection.GetValue<int>("waittime"));
+            }
+            return client;
         }
 
         internal static ConsulRegisterServiceConfiguration ReadRegisterServiceConfiguration(IConfigurationSection configurationSection)
         {
-            return new ConsulRegisterServiceConfiguration
-            {
-                Id = configurationSection.GetValue<string>("id"),
-                Name = configurationSection.GetValue<string>("name"),
-                HealthCheckInterval =
-                    string.IsNullOrWhiteSpace(configurationSection.GetValue<string>("HealthCheckInterval"))
-                        ? TimeSpan.FromSeconds(10)
-                        : TimeSpan.FromMilliseconds(configurationSection.GetValue<int>("HealthCheckInterval")),
-                EnableTagOverride = configurationSection.GetValue<bool>("EnableTagOverride"),
-                Meta = configurationSection.GetValue<Dictionary<string, string>>("meta"),
-                Tags = configurationSection.GetValue<string[]>("tags")
-            };
+            var service = new ConsulRegisterServiceConfiguration();
+
+            var idSection = configurationSection.GetSection("id");
+            if (idSection.Exists())
+                service.Id = idSection.Value;
+            var nameSection = configurationSection.GetSection("name");
+            if (nameSection.Exists())
+                service.Name = nameSection.Value;
+            var hcSection = configurationSection.GetSection("HealthCheckInterval");
+            if (hcSection.Exists())
+                service.HealthCheckInterval =
+                    TimeSpan.FromMilliseconds(configurationSection.GetValue<int>("HealthCheckInterval"));
+
+            service.EnableTagOverride = configurationSection.GetValue<bool>("EnableTagOverride");
+            service.Meta = configurationSection.GetValue<Dictionary<string, string>>("meta");
+            service.Tags = configurationSection.GetValue<string[]>("tags");
+            return service;
         }
     }
 }

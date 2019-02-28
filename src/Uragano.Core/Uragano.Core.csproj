@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Uragano.Codec.MessagePack\Uragano.Codec.MessagePack.csproj" />
-    <ProjectReference Include="..\Uragano.Consul\Uragano.Consul.csproj" />
     <ProjectReference Include="..\Uragano.DynamicProxy\Uragano.DynamicProxy.csproj" />
   </ItemGroup>
 

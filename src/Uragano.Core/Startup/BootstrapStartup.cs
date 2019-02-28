@@ -7,12 +7,12 @@ using Uragano.Remoting;
 
 namespace Uragano.Core.Startup
 {
-    public class DotNettyBootstrapStartup : IHostedService
+    public class BootstrapStartup : IHostedService
     {
         private UraganoSettings UraganoSettings { get; }
         private IBootstrap Bootstrap { get; }
 
-        public DotNettyBootstrapStartup(UraganoSettings uraganoSettings, IBootstrap bootstrap)
+        public BootstrapStartup(UraganoSettings uraganoSettings, IBootstrap bootstrap)
         {
             UraganoSettings = uraganoSettings;
             Bootstrap = bootstrap;
