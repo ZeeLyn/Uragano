@@ -24,7 +24,7 @@ namespace Uragano.Core.Startup
         {
             if (UraganoSettings.ServerSettings == null)
                 return;
-            if (UraganoSettings.ServiceRegisterConfiguration == null || UraganoSettings.IsDevelopment) return;
+            if (UraganoSettings.ServiceRegisterConfiguration == null) return;
             if (UraganoSettings.ServiceDiscoveryClientConfiguration == null)
                 throw new ArgumentNullException(nameof(UraganoSettings.ServiceDiscoveryClientConfiguration));
 
@@ -44,8 +44,7 @@ namespace Uragano.Core.Startup
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            if (!UraganoSettings.IsDevelopment)
-                await ServiceDiscovery.DeregisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration.Id, cancellationToken);
+            await ServiceDiscovery.DeregisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration.Id);
         }
     }
 }

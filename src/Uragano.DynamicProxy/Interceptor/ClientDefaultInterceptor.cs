@@ -49,11 +49,7 @@ namespace Uragano.DynamicProxy.Interceptor
 
         private async Task<object> Exec(string serviceName, string route, object[] args, Dictionary<string, string> meta, Type returnValueType)
         {
-            ServiceNodeInfo node;
-            if (UraganoSettings.IsDevelopment)
-                node = new ServiceNodeInfo { Address = UraganoSettings.ServerSettings.IP.ToString(), Port = UraganoSettings.ServerSettings.Port };
-            else
-                node = await LoadBalancing.GetNextNode(serviceName);
+            var node = await LoadBalancing.GetNextNode(serviceName);
             var client = await ClientFactory.CreateClientAsync(node.Address, node.Port);
             var result = await client.SendAsync(new InvokeMessage(route, args, meta));
             if (result.Status != RemotingStatus.Ok)

@@ -50,18 +50,26 @@ namespace XUnitTest
                 ConsulServiceDiscovery.RegisterAsync(new ConsulClientConfigure
                 {
                     Address = new Uri("http://127.0.0.1:8600"),
-                    WaitTime = TimeSpan.FromSeconds(2)
+                    WaitTime = TimeSpan.FromSeconds(2),
+                    Token = "5ece74af-19d1-0e61-b25c-b9665d29f50b"
                 }, new ConsulRegisterServiceConfiguration
                 {
-                    Name = ""
 
                 }).GetAwaiter().GetResult();
             });
         }
+        [Fact]
+        public void QueryServiceAsync()
+        {
+            var result = ConsulServiceDiscovery
+                .QueryServiceAsync(ConsulFixture.UraganoSettings.ServiceDiscoveryClientConfiguration, "XUnitTest1",
+                    Uragano.Abstractions.ServiceDiscovery.ServiceStatus.All).GetAwaiter().GetResult();
+            Assert.True(result.Count >= 0);
+        }
 
         public void Dispose()
         {
-            ConsulServiceDiscovery.DeregisterAsync(ConsulFixture.UraganoSettings.ServiceDiscoveryClientConfiguration, "123").Wait();
+            ConsulServiceDiscovery.DeregisterAsync(ConsulFixture.UraganoSettings.ServiceDiscoveryClientConfiguration, "123").GetAwaiter().GetResult();
         }
     }
 
@@ -77,7 +85,8 @@ namespace XUnitTest
             {
                 ServiceDiscoveryClientConfiguration = new ConsulClientConfigure
                 {
-                    Address = new Uri("http://192.168.1.133:8500")
+                    Address = new Uri("http://192.168.1.254:8500"),
+                    Token = "5ece74af-19d1-0e61-b25c-b9665d29f50b"
                 },
                 ServerSettings = new ServerSettings
                 {

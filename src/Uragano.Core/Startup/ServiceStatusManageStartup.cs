@@ -27,33 +27,31 @@ namespace Uragano.Core.Startup
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            if (!UraganoSettings.IsDevelopment)
+            if (UraganoOptions.Client_Node_Status_Refresh_Interval.Value.Ticks > 0)
             {
-                if (UraganoOptions.Client_Node_Status_Refresh_Interval.Value.Ticks > 0)
+                Timer = new System.Timers.Timer(UraganoOptions.Client_Node_Status_Refresh_Interval.Value.TotalMilliseconds);
+                Timer.Elapsed += async (sender, args) =>
                 {
-                    Timer = new System.Timers.Timer(UraganoOptions.Client_Node_Status_Refresh_Interval.Value.TotalMilliseconds);
-                    Timer.Elapsed += async (sender, args) =>
-                    {
-                        await ServiceStatusManageFactory.Refresh(cancellationToken);
-                    };
-                    Timer.Enabled = true;
-                    //NOTE:Replace with Timer
-                    //Task.Factory.StartNew(async () =>
-                    //{
-                    //    while (!CancellationTokenSource.IsCancellationRequested)
-                    //    {
-                    //        await ServiceStatusManageFactory.Refresh(CancellationTokenSource.Token);
-                    //        if (CancellationTokenSource.IsCancellationRequested)
-                    //            break;
-                    //        await Task.Delay(UraganoOptions.Client_Node_Status_Refresh_Interval.Value,
-                    //            CancellationTokenSource.Token);
-                    //    }
+                    await ServiceStatusManageFactory.Refresh(cancellationToken);
+                };
+                Timer.Enabled = true;
+                //NOTE:Replace with Timer
+                //Task.Factory.StartNew(async () =>
+                //{
+                //    while (!CancellationTokenSource.IsCancellationRequested)
+                //    {
+                //        await ServiceStatusManageFactory.Refresh(CancellationTokenSource.Token);
+                //        if (CancellationTokenSource.IsCancellationRequested)
+                //            break;
+                //        await Task.Delay(UraganoOptions.Client_Node_Status_Refresh_Interval.Value,
+                //            CancellationTokenSource.Token);
+                //    }
 
-                    //    Logger.LogTrace("Stop refreshing service status.");
-                    //}, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                //    Logger.LogTrace("Stop refreshing service status.");
+                //}, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
-                }
             }
+
             await Task.CompletedTask;
         }
 

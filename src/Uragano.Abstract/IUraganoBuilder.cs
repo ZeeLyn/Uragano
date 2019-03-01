@@ -11,7 +11,6 @@ namespace Uragano.Abstractions
     public interface IUraganoBuilder
     {
         IServiceCollection ServiceCollection { get; }
-        void IsDevelopment(bool isDevelopment = false);
 
         void AddServer(string ip, int port = 5730, string certUrl = "", string certPwd = "", int? weight = default);
 

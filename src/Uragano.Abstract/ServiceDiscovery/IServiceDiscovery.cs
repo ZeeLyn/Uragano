@@ -8,7 +8,7 @@ namespace Uragano.Abstractions.ServiceDiscovery
     {
         Task<bool> RegisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, IServiceRegisterConfiguration serviceRegisterConfiguration, int? weight = default, CancellationToken cancellationToken = default);
 
-        Task<bool> DeregisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceId, CancellationToken cancellationToken = default);
+        Task<bool> DeregisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceId);
 
         Task<List<ServiceDiscoveryInfo>> QueryServiceAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName, ServiceStatus serviceStatus = ServiceStatus.Alive, CancellationToken cancellationToken = default);
     }

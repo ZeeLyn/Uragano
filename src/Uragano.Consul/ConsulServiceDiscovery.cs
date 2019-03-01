@@ -80,7 +80,7 @@ namespace Uragano.Consul
             }
         }
 
-        public async Task<bool> DeregisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceId, CancellationToken cancellationToken = default)
+        public async Task<bool> DeregisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceId)
         {
             if (!(serviceDiscoveryClientConfiguration is ConsulClientConfigure client))
                 throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
@@ -95,15 +95,23 @@ namespace Uragano.Consul
                 conf.WaitTime = client.WaitTime;
             }))
             {
-                var result = await consul.Agent.ServiceDeregister(serviceId, cancellationToken);
-                if (result.StatusCode != HttpStatusCode.OK)
+                try
                 {
-                    Logger.LogError("Deregistration service failed:{0}", result.StatusCode);
-                    throw new ConsulRequestException("Deregistration service failed.", result.StatusCode);
-                }
+                    var result = await consul.Agent.ServiceDeregister(serviceId);
+                    if (result.StatusCode != HttpStatusCode.OK)
+                    {
+                        Logger.LogError("Deregistration service failed:{0}", result.StatusCode);
+                        throw new ConsulRequestException("Deregistration service failed.", result.StatusCode);
+                    }
 
-                Logger.LogTrace("Deregistration consul has been completed.");
-                return result.StatusCode == HttpStatusCode.OK;
+                    Logger.LogTrace("Deregistration consul has been completed.");
+                    return result.StatusCode == HttpStatusCode.OK;
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(e, e.Message);
+                    return false;
+                }
             }
         }
 

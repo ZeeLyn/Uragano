@@ -32,11 +32,6 @@ namespace Uragano.Core
 
         #region Server
 
-        public void IsDevelopment(bool isDevelopment = false)
-        {
-            UraganoSettings.IsDevelopment = isDevelopment;
-        }
-
         public void AddServer(string ip, int port = 5730, string certUrl = "", string certPwd = "", int? weight = default)
         {
             UraganoSettings.ServerSettings = new ServerSettings
