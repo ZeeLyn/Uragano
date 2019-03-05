@@ -156,8 +156,6 @@ namespace Uragano.Core
         {
             UraganoSettings.ServiceDiscoveryClientConfiguration = serviceDiscoveryClientConfiguration ?? throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
             UraganoSettings.ServiceRegisterConfiguration = serviceRegisterConfiguration ?? throw new ArgumentNullException(nameof(serviceRegisterConfiguration));
-            if (string.IsNullOrWhiteSpace(serviceRegisterConfiguration.Name))
-                throw new ArgumentNullException(nameof(serviceRegisterConfiguration.Name));
 
             ServiceCollection.AddSingleton(typeof(IServiceDiscovery), serviceDiscovery);
             AddStartUpTask<ServiceDiscoveryStartup>();
