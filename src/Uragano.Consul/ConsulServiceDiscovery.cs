@@ -36,47 +36,59 @@ namespace Uragano.Consul
             if (!(serviceRegisterConfiguration is ConsulRegisterServiceConfiguration service))
                 throw new ArgumentNullException(nameof(UraganoSettings.ServiceRegisterConfiguration));
 
-            Logger.LogTrace("Start registration consul...");
-            using (var consul = new ConsulClient(conf =>
-            {
-                conf.Address = client.Address;
-                conf.Datacenter = client.Datacenter;
-                conf.Token = client.Token;
-                conf.WaitTime = client.WaitTime;
-            }))
-            {
-                if (weight.HasValue)
-                {
-                    if (service.Meta == null)
-                        service.Meta = new Dictionary<string, string>();
-                    service.Meta.Add("X-Weight", weight.ToString());
-                }
+            if (string.IsNullOrWhiteSpace(serviceRegisterConfiguration.Name))
+                throw new ArgumentNullException(nameof(serviceRegisterConfiguration.Name), "Service name value cannot be null.");
 
-                //Register service to consul agent 
-                var result = await consul.Agent.ServiceRegister(new AgentServiceRegistration
+            Logger.LogTrace("Start registering with consul[{0}]...", client.Address);
+            try
+            {
+                using (var consul = new ConsulClient(conf =>
                 {
-                    Address = UraganoSettings.ServerSettings.IP.ToString(),
-                    Port = UraganoSettings.ServerSettings.Port,
-                    ID = service.Id,
-                    Name = service.Name,
-                    EnableTagOverride = service.EnableTagOverride,
-                    Meta = service.Meta,
-                    Tags = service.Tags,
-                    Check = new AgentServiceCheck
+                    conf.Address = client.Address;
+                    conf.Datacenter = client.Datacenter;
+                    conf.Token = client.Token;
+                    conf.WaitTime = client.WaitTime;
+                }))
+                {
+                    if (weight.HasValue)
                     {
-                        TCP = $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}",
-                        DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(20),
-                        Timeout = TimeSpan.FromSeconds(3),
-                        Interval = service.HealthCheckInterval
+                        if (service.Meta == null)
+                            service.Meta = new Dictionary<string, string>();
+                        service.Meta.Add("X-Weight", weight.ToString());
                     }
-                }, cancellationToken);
-                if (result.StatusCode != HttpStatusCode.OK)
-                {
-                    Logger.LogError("Registration service failed:{0}", result.StatusCode);
-                    throw new ConsulRequestException("Registration service failed.", result.StatusCode);
+
+                    //Register service to consul agent 
+                    var result = await consul.Agent.ServiceRegister(new AgentServiceRegistration
+                    {
+                        Address = UraganoSettings.ServerSettings.IP.ToString(),
+                        Port = UraganoSettings.ServerSettings.Port,
+                        ID = service.Id,
+                        Name = service.Name,
+                        EnableTagOverride = service.EnableTagOverride,
+                        Meta = service.Meta,
+                        Tags = service.Tags,
+                        Check = new AgentServiceCheck
+                        {
+                            TCP = $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}",
+                            DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(20),
+                            Timeout = TimeSpan.FromSeconds(3),
+                            Interval = service.HealthCheckInterval
+                        }
+                    }, cancellationToken);
+                    if (result.StatusCode != HttpStatusCode.OK)
+                    {
+                        Logger.LogError("Registration service failed:{0}", result.StatusCode);
+                        throw new ConsulRequestException("Registration service failed.", result.StatusCode);
+                    }
+
+                    Logger.LogTrace("Consul service registration completed");
+                    return result.StatusCode == HttpStatusCode.OK;
                 }
-                Logger.LogTrace("Consul service registration completed");
-                return result.StatusCode == HttpStatusCode.OK;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Registration service failed:{0}", e.Message);
+                return false;
             }
         }
 
