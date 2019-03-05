@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,15 +16,17 @@ namespace GenericHostSample
 
         static async Task Main(string[] args)
         {
+
             var hostBuilder = new HostBuilder().ConfigureHostConfiguration(builder =>
                 {
                     builder.SetBasePath(Directory.GetCurrentDirectory());
+                    //builder.AddJsonFile("appsettings.json", true, true);
+                    builder.AddJsonFile("uragano.json", true, true);
+                    builder.AddEnvironmentVariables("uragano");
+                    builder.AddCommandLine(args);
                 }).ConfigureAppConfiguration((context, builder) =>
                 {
-                    builder.SetBasePath(Directory.GetCurrentDirectory());
-                    builder.AddJsonFile("uragano.json", true, true);
-                    //builder.AddEnvironmentVariables("uragano");
-                    builder.AddCommandLine(args);
+
                 })
                 .ConfigureServices((context, service) =>
                 {

@@ -31,10 +31,7 @@ namespace Uragano.Consul
         {
             var client = builder.Configuration.GetSection("Uragano:ServiceDiscovery:Consul:Client");
             var service = builder.Configuration.GetSection("Uragano:ServiceDiscovery:Consul:Service");
-            if (service.Exists())
-                builder.AddConsul(client, service);
-            else
-                builder.AddConsul(client);
+            builder.AddConsul(client, service);
         }
     }
 }

@@ -43,9 +43,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uragano.Caching.Memory", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenericHostSample", "samples\GenericHostSample\GenericHostSample.csproj", "{0E2FEB44-B557-49A7-AB77-EFFB5B779C4D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uragano.Logging.Log4Net", "src\Uragano.Logging.Log4net\Uragano.Logging.Log4Net.csproj", "{9BC4A74F-5ADF-4836-8ABC-92DAF9ADAA20}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Uragano.Logging.Log4Net", "src\Uragano.Logging.Log4net\Uragano.Logging.Log4Net.csproj", "{9BC4A74F-5ADF-4836-8ABC-92DAF9ADAA20}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uragano.Logging.NLog", "src\Uragano.Logging.NLog\Uragano.Logging.NLog.csproj", "{2E19A779-21E7-44D2-958A-F8A69D9A71B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Uragano.Logging.NLog", "src\Uragano.Logging.NLog\Uragano.Logging.NLog.csproj", "{2E19A779-21E7-44D2-958A-F8A69D9A71B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

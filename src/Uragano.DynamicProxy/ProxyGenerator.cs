@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -114,13 +113,13 @@ namespace Uragano.DynamicProxy
             var argDeclarations = new List<SyntaxNodeOrToken>();
             foreach (var arg in methodInfo.GetParameters())
             {
-                argDeclarations.Add(arg.ParameterType.IsGenericType
-                    ? SyntaxFactory.Parameter(SyntaxFactory.Identifier(arg.Name))
-                        .WithType(GenerateType(arg.ParameterType))
-                    : SyntaxFactory.Parameter(SyntaxFactory.Identifier(arg.Name))
-                        .WithType(GenerateQualifiedNameSyntax(arg.ParameterType)));
+                if (arg.ParameterType.IsGenericType)
+                    argDeclarations.Add(SyntaxFactory.Parameter(SyntaxFactory.Identifier(arg.Name)).WithType(GenerateType(arg.ParameterType)));
+                else
+                    argDeclarations.Add(SyntaxFactory.Parameter(SyntaxFactory.Identifier(arg.Name)).WithType(GenerateQualifiedNameSyntax(arg.ParameterType)));
 
                 argDeclarations.Add(SyntaxFactory.Token(SyntaxKind.CommaToken));
+
             }
 
             if (argDeclarations.Any())
@@ -128,8 +127,19 @@ namespace Uragano.DynamicProxy
                 argDeclarations.RemoveAt(argDeclarations.Count - 1);
             }
 
-            //Generate return type.
-            var methodDeclaration = SyntaxFactory.MethodDeclaration(methodInfo.ReturnType == typeof(void) ? SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)) : returnDeclaration, SyntaxFactory.Identifier(methodInfo.Name));
+            MethodDeclarationSyntax methodDeclaration;
+
+            if (methodInfo.ReturnType == typeof(void))
+            {
+                methodDeclaration = SyntaxFactory.MethodDeclaration(
+                        SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
+                        SyntaxFactory.Identifier(methodInfo.Name));
+            }
+            else
+            {
+                methodDeclaration = SyntaxFactory
+                    .MethodDeclaration(returnDeclaration, SyntaxFactory.Identifier(methodInfo.Name));
+            }
 
             if (methodInfo.ReturnType.Namespace == typeof(Task).Namespace)
             {
@@ -145,59 +155,35 @@ namespace Uragano.DynamicProxy
                 SyntaxFactory.ParameterList(SyntaxFactory.SeparatedList<ParameterSyntax>(argDeclarations)));
 
 
-            ExpressionSyntax expressionSyntax;
 
-            if (methodInfo.ReturnType == typeof(Task))
+            string methodBody = null;
+            var argNames = string.Join(",", methodInfo.GetParameters().Select(p => p.Name));
+            //Sync method
+            if (methodInfo.ReturnType.Namespace != typeof(Task).Namespace)
             {
-                expressionSyntax = SyntaxFactory.IdentifierName("InvokeAsync");
+                if (methodInfo.ReturnType == typeof(void))
+                {
+                    methodBody = $"Invoke(new object[]{{{argNames}}},@\"{serviceRoute}\",@\"{serviceName}\");";
+
+                }
+                else
+                {
+                    methodBody = $"return Invoke<{methodInfo.ReturnType.Namespace}.{methodInfo.ReturnType.Name}>(new object[]{{{argNames}}},@\"{serviceRoute}\",@\"{serviceName}\");";
+                }
             }
-            else
+            else //Async method
             {
-                expressionSyntax = SyntaxFactory.GenericName(SyntaxFactory.Identifier("InvokeAsync"))
-                    .WithTypeArgumentList(((GenericNameSyntax)returnDeclaration).TypeArgumentList);
-            }
-
-            var argNames = methodInfo.GetParameters().Select(p => SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(p.Name))).ToList();
-            var token = new SyntaxNodeOrToken[]
-            {
-                SyntaxFactory.Argument(SyntaxFactory
-                    .ArrayCreationExpression(SyntaxFactory
-                        .ArrayType(SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)))
-                        .WithRankSpecifiers(SyntaxFactory.SingletonList(
-                            SyntaxFactory.ArrayRankSpecifier(
-                                SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
-                                    SyntaxFactory.OmittedArraySizeExpression())))))
-                    .WithInitializer(SyntaxFactory.InitializerExpression(SyntaxKind.CollectionInitializerExpression,
-                        SyntaxFactory.SeparatedList<ExpressionSyntax>(argNames)))),
-
-                SyntaxFactory.Token(SyntaxKind.CommaToken),
-                SyntaxFactory.Argument(
-                    SyntaxFactory.LiteralExpression(
-                        SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal(serviceRoute))),
-                SyntaxFactory.Token(SyntaxKind.CommaToken),
-                SyntaxFactory.Argument(
-                    SyntaxFactory.LiteralExpression(
-                        SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal(serviceName)))
-            };
-
-            expressionSyntax = SyntaxFactory.AwaitExpression(SyntaxFactory.InvocationExpression(expressionSyntax)
-                .WithArgumentList(
-                    SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(token))
-                ));
-
-            StatementSyntax statementSyntax;
-            if (methodInfo.ReturnType != typeof(Task) && methodInfo.ReturnType != typeof(void))
-            {
-                statementSyntax = SyntaxFactory.ReturnStatement(expressionSyntax);
-            }
-            else
-            {
-                statementSyntax = SyntaxFactory.ExpressionStatement(expressionSyntax);
+                if (methodInfo.ReturnType == typeof(Task))
+                {
+                    methodBody = $"await InvokeAsync(new object[]{{{argNames}}},@\"{serviceRoute}\",@\"{serviceName}\");";
+                }
+                else
+                {
+                    methodBody = $"return await InvokeAsync<{methodInfo.ReturnType.GetGenericArguments().First().Namespace}.{methodInfo.ReturnType.GetGenericArguments().First().Name}>(new object[]{{{argNames}}},\"{serviceRoute}\",@\"{serviceName}\");";
+                }
             }
 
-            return methodDeclaration.WithBody(SyntaxFactory.Block(SyntaxFactory.SingletonList(statementSyntax)));
+            return methodDeclaration.WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(methodBody)));
         }
 
         private static ConstructorDeclarationSyntax GenerateConstructorDeclaration(string className)
@@ -286,7 +272,11 @@ namespace Uragano.DynamicProxy
             var result = compilation.Emit(stream);
             if (!result.Success)
             {
-                throw new Exception("Generate dynamic proxy failed:\n" + string.Join(";\n", result.Diagnostics.Select(i => i.ToString())));
+                //foreach (var message in result.Diagnostics.Select(i => i.ToString()))
+                //{
+                //	Logger.LogError(message);
+                //}
+                return null;
             }
             stream.Seek(0, SeekOrigin.Begin);
             return stream;

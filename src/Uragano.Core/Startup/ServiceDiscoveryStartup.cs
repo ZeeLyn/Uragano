@@ -44,8 +44,6 @@ namespace Uragano.Core.Startup
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            if (UraganoSettings.ServerSettings == null)
-                return;
             await ServiceDiscovery.DeregisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration.Id);
         }
     }

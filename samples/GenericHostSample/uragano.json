@@ -1,7 +1,7 @@
 {
   "Logging": {
     "LogLevel": {
-      "Default": "Trace",
+      "Default": "Debug",
       "System": "Information",
       "Microsoft": "Information"
     }
@@ -9,16 +9,20 @@
   "AllowedHosts": "*",
   "Uragano": {
     "Server": {
-      "ip": "192.168.1.129",
+      "ip": "{LocalIP}",
       "port": 5002,
       "certUrl": "",
       "certPwd": "",
       "weight": 1
     },
+    "Client": {
+      "LoadBalancing": "Uragano.Remoting.LoadBalancing.LoadBalancingPolling"
+    },
     "ServiceDiscovery": {
       "Consul": {
+        "ServiceDiscovery": "Uragano.Consul.ConsulServiceDiscovery",
         "Client": {
-          "Address": "http://192.168.1.254:8500",
+          "Address": "http://192.168.1.133:8500",
           "Token": ""
         },
         "Service": {

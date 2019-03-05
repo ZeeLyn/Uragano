@@ -44,50 +44,44 @@ namespace Uragano.Remoting
 
         public async Task StartAsync()
         {
-            try
-            {
-                var bootstrap = new DotNetty.Transport.Bootstrapping.ServerBootstrap();
-                if (UraganoOptions.DotNetty_Enable_Libuv.Value)
-                {
-                    var dispatcher = new DispatcherEventLoopGroup();
-                    BossGroup = dispatcher;
-                    WorkerGroup = new WorkerEventLoopGroup(dispatcher);
-                    bootstrap.Channel<TcpServerChannel>();
-                }
-                else
-                {
-                    BossGroup = new MultithreadEventLoopGroup(1);
-                    WorkerGroup = new MultithreadEventLoopGroup(UraganoOptions.DotNetty_Event_Loop_Count.Value);
-                    bootstrap.Channel<TcpServerSocketChannel>();
-                }
 
-                bootstrap
-                    .Group(BossGroup, WorkerGroup)
-                    .Option(ChannelOption.SoBacklog, UraganoOptions.Server_DotNetty_Channel_SoBacklog.Value)
-                    .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
-                    .ChildOption(ChannelOption.ConnectTimeout, UraganoOptions.DotNetty_Connect_Timeout.Value)
-                    .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
+            var bootstrap = new DotNetty.Transport.Bootstrapping.ServerBootstrap();
+            if (UraganoOptions.DotNetty_Enable_Libuv.Value)
+            {
+                var dispatcher = new DispatcherEventLoopGroup();
+                BossGroup = dispatcher;
+                WorkerGroup = new WorkerEventLoopGroup(dispatcher);
+                bootstrap.Channel<TcpServerChannel>();
+            }
+            else
+            {
+                BossGroup = new MultithreadEventLoopGroup(1);
+                WorkerGroup = new MultithreadEventLoopGroup(UraganoOptions.DotNetty_Event_Loop_Count.Value);
+                bootstrap.Channel<TcpServerSocketChannel>();
+            }
+
+            bootstrap
+                .Group(BossGroup, WorkerGroup)
+                .Option(ChannelOption.SoBacklog, UraganoOptions.Server_DotNetty_Channel_SoBacklog.Value)
+                .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
+                .ChildOption(ChannelOption.ConnectTimeout, UraganoOptions.DotNetty_Connect_Timeout.Value)
+                .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
+                {
+                    var pipeline = channel.Pipeline;
+                    if (ServerSettings.X509Certificate2 != null)
                     {
-                        var pipeline = channel.Pipeline;
-                        if (ServerSettings.X509Certificate2 != null)
-                        {
-                            pipeline.AddLast(TlsHandler.Server(ServerSettings.X509Certificate2));
-                        }
+                        pipeline.AddLast(TlsHandler.Server(ServerSettings.X509Certificate2));
+                    }
+                    //pipeline.AddLast(new LoggingHandler("SRV-CONN"));
+                    pipeline.AddLast(new LengthFieldPrepender(4));
+                    pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
+                    pipeline.AddLast(new MessageDecoder<IInvokeMessage>(Codec));
+                    pipeline.AddLast(new MessageEncoder<IServiceResult>(Codec));
+                    pipeline.AddLast(new ServerMessageHandler(ServiceFactory, ServiceProvider, Logger));
+                }));
+            Logger.LogInformation($"Uragano server listening {ServerSettings.IP}:{ServerSettings.Port}");
+            Channel = await bootstrap.BindAsync(new IPEndPoint(ServerSettings.IP, ServerSettings.Port));
 
-                        //pipeline.AddLast(new LoggingHandler("SRV-CONN"));
-                        pipeline.AddLast(new LengthFieldPrepender(4));
-                        pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
-                        pipeline.AddLast(new MessageDecoder<IInvokeMessage>(Codec));
-                        pipeline.AddLast(new MessageEncoder<IServiceResult>(Codec));
-                        pipeline.AddLast(new ServerMessageHandler(ServiceFactory, ServiceProvider, Logger));
-                    }));
-                Channel = await bootstrap.BindAsync(new IPEndPoint(ServerSettings.IP, ServerSettings.Port));
-                Logger.LogInformation($"Uragano server listening {ServerSettings.IP}:{ServerSettings.Port}");
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e, $"Start server[{ServerSettings.IP}:{ServerSettings.Port}] failed!");
-            }
         }
 
 

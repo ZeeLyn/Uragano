@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.0.1-preview.312</Version>
+    <Version>0.0.1-preview.310</Version>
     <Authors>Owen</Authors>
     <Company>Owen</Company>
     <Description>A simple, high performance RPC library.</Description>
