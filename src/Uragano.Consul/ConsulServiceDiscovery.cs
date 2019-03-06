@@ -60,7 +60,7 @@ namespace Uragano.Consul
                     //Register service to consul agent 
                     var result = await consul.Agent.ServiceRegister(new AgentServiceRegistration
                     {
-                        Address = UraganoSettings.ServerSettings.IP.ToString(),
+                        Address = UraganoSettings.ServerSettings.Address,
                         Port = UraganoSettings.ServerSettings.Port,
                         ID = service.Id,
                         Name = service.Name,
@@ -69,7 +69,7 @@ namespace Uragano.Consul
                         Tags = service.Tags,
                         Check = new AgentServiceCheck
                         {
-                            TCP = $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}",
+                            TCP = UraganoSettings.ServerSettings.ToString(),
                             DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(20),
                             Timeout = TimeSpan.FromSeconds(3),
                             Interval = service.HealthCheckInterval

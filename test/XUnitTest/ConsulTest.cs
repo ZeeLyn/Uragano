@@ -90,7 +90,7 @@ namespace XUnitTest
                 },
                 ServerSettings = new ServerSettings
                 {
-                    IP = IPAddress.Parse("127.0.0.1"),
+                    Address = "127.0.0.1",
                     Port = 1000
                 }
             };

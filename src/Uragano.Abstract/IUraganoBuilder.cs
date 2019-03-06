@@ -12,7 +12,7 @@ namespace Uragano.Abstractions
     {
         IServiceCollection ServiceCollection { get; }
 
-        void AddServer(string ip, int port = 5730, string certUrl = "", string certPwd = "", int? weight = default);
+        void AddServer(string address, int port = 5730, string certUrl = "", string certPwd = "", int? weight = default);
 
         void AddServer(IConfigurationSection configurationSection);
 

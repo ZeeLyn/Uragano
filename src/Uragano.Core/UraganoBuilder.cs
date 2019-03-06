@@ -32,11 +32,11 @@ namespace Uragano.Core
 
         #region Server
 
-        public void AddServer(string ip, int port = 5730, string certUrl = "", string certPwd = "", int? weight = default)
+        public void AddServer(string address, int port = 5730, string certUrl = "", string certPwd = "", int? weight = default)
         {
             UraganoSettings.ServerSettings = new ServerSettings
             {
-                IP = IPAddress.Parse(ip.ReplaceIpPlaceholder()),
+                Address = address.ReplaceIpPlaceholder(),
                 Port = port,
                 Weight = weight
             };
@@ -56,9 +56,9 @@ namespace Uragano.Core
             UraganoSettings.ServerSettings = new ServerSettings();
             if (configurationSection.Exists())
             {
-                var ipSection = configurationSection.GetSection("ip");
-                if (ipSection.Exists())
-                    UraganoSettings.ServerSettings.IP = IPAddress.Parse(ipSection.Value.ReplaceIpPlaceholder());
+                var addressSection = configurationSection.GetSection("address");
+                if (addressSection.Exists())
+                    UraganoSettings.ServerSettings.Address = addressSection.Value.ReplaceIpPlaceholder();
 
                 var portSection = configurationSection.GetSection("port");
                 if (portSection.Exists())

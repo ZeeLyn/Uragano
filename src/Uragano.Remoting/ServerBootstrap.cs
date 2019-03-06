@@ -81,12 +81,18 @@ namespace Uragano.Remoting
                         pipeline.AddLast(new MessageEncoder<IServiceResult>(Codec));
                         pipeline.AddLast(new ServerMessageHandler(ServiceFactory, ServiceProvider, Logger));
                     }));
-                Channel = await bootstrap.BindAsync(new IPEndPoint(ServerSettings.IP, ServerSettings.Port));
-                Logger.LogInformation($"Uragano server listening {ServerSettings.IP}:{ServerSettings.Port}");
+
+                EndPoint endPoint;
+                if (IPAddress.TryParse(ServerSettings.Address, out var iPAddress))
+                    endPoint = new IPEndPoint(iPAddress, ServerSettings.Port);
+                else
+                    endPoint = new DnsEndPoint(ServerSettings.Address, ServerSettings.Port);
+                Channel = await bootstrap.BindAsync(endPoint);
+                Logger.LogInformation($"Uragano server listening {ServerSettings}");
             }
             catch (Exception e)
             {
-                Logger.LogError(e, $"Start server[{ServerSettings.IP}:{ServerSettings.Port}] failed!");
+                Logger.LogError(e, $"Start server[{ServerSettings}] failed!");
             }
         }
 

@@ -31,17 +31,22 @@ namespace Uragano.Abstractions
 
     public class ServerSettings
     {
-        public IPAddress IP { get; set; } = Environment.GetEnvironmentVariable("uragano-ip") == null
-            ? IpHelper.GetLocalInternetIp()
-            : IPAddress.Parse(Environment.GetEnvironmentVariable("uragano-ip") ?? "127.0.0.1");
+        public string Address { get; set; } = Environment.GetEnvironmentVariable("uragano-server-addr") == null
+            ? IpHelper.GetLocalInternetIp().ToString()
+            : Environment.GetEnvironmentVariable("uragano-server-addr") ?? "127.0.0.1";
 
-        public int Port { get; set; } = int.Parse(Environment.GetEnvironmentVariable("uragano-port") ?? "5730");
+        public int Port { get; set; } = int.Parse(Environment.GetEnvironmentVariable("uragano-server-port") ?? "5730");
 
         public X509Certificate2 X509Certificate2 { get; set; }
 
-        public int? Weight { get; set; } = Environment.GetEnvironmentVariable("uragano-weight") == null
+        public int? Weight { get; set; } = Environment.GetEnvironmentVariable("uragano-server-weight") == null
             ? default
-            : int.Parse(Environment.GetEnvironmentVariable("uragano-weight") ?? "0");
+            : int.Parse(Environment.GetEnvironmentVariable("uragano-server-weight") ?? "0");
+
+        public override string ToString()
+        {
+            return $"{Address}:{Port}";
+        }
     }
 
 }

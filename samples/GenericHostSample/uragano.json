@@ -9,7 +9,7 @@
   "AllowedHosts": "*",
   "Uragano": {
     "Server": {
-      "ip": "192.168.1.129",
+      "address": "192.168.1.129",
       "port": 5002,
       "certUrl": "",
       "certPwd": "",

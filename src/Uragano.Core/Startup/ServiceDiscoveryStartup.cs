@@ -30,13 +30,12 @@ namespace Uragano.Core.Startup
 
             if (string.IsNullOrWhiteSpace(UraganoSettings.ServiceRegisterConfiguration.Id))
             {
-                UraganoSettings.ServiceRegisterConfiguration.Id =
-                    $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}";
+                UraganoSettings.ServiceRegisterConfiguration.Id = UraganoSettings.ServerSettings.ToString();
             }
 
             if (string.IsNullOrWhiteSpace(UraganoSettings.ServiceRegisterConfiguration.Name))
             {
-                UraganoSettings.ServiceRegisterConfiguration.Name = $"{UraganoSettings.ServerSettings.IP}:{UraganoSettings.ServerSettings.Port}";
+                UraganoSettings.ServiceRegisterConfiguration.Name = UraganoSettings.ServerSettings.ToString();
             }
 
             await ServiceDiscovery.RegisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration, UraganoSettings.ServerSettings.Weight, cancellationToken);
