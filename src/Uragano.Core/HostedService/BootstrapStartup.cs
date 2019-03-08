@@ -4,8 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Uragano.Abstractions;
 using Uragano.Remoting;
 
-
-namespace Uragano.Core.Startup
+namespace Uragano.Core.HostedService
 {
     public class BootstrapStartup : IHostedService
     {

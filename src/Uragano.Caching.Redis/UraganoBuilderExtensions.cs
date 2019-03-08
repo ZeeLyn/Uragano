@@ -9,7 +9,7 @@ namespace Uragano.Caching.Redis
         public static void AddRedisCaching(this IUraganoBuilder builder, RedisOptions redisOptions)
         {
             builder.AddCaching<RedisCaching>(redisOptions);
-            builder.AddStartUpTask<InitializationRedis>();
+            builder.AddHostedService<InitializationRedis>();
         }
 
         public static void AddRedisCaching(this IUraganoBuilder builder, IConfigurationSection configurationSection)

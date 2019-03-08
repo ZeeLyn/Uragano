@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.ServiceDiscovery;
-using Uragano.Core.Startup;
+using Uragano.Core.HostedService;
 using Uragano.DynamicProxy;
 using Uragano.DynamicProxy.Interceptor;
 using Uragano.Remoting;
@@ -27,7 +27,7 @@ namespace Uragano.Core
         public UraganoBuilder(IServiceCollection serviceCollection)
         {
             ServiceCollection = serviceCollection;
-            AddStartUpTask<InfrastructureStartup>();
+            AddHostedService<InfrastructureStartup>();
         }
 
         #region Server
@@ -135,7 +135,7 @@ namespace Uragano.Core
         {
             UraganoSettings.ServiceDiscoveryClientConfiguration = serviceDiscoveryClientConfiguration ?? throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
             ServiceCollection.AddSingleton(typeof(IServiceDiscovery), serviceDiscovery);
-            AddStartUpTask<ServiceDiscoveryStartup>();
+            AddHostedService<ServiceDiscoveryStartup>();
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace Uragano.Core
             UraganoSettings.ServiceRegisterConfiguration = serviceRegisterConfiguration ?? throw new ArgumentNullException(nameof(serviceRegisterConfiguration));
 
             ServiceCollection.AddSingleton(typeof(IServiceDiscovery), serviceDiscovery);
-            AddStartUpTask<ServiceDiscoveryStartup>();
+            AddHostedService<ServiceDiscoveryStartup>();
         }
 
         #endregion
@@ -291,11 +291,11 @@ namespace Uragano.Core
         #endregion
 
         #region StartUp Task
-        public void AddStartUpTask<TStartUpTask>() where TStartUpTask : IHostedService
+        public void AddHostedService<THostedService>() where THostedService : class, IHostedService
         {
-            if (ServiceCollection.Any(p => p.ServiceType == typeof(IHostedService) && p.ImplementationType == typeof(TStartUpTask)))
+            if (ServiceCollection.Any(p => p.ServiceType == typeof(IHostedService) && p.ImplementationType == typeof(THostedService)))
                 return;
-            ServiceCollection.AddSingleton(typeof(IHostedService), typeof(TStartUpTask));
+            ServiceCollection.AddHostedService<THostedService>();
         }
         #endregion
 
@@ -306,7 +306,7 @@ namespace Uragano.Core
             if (!RegisterSingletonService<ServerDefaultInterceptor>())
                 return;
             RegisterSingletonService<IBootstrap, ServerBootstrap>();
-            AddStartUpTask<BootstrapStartup>();
+            AddHostedService<BootstrapStartup>();
             var types = ReflectHelper.GetDependencyTypes();
             var services = types.Where(t => t.IsInterface && typeof(IService).IsAssignableFrom(t)).Select(@interface => new
             {
@@ -329,8 +329,8 @@ namespace Uragano.Core
         {
             if (!RegisterSingletonService<IServiceStatusManageFactory, ServiceStatusManageFactory>())
                 return;
-            AddStartUpTask<ServiceStatusManageStartup>();
-            AddStartUpTask<RemotingClientStartup>();
+            AddHostedService<ServiceStatusManageStartup>();
+            AddHostedService<RemotingClientStartup>();
             RegisterSingletonService<ClientDefaultInterceptor>();
             RegisterSingletonService<IClientFactory, ClientFactory>();
             RegisterSingletonService<IRemotingInvoke, RemotingInvoke>();

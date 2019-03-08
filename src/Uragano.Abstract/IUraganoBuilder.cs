@@ -67,7 +67,7 @@ namespace Uragano.Abstractions
 
         void AddLogger(ILoggerProvider loggerProvider);
 
-        void AddStartUpTask<TStartUpTask>() where TStartUpTask : IHostedService;
+        void AddHostedService<THostedService>() where THostedService : class, IHostedService;
 
     }
 

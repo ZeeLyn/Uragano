@@ -20,13 +20,16 @@ namespace Uragano.Remoting
 
         private ILogger Logger { get; }
 
-        public Client(IChannel channel, IEventLoopGroup eventLoopGroup, IMessageListener messageListener, ILogger logger)
+        private ICodec Codec { get; }
+
+        public Client(IChannel channel, IEventLoopGroup eventLoopGroup, IMessageListener messageListener, ILogger logger, ICodec codec)
         {
             Channel = channel;
             MessageListener = messageListener;
             MessageListener.OnReceived += MessageListener_OnReceived;
             EventLoopGroup = eventLoopGroup;
             Logger = logger;
+            Codec = codec;
         }
 
         private void MessageListener_OnReceived(TransportMessage<IServiceResult> message)
@@ -46,8 +49,8 @@ namespace Uragano.Remoting
                 Id = Guid.NewGuid().ToString("N"),
                 Body = message
             };
-            if (Logger.IsEnabled(LogLevel.Debug))
-                Logger.LogTrace($"Sending message.[message id:{transportMessage.Id}]");
+            if (Logger.IsEnabled(LogLevel.Trace))
+                Logger.LogTrace($"\nSending message.\nMessage id:{transportMessage.Id}\nArgs:{Codec.ToJson(message.Args)}");
             var tcs = new TaskCompletionSource<IServiceResult>(TaskCreationOptions.RunContinuationsAsynchronously);
             using (var ct = new CancellationTokenSource(UraganoOptions.Remoting_Invoke_CancellationTokenSource_Timeout.Value))
             {
@@ -56,8 +59,8 @@ namespace Uragano.Remoting
                 try
                 {
                     await Channel.WriteAndFlushAsync(transportMessage);
-                    if (Logger.IsEnabled(LogLevel.Debug))
-                        Logger.LogTrace($"Send completed, waiting for results.[message id:{transportMessage.Id}]");
+                    if (Logger.IsEnabled(LogLevel.Trace))
+                        Logger.LogTrace($"\nSend completed, waiting for results.\nMessage id:{transportMessage.Id}");
                     return await tcs.Task;
                 }
                 finally

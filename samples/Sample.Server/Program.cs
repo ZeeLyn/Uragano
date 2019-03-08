@@ -15,6 +15,7 @@ namespace Sample.Server
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args).Build().Run();
+            Console.ReadKey();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>

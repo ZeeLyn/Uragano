@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Uragano.Remoting;
 
-namespace Uragano.Core.Startup
+namespace Uragano.Core.HostedService
 {
     public class RemotingClientStartup : IHostedService
     {

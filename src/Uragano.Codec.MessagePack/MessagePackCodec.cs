@@ -27,5 +27,10 @@ namespace Uragano.Codec.MessagePack
         {
             return data == null ? default : (T)MessagePackSerializer.Typeless.Deserialize(data);
         }
+
+        public string ToJson<TData>(TData data)
+        {
+            return data == null ? default : MessagePackSerializer.ToJson(data);
+        }
     }
 }

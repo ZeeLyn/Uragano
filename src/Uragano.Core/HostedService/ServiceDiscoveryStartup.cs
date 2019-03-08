@@ -5,8 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceDiscovery;
 
-
-namespace Uragano.Core.Startup
+namespace Uragano.Core.HostedService
 {
     public class ServiceDiscoveryStartup : IHostedService
     {

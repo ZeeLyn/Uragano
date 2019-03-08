@@ -101,7 +101,7 @@ namespace Uragano.Remoting
                     });
                     var listener = new MessageListener();
                     channel.GetAttribute(MessageListenerAttributeKey).Set(listener);
-                    return new Client(channel, group, listener, Logger);
+                    return new Client(channel, group, listener, Logger, Codec);
                 });
             }
             catch

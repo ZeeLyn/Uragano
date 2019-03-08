@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 
-namespace Uragano.Core.Startup
+namespace Uragano.Core.HostedService
 {
     public class InfrastructureStartup : IHostedService
     {

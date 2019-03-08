@@ -9,5 +9,7 @@ namespace Uragano.Abstractions
         object Deserialize(byte[] data, Type type);
 
         T Deserialize<T>(byte[] data);
+
+        string ToJson<TData>(TData data);
     }
 }
