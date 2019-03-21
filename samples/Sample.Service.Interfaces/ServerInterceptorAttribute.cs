@@ -13,7 +13,6 @@ namespace Sample.Service.Interfaces
 
         public ServerInterceptorAttribute()
         {
-
         }
 
         public ServerInterceptorAttribute(ILogger<ServerInterceptorAttribute> logger)

@@ -19,6 +19,7 @@ namespace Sample.Service.Interfaces
 
         public override async Task<IServiceResult> Intercept(IInterceptorContext context)
         {
+
             Logger.LogTrace("\n---------------->Client global interceptor\n");
             return await context.Next();
 

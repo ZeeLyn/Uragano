@@ -74,12 +74,21 @@ namespace Uragano.DynamicProxy
                 if (enableServer && imp != null)
                     implementationMethods = imp.GetMethods().ToList();
 
-                var clientClassInterceptors = service.Interface.GetCustomAttributes(true).Where(p => p is IInterceptor)
+                var disableClientIntercept = service.Interface.GetCustomAttribute<NonInterceptAttribute>(true) != null;
+                List<Type> clientClassInterceptors = null;
+                if (!disableClientIntercept)
+                    clientClassInterceptors = service.Interface.GetCustomAttributes(true).Where(p => p is IInterceptor)
                     .Select(p => p.GetType()).ToList();
 
                 List<Type> serverClassInterceptors = null;
+                var disableServerIntercept = false;
                 if (enableServer && imp != null)
-                    serverClassInterceptors = imp.GetCustomAttributes(true).Where(p => p is IInterceptor).Select(p => p.GetType()).ToList();
+                {
+                    disableServerIntercept = imp.GetCustomAttribute<NonInterceptAttribute>(true) != null;
+                    if (!disableServerIntercept)
+                        serverClassInterceptors = imp.GetCustomAttributes(true).Where(p => p is IInterceptor)
+                            .Select(p => p.GetType()).ToList();
+                }
 
                 foreach (var interfaceMethod in interfaceMethods)
                 {
@@ -91,15 +100,18 @@ namespace Uragano.DynamicProxy
                     if (enableServer && imp != null)
                     {
                         serverMethod = implementationMethods.First(p => IsImplementationMethod(interfaceMethod, p));
-                        serverInterceptors.AddRange(serverClassInterceptors.ToList());
-                        if (serverMethod != null)
-                            serverInterceptors.AddRange(serverMethod.GetCustomAttributes(true)
-                                .Where(p => p is IInterceptor).Select(p => p.GetType()).ToList());
-                        serverInterceptors.Reverse();
+                        if (!disableServerIntercept)
+                        {
+                            serverInterceptors.AddRange(serverClassInterceptors.ToList());
+                            if (serverMethod != null)
+                                serverInterceptors.AddRange(serverMethod.GetCustomAttributes(true)
+                                    .Where(p => p is IInterceptor).Select(p => p.GetType()).ToList());
+                            serverInterceptors.Reverse();
+                        }
                     }
 
                     var clientInterceptors = new List<Type>();
-                    if (enableClient)
+                    if (enableClient && !disableClientIntercept)
                     {
                         clientInterceptors.AddRange(clientClassInterceptors);
                         clientInterceptors.AddRange(interfaceMethod.GetCustomAttributes(true)
