@@ -70,21 +70,27 @@ namespace Uragano.DynamicProxy
 
                         if (circuitBreakerAttr != null)
                         {
-                            if (circuitBreakerAttr.Timeout.HasValue)
-                                breaker.Timeout = circuitBreakerAttr.Timeout.Value;
-                            if (circuitBreakerAttr.Retry.HasValue)
-                                breaker.Retry = circuitBreakerAttr.Retry.Value;
-                            if (circuitBreakerAttr.ExceptionsAllowedBeforeBreaking.HasValue)
+                            if (circuitBreakerAttr.TimeoutMilliseconds > -1)
+                                breaker.Timeout = TimeSpan.FromMilliseconds(circuitBreakerAttr.TimeoutMilliseconds);
+                            if (circuitBreakerAttr.Retry > -1)
+                                breaker.Retry = circuitBreakerAttr.Retry;
+                            if (circuitBreakerAttr.ExceptionsAllowedBeforeBreaking > -1)
                                 breaker.ExceptionsAllowedBeforeBreaking =
-                                    circuitBreakerAttr.ExceptionsAllowedBeforeBreaking.Value;
-                            if (circuitBreakerAttr.DurationOfBreak.HasValue)
-                                breaker.DurationOfBreak = circuitBreakerAttr.DurationOfBreak.Value;
+                                    circuitBreakerAttr.ExceptionsAllowedBeforeBreaking;
+                            if (circuitBreakerAttr.DurationOfBreakSeconds > -1)
+                                breaker.DurationOfBreak = TimeSpan.FromSeconds(circuitBreakerAttr.DurationOfBreakSeconds);
                             if (!string.IsNullOrWhiteSpace(circuitBreakerAttr.FallbackExecuteScript))
                             {
                                 breaker.HasInjection = true;
                                 ScriptInjection.AddScript(route, circuitBreakerAttr.FallbackExecuteScript,
                                     circuitBreakerAttr.ScriptUsingNameSpaces);
                             }
+
+                            if (circuitBreakerAttr.MaxParallelization > -1)
+                                breaker.MaxParallelization = circuitBreakerAttr.MaxParallelization;
+
+                            if (circuitBreakerAttr.MaxQueuingActions > -1)
+                                breaker.MaxQueuingActions = circuitBreakerAttr.MaxQueuingActions;
                         }
 
                         serviceDescriptor.ServiceCircuitBreakerOptions = breaker;
@@ -99,11 +105,12 @@ namespace Uragano.DynamicProxy
                     var attr = clientMethodInfo.GetCustomAttribute<CachingAttribute>();
                     var keyGenerator = ServiceProvider.GetRequiredService<ICachingKeyGenerator>();
                     var key = keyGenerator.GenerateKeyPlaceholder(UraganoSettings.CachingOptions.KeyPrefix, UraganoSettings.CachingOptions.ExpireSeconds, route, clientMethodInfo, attr);
+
                     serviceDescriptor.CachingConfig = new CachingConfig
                     {
                         CustomKey = attr != null && !string.IsNullOrWhiteSpace(attr.Key),
                         KeyPlaceholder = key,
-                        ExpireSeconds = string.IsNullOrWhiteSpace(attr?.ExpireSeconds) ? UraganoSettings.CachingOptions.ExpireSeconds : int.Parse(attr.ExpireSeconds)
+                        ExpireSeconds = attr != null && attr.ExpireSeconds != -1 ? attr.ExpireSeconds : UraganoSettings.CachingOptions.ExpireSeconds
                     };
                 }
                 #endregion

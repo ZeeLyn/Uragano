@@ -18,5 +18,9 @@ namespace Uragano.Abstractions.CircuitBreaker
         /// </summary>
         public TimeSpan DurationOfBreak { get; set; } = TimeSpan.FromMinutes(1);
 
+
+        public int MaxParallelization { get; set; } = 0;
+
+        public int MaxQueuingActions { get; set; } = 0;
     }
 }

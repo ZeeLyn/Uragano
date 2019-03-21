@@ -50,7 +50,7 @@ namespace Sample.Server
                  builder.AddExceptionlessLogger();
                  //builder.AddLog4NetLogger();
                  //builder.AddNLogLogger();
-                 builder.AddRedisPartitionCaching();
+                 //builder.AddRedisPartitionCaching();
                  //builder.AddMemoryCaching();
                  builder.Options();
              });

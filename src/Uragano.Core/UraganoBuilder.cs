@@ -327,7 +327,7 @@ namespace Uragano.Core
 
         private void RegisterClientServices()
         {
-            if (!RegisterSingletonService<IServiceStatusManageFactory, ServiceStatusManageFactory>())
+            if (!RegisterSingletonService<IServiceStatusManage, ServiceStatusManage>())
                 return;
             AddHostedService<ServiceStatusManageStartup>();
             AddHostedService<RemotingClientStartup>();

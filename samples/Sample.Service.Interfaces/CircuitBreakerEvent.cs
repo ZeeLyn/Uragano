@@ -45,5 +45,10 @@ namespace Sample.Service.Interfaces
         {
             Logger.LogTrace($"Raise OnRetry;{exception.Message};{retryTimes}");
         }
+
+        public async Task OnBulkheadRejected(string route, MethodInfo methodInfo)
+        {
+            Logger.LogTrace("Raise OnBulkheadRejected;");
+        }
     }
 }

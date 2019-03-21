@@ -9,7 +9,7 @@ namespace Uragano.Core.HostedService
 {
     public class ServiceStatusManageStartup : BackgroundService
     {
-        private IServiceStatusManageFactory ServiceStatusManageFactory { get; }
+        private IServiceStatusManage ServiceStatusManageFactory { get; }
 
         private static System.Timers.Timer Timer { get; set; }
 
@@ -17,7 +17,7 @@ namespace Uragano.Core.HostedService
 
         private ILogger Logger { get; }
 
-        public ServiceStatusManageStartup(IServiceStatusManageFactory serviceStatusManageFactory, UraganoSettings uraganoSettings, ILogger<ServiceStatusManageStartup> logger)
+        public ServiceStatusManageStartup(IServiceStatusManage serviceStatusManageFactory, UraganoSettings uraganoSettings, ILogger<ServiceStatusManageStartup> logger)
         {
             ServiceStatusManageFactory = serviceStatusManageFactory;
             UraganoSettings = uraganoSettings;

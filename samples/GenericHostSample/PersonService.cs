@@ -18,10 +18,11 @@ namespace GenericHostSample
 
         public async Task<object> GetName(int id)
         {
+            await Task.Delay(TimeSpan.FromHours(1));
             return await Task.FromResult(new
             {
                 name = $"[{id}]Owen",
-                message = await HelloService.SayHello("Owen")
+                //message = await HelloService.SayHello("Owen")
             });
         }
     }

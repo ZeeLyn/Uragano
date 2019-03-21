@@ -14,7 +14,7 @@ namespace Sample.Service.Interfaces
         //[ClientMethodInterceptor_1_]
         //[ClientMethodInterceptor_2_]
         [CircuitBreaker(FallbackExecuteScript = "return new ResultModel{Message=\"fallback\"};", ScriptUsingNameSpaces = new[] { "Sample.Common" })]
-        [Caching(Key = "customKey:{0}", ExpireSeconds = "30")]
+        [Caching(Key = "customKey:{0}", ExpireSeconds = 30)]
         [ServiceRoute("say/async")]
         Task<ResultModel> SayHello(string name);
 

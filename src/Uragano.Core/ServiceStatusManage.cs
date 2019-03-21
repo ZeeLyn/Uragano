@@ -10,7 +10,7 @@ using Uragano.Abstractions.ServiceDiscovery;
 
 namespace Uragano.Core
 {
-    public class ServiceStatusManageFactory : IServiceStatusManageFactory
+    public class ServiceStatusManage : IServiceStatusManage
     {
         private ILogger Logger { get; }
 
@@ -24,7 +24,7 @@ namespace Uragano.Core
             new ConcurrentDictionary<string, List<ServiceNodeInfo>>();
 
 
-        public ServiceStatusManageFactory(ILogger<ServiceStatusManageFactory> logger, IServiceDiscovery serviceDiscovery, UraganoSettings uraganoSettings)
+        public ServiceStatusManage(ILogger<ServiceStatusManage> logger, IServiceDiscovery serviceDiscovery, UraganoSettings uraganoSettings)
         {
             Logger = logger;
             ServiceDiscovery = serviceDiscovery;
@@ -48,7 +48,8 @@ namespace Uragano.Core
 
             if (ServiceNodes.TryAdd(serviceName, nodes))
                 return nodes;
-            throw new InvalidOperationException($"Get service[{serviceName}] failure.");
+
+            throw new InvalidOperationException($"Service {serviceName} not found.");
         }
 
         public async Task Refresh(CancellationToken cancellationToken)

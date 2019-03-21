@@ -5,7 +5,6 @@ using Uragano.Remoting;
 using Uragano.Abstractions.CircuitBreaker;
 using System;
 using System.Collections.Generic;
-using Uragano.Abstractions.ServiceDiscovery;
 
 namespace Uragano.DynamicProxy.Interceptor
 {

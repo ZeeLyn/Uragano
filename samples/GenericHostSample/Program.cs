@@ -22,8 +22,7 @@ namespace GenericHostSample
                     builder.SetBasePath(Directory.GetCurrentDirectory());
                 }).ConfigureAppConfiguration((context, builder) =>
                 {
-                    builder.SetBasePath(Directory.GetCurrentDirectory());
-                    builder.AddJsonFile("uragano.json", true, true);
+                    builder.AddJsonFile("uragano.json", false, true);
                     //builder.AddEnvironmentVariables("uragano");
                     builder.AddCommandLine(args);
                 })

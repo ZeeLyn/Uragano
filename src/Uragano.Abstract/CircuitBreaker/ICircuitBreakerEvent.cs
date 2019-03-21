@@ -17,5 +17,7 @@ namespace Uragano.Abstractions.CircuitBreaker
         Task OnTimeOut(string route, MethodInfo methodInfo, Exception exception);
 
         Task OnRetry(string route, MethodInfo methodInfo, Exception exception, int retryTimes);
+
+        Task OnBulkheadRejected(string route, MethodInfo methodInfo);
     }
 }

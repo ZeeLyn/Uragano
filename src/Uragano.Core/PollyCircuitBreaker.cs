@@ -44,7 +44,7 @@ namespace Uragano.Core
 
         private AsyncPolicy<object> GetPolicy(string route, Type returnValueType)
         {
-            return Policies.GetOrAdd(route, (key) =>
+            return Policies.GetOrAdd(route, key =>
             {
                 var service = ServiceFactory.Get(route);
                 var serviceCircuitBreakerOptions = service.ServiceCircuitBreakerOptions;
@@ -89,6 +89,15 @@ namespace Uragano.Core
                         }));
                 }
 
+                if (serviceCircuitBreakerOptions.MaxParallelization > 0)
+                {
+                    policy = policy.WrapAsync(Policy.BulkheadAsync(serviceCircuitBreakerOptions.MaxParallelization, serviceCircuitBreakerOptions.MaxQueuingActions, async ctx =>
+                     {
+                         if (circuitBreakerEvent != null)
+                             await circuitBreakerEvent.OnBulkheadRejected(route, service.ClientMethodInfo);
+                     }));
+                }
+
                 if (serviceCircuitBreakerOptions.Timeout.Ticks > 0)
                 {
                     policy = policy.WrapAsync(Policy.TimeoutAsync(serviceCircuitBreakerOptions.Timeout, TimeoutStrategy.Pessimistic,
@@ -98,6 +107,8 @@ namespace Uragano.Core
                                 await circuitBreakerEvent.OnTimeOut(route, service.ClientMethodInfo, ex);
                         }));
                 }
+
+
                 return policy;
             });
         }

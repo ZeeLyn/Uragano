@@ -8,11 +8,11 @@ namespace Uragano.Remoting.LoadBalancing
 {
 	public class LoadBalancingPolling : ILoadBalancing
 	{
-		private IServiceStatusManageFactory ServiceStatusManageFactory { get; }
+		private IServiceStatusManage ServiceStatusManageFactory { get; }
 
 		private static int _index = -1;
 		private static readonly object LockObject = new object();
-		public LoadBalancingPolling(IServiceStatusManageFactory serviceStatusManageFactory)
+		public LoadBalancingPolling(IServiceStatusManage serviceStatusManageFactory)
 		{
 			ServiceStatusManageFactory = serviceStatusManageFactory;
 		}
