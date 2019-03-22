@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.0.1-preview.312</Version>
+    <Version>0.0.1-preview.313</Version>
     <Authors>Owen</Authors>
     <Company>Owen</Company>
     <Description>A simple, high performance RPC library.</Description>
@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Uragano.Abstract\Uragano.Abstractions.csproj" />
-    <ProjectReference Include="..\Uragano.Codec.MessagePack\Uragano.Codec.MessagePack.csproj" />
   </ItemGroup>
 
 </Project>

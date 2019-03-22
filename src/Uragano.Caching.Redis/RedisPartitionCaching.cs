@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
-using Uragano.Codec.MessagePack;
 
 namespace Uragano.Caching.Redis
 {
@@ -13,8 +12,11 @@ namespace Uragano.Caching.Redis
     {
         private IDistributedCache Cache { get; }
 
-        public RedisPartitionCaching(UraganoSettings uraganoSettings, IServiceProvider serviceProvider)
+        private ICodec Codec { get; }
+
+        public RedisPartitionCaching(UraganoSettings uraganoSettings, IServiceProvider serviceProvider, ICodec codec)
         {
+            Codec = codec;
             var redisOptions = (RedisOptions)uraganoSettings.CachingOptions;
             var policy = serviceProvider.GetService<Func<string, IEnumerable<RedisConnection>, RedisConnection>>();
             if (policy != null)
@@ -39,12 +41,12 @@ namespace Uragano.Caching.Redis
         public async Task Set<TValue>(string key, TValue value, int expireSeconds = -1)
         {
             if (expireSeconds > 0)
-                await Cache.SetAsync(key, SerializerHelper.Serialize(value), new DistributedCacheEntryOptions
+                await Cache.SetAsync(key, Codec.Serialize(value), new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = expireSeconds <= 0 ? default : TimeSpan.FromSeconds(expireSeconds)
                 });
             else
-                await Cache.SetAsync(key, SerializerHelper.Serialize(value));
+                await Cache.SetAsync(key, Codec.Serialize(value));
         }
 
         public async Task<(object value, bool hasKey)> Get(string key, Type type)
@@ -52,7 +54,7 @@ namespace Uragano.Caching.Redis
             var bytes = await Cache.GetAsync(key);
             if (bytes == null || bytes.LongLength == 0)
                 return (null, false);
-            return (SerializerHelper.Deserialize(bytes), true);
+            return (Codec.Deserialize(bytes, type), true);
         }
 
         public async Task<(TValue value, bool hasKey)> Get<TValue>(string key)

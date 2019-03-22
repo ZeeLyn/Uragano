@@ -1,15 +1,21 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Uragano.Abstractions;
-using Uragano.Codec.MessagePack;
 
 namespace Uragano.Caching.Redis
 {
     public class RedisCaching : ICaching
     {
+        private ICodec Codec { get; }
+
+        public RedisCaching(ICodec codec)
+        {
+            Codec = codec;
+        }
+
         public async Task Set<TValue>(string key, TValue value, int expireSeconds = -1)
         {
-            await RedisHelper.SetAsync(key, SerializerHelper.Serialize(value), expireSeconds);
+            await RedisHelper.SetAsync(key, Codec.Serialize(value), expireSeconds);
         }
 
         public async Task<(object value, bool hasKey)> Get(string key, Type type)
@@ -17,7 +23,7 @@ namespace Uragano.Caching.Redis
             var bytes = await RedisHelper.GetAsync<byte[]>(key);
             if (bytes == null || bytes.LongLength == 0)
                 return (null, false);
-            return (SerializerHelper.Deserialize(bytes), true);
+            return (Codec.Deserialize(bytes, type), true);
         }
 
         public async Task<(TValue value, bool hasKey)> Get<TValue>(string key)
