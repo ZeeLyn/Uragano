@@ -32,4 +32,5 @@ Samples|Average|Median|90% Line|95% Line|99% Line|Min|Max|Error %|Throughput|KB/
 
 
 ## Docs
+See [wiki documentation](wiki).
 
