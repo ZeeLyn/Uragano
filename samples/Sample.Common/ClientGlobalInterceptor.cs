@@ -1,17 +1,15 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 using Uragano.DynamicProxy.Interceptor;
 
-
-namespace Sample.Service.Interfaces
+namespace Sample.Common
 {
-    public class ClientGlobal_1_Interceptor : InterceptorAbstract
+    public class ClientGlobalInterceptor : InterceptorAbstract
     {
         private ILogger Logger { get; }
 
-        public ClientGlobal_1_Interceptor(ILogger<ClientGlobal_1_Interceptor> logger)
+        public ClientGlobalInterceptor(ILogger<ClientGlobalInterceptor> logger)
         {
             Logger = logger;
         }

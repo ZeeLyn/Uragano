@@ -53,13 +53,13 @@ namespace Uragano.DynamicProxy
                     context.Interceptors.Push(interceptor);
                 }
 
-                if (UraganoSettings.ClientGlobalInterceptors.Any())
-                {
-                    foreach (var interceptor in UraganoSettings.ClientGlobalInterceptors)
-                    {
-                        context.Interceptors.Push(interceptor);
-                    }
-                }
+                //if (UraganoSettings.ClientGlobalInterceptors.Any())
+                //{
+                //    foreach (var interceptor in UraganoSettings.ClientGlobalInterceptors)
+                //    {
+                //        context.Interceptors.Push(interceptor);
+                //    }
+                //}
 
                 var result = await ((IInterceptor)scope.ServiceProvider.GetRequiredService(context.Interceptors.Pop())).Intercept(context);
                 if (result.Status != RemotingStatus.Ok)

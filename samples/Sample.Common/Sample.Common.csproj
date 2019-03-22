@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Uragano.Caching.Redis\Uragano.Caching.Redis.csproj" />
+    <ProjectReference Include="..\..\src\Uragano.DynamicProxy\Uragano.DynamicProxy.csproj" />
   </ItemGroup>
 
 </Project>

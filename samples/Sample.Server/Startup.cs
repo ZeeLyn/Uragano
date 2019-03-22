@@ -46,12 +46,13 @@ namespace Sample.Server
                  builder.AddServer();
 
                  builder.AddConsul();
-                 builder.AddClientGlobalInterceptor<ClientGlobal_1_Interceptor>();
+                 builder.AddClientGlobalInterceptor<ClientGlobalInterceptor>();
+                 builder.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
                  builder.AddExceptionlessLogger();
                  //builder.AddLog4NetLogger();
                  //builder.AddNLogLogger();
-                 builder.AddRedisPartitionCaching();
-                 builder.AddMemoryCaching();
+                 //builder.AddRedisPartitionCaching();
+                 //builder.AddMemoryCaching();
                  builder.Options();
              });
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
 using Uragano.Abstractions;
 
 namespace Uragano.Caching.Memory
@@ -13,11 +12,6 @@ namespace Uragano.Caching.Memory
         public MemoryCaching(IMemoryCache memoryCache)
         {
             MemoryCache = memoryCache;
-        }
-
-        public ICachingOptions ReadConfiguration(IConfigurationSection configurationSection)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task Set<TValue>(string key, TValue value, int expireSeconds = -1)

@@ -31,11 +31,11 @@ namespace Sample.Server.Controllers
         public async Task<IActionResult> Get()
         {
 
-            await HelloService.SayHello();
+            //await HelloService.SayHello();
             return Ok(new
             {
                 //name = await HelloService.SetMeta(("token", "bearer .....")).SayHello(Guid.NewGuid().ToString()),
-                age = await HelloService.Age(),
+                Reply = await HelloService.SayHello("Owen"),
                 //entity = await HelloService.SayHello(new TestModel { Id = 1, Name = "owen" })
             });
         }

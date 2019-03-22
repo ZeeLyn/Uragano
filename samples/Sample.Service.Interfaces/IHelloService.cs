@@ -5,14 +5,14 @@ using Uragano.Abstractions;
 
 namespace Sample.Service.Interfaces
 {
-    //[ClientInterceptor_1_]
-    //[ClientInterceptor_2_]
     [ServiceDiscoveryName("RPC")]
     [ServiceRoute("hello")]
+    [ClientClassInterceptor]
+
     public interface IHelloService : IService
     {
-        //[ClientMethodInterceptor_1_]
-        //[ClientMethodInterceptor_2_]
+        [NonIntercept]
+        [ClientMethodInterceptor]
         [CircuitBreaker(FallbackExecuteScript = "return new ResultModel{Message=\"fallback\"};", ScriptUsingNameSpaces = new[] { "Sample.Common" })]
         [Caching(Key = "customKey:{0}", ExpireSeconds = 30)]
         [ServiceRoute("say/async")]

@@ -7,10 +7,12 @@ using Uragano.Abstractions;
 namespace Sample.Server
 {
 
+    [ServerClassInterceptor]
     [ServerInterceptor]
     public class HelloService : IHelloService
     {
-
+        [NonIntercept]
+        [ServerMethodInterceptor]
         public async Task<ResultModel> SayHello(string name)
         {
             // await Task.Delay(2000);

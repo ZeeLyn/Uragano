@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions.CircuitBreaker;
 
-namespace Sample.Service.Interfaces
+namespace Sample.Common
 {
     public class CircuitBreakerEvent : ICircuitBreakerEvent
     {

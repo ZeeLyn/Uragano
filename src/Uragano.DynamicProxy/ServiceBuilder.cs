@@ -75,12 +75,12 @@ namespace Uragano.DynamicProxy
                     implementationMethods = imp.GetMethods().ToList();
 
                 var disableClientIntercept = service.Interface.GetCustomAttribute<NonInterceptAttribute>(true) != null;
-                List<Type> clientClassInterceptors = null;
+                var clientClassInterceptors = new List<Type>();
                 if (!disableClientIntercept)
                     clientClassInterceptors = service.Interface.GetCustomAttributes(true).Where(p => p is IInterceptor)
                     .Select(p => p.GetType()).ToList();
 
-                List<Type> serverClassInterceptors = null;
+                var serverClassInterceptors = new List<Type>();
                 var disableServerIntercept = false;
                 if (enableServer && imp != null)
                 {
@@ -96,27 +96,30 @@ namespace Uragano.DynamicProxy
                     var idAttr = interfaceMethod.GetCustomAttribute<ServiceRouteAttribute>();
                     var route = idAttr == null ? $"{routePrefix}/{interfaceMethod.Name}" : $"{routePrefix}/{idAttr.Route}";
 
+                    var clientInterceptors = new List<Type>();
+                    if (enableClient && !disableClientIntercept && interfaceMethod.GetCustomAttribute<NonInterceptAttribute>(true) == null)
+                    {
+                        clientInterceptors.AddRange(UraganoSettings.ClientGlobalInterceptors);
+                        clientInterceptors.AddRange(clientClassInterceptors);
+                        clientInterceptors.AddRange(interfaceMethod.GetCustomAttributes(true)
+                            .Where(p => p is IInterceptor).Select(p => p.GetType()).ToList());
+                        clientInterceptors.Reverse();
+                    }
+
+
                     var serverInterceptors = new List<Type>();
                     if (enableServer && imp != null)
                     {
                         serverMethod = implementationMethods.First(p => IsImplementationMethod(interfaceMethod, p));
-                        if (!disableServerIntercept)
+                        if (!disableServerIntercept && serverMethod?.GetCustomAttribute<NonInterceptAttribute>(true) == null)
                         {
+                            serverInterceptors.AddRange(UraganoSettings.ServerGlobalInterceptors);
                             serverInterceptors.AddRange(serverClassInterceptors.ToList());
                             if (serverMethod != null)
                                 serverInterceptors.AddRange(serverMethod.GetCustomAttributes(true)
                                     .Where(p => p is IInterceptor).Select(p => p.GetType()).ToList());
                             serverInterceptors.Reverse();
                         }
-                    }
-
-                    var clientInterceptors = new List<Type>();
-                    if (enableClient && !disableClientIntercept)
-                    {
-                        clientInterceptors.AddRange(clientClassInterceptors);
-                        clientInterceptors.AddRange(interfaceMethod.GetCustomAttributes(true)
-                            .Where(p => p is IInterceptor).Select(p => p.GetType()).ToList());
-                        clientInterceptors.Reverse();
                     }
 
                     ServiceFactory.Create(route, serverMethod, interfaceMethod, serverInterceptors, clientInterceptors);
