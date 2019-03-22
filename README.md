@@ -4,12 +4,17 @@ A simple, high performance RPC library.
 ## Package & Status
 Package | NuGet
 --------|------
-Uragano.Abstractions|[![NuGet package](https://buildstats.info/nuget/Uragano.Abstractions?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Abstractions/0.0.1-preview.201)
-Uragano.Codec.MessagePack|[![NuGet package](https://buildstats.info/nuget/Uragano.Codec.MessagePack?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Codec.MessagePack/0.0.1-preview.201)
-Uragano.Consul|[![NuGet package](https://buildstats.info/nuget/Uragano.Consul?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Consul/0.0.1-preview.201)
-Uragano.DynamicProxy|[![NuGet package](https://buildstats.info/nuget/Uragano.DynamicProxy?includePreReleases=true)](https://www.nuget.org/packages/Uragano.DynamicProxy/0.0.1-preview.201)
-Uragano.Remoting|[![NuGet package](https://buildstats.info/nuget/Uragano.Remoting?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Remoting/0.0.1-preview.201)
-Uragano.Core|[![NuGet package](https://buildstats.info/nuget/Uragano.Core?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Core/0.0.1-preview.201)
+Uragano.Abstractions|[![NuGet package](https://buildstats.info/nuget/Uragano.Abstractions?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Abstractions)
+Uragano.Codec.MessagePack|[![NuGet package](https://buildstats.info/nuget/Uragano.Codec.MessagePack?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Codec.MessagePack)
+Uragano.Consul|[![NuGet package](https://buildstats.info/nuget/Uragano.Consul?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Consul)
+Uragano.DynamicProxy|[![NuGet package](https://buildstats.info/nuget/Uragano.DynamicProxy?includePreReleases=true)](https://www.nuget.org/packages/Uragano.DynamicProxy)
+Uragano.Remoting|[![NuGet package](https://buildstats.info/nuget/Uragano.Remoting?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Remoting)
+Uragano.Core|[![NuGet package](https://buildstats.info/nuget/Uragano.Core?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Core)
+Uragano.Caching.Memory|[![NuGet package](https://buildstats.info/nuget/Uragano.Caching.Memory?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Caching.Memory)
+Uragano.Caching.Redis|[![NuGet package](https://buildstats.info/nuget/Uragano.Caching.Redis?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Caching.Redis)
+Uragano.Logging.Exceptionless|[![NuGet package](https://buildstats.info/nuget/Uragano.Logging.Exceptionless?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Logging.Exceptionless)
+Uragano.Logging.Log4Net|[![NuGet package](https://buildstats.info/nuget/Uragano.Caching.Redis?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Logging.Log4Net)
+Uragano.Logging.NLog|[![NuGet package](https://buildstats.info/nuget/Uragano.Logging.NLog?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Logging.NLog)
 
 ## Performance
 ### Computer configuration
@@ -27,5 +32,4 @@ Samples|Average|Median|90% Line|95% Line|99% Line|Min|Max|Error %|Throughput|KB/
 
 
 ## Docs
-For the time being, there is no document, I will provide it later, you can read this [blog](https://blog.csdn.net/petbase1/article/details/87007606).
 

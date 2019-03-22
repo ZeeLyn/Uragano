@@ -33,7 +33,7 @@ namespace Uragano.Abstractions
             return min;
         });
 
-        public static UraganoOption<TimeSpan> Remoting_Invoke_CancellationTokenSource_Timeout { get; } = new UraganoOption<TimeSpan>(TimeSpan.FromSeconds(10));
+        public static UraganoOption<TimeSpan> Remoting_Invoke_CancellationTokenSource_Timeout { get; } = new UraganoOption<TimeSpan>(TimeSpan.FromSeconds(60));
 
 
         public static void SetOption<T>(UraganoOption<T> option, T value)

@@ -39,7 +39,7 @@ namespace Uragano.Remoting
                 task.TrySetResult(message.Body);
             }
             else
-                Logger.LogError($"Not found callback[message id:{message.Id}]");
+                Logger.LogWarning($"\nThe message callback wait task was not found, probably because the timeout has been canceled waiting.\n[message id:{message.Id}]");
         }
 
         public async Task<IServiceResult> SendAsync(IInvokeMessage message)
@@ -54,7 +54,12 @@ namespace Uragano.Remoting
             var tcs = new TaskCompletionSource<IServiceResult>(TaskCreationOptions.RunContinuationsAsynchronously);
             using (var ct = new CancellationTokenSource(UraganoOptions.Remoting_Invoke_CancellationTokenSource_Timeout.Value))
             {
-                ct.Token.Register(() => { tcs.TrySetResult(new ServiceResult("Remoting invoke timeout!", RemotingStatus.Timeout)); }, false);
+                ct.Token.Register(() =>
+                {
+                    tcs.TrySetResult(new ServiceResult("Remoting invoke timeout!", RemotingStatus.Timeout));
+                    Logger.LogWarning("\nRemoting invoke timeout,You can set the wait time with the Remoting_Invoke_CancellationTokenSource_Timeout option.\n[Message id:{0}]", transportMessage.Id);
+                }, false);
+
                 if (!_resultCallbackTask.TryAdd(transportMessage.Id, tcs)) throw new Exception("Failed to send.");
                 try
                 {
@@ -73,7 +78,7 @@ namespace Uragano.Remoting
 
         public async Task DisconnectAsync()
         {
-            Logger.LogTrace($"Stopping dotnetty client.[{Channel.LocalAddress}]");
+            Logger.LogTrace($"Stopping client.[{Channel.LocalAddress}]");
             foreach (var task in _resultCallbackTask.Values)
             {
                 task.TrySetCanceled();
@@ -86,7 +91,7 @@ namespace Uragano.Remoting
                 await EventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
             }
 
-            Logger.LogTrace($"The dotnetty client[{Channel.LocalAddress}] has stopped.");
+            Logger.LogTrace($"The client[{Channel.LocalAddress}] has stopped.");
         }
     }
 }
