@@ -25,7 +25,7 @@ namespace Uragano.DynamicProxy
                 var ignoreAssemblyFix = new[]
                 {
                     "Microsoft", "System", "Consul", "Polly", "Newtonsoft.Json", "MessagePack", "Google.Protobuf","DotNetty","Exceptionless","CSRedis","SafeObjectPool",
-                    "Remotion.Linq", "SOS.NETCore", "WindowsBase", "mscorlib", "netstandard", "Uragano.Abstractions","Uragano.Core","Uragano.DynamicProxy","Uragano.Logging.Exceptionless"
+                    "Remotion.Linq", "SOS.NETCore", "WindowsBase", "mscorlib", "netstandard", "Uragano.Abstractions","Uragano.Core","Uragano.DynamicProxy","Uragano.Logging.Exceptionless","Uragano.Remoting","Uragano.Consul","Uragano.Codec.MessagePack","Uragano.Logging.Log4Net","Uragano.Logging.NLog","Uragano.Caching.Redis","Uragano.Caching.Memory"
                 };
 
                 var assemblies = DependencyContext.Default.RuntimeLibraries.SelectMany(i =>

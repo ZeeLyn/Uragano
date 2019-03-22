@@ -83,7 +83,7 @@ namespace Uragano.Core
 
         #region Client
 
-        public void AddClient<TLoadBalancing>() where TLoadBalancing : ILoadBalancing
+        public void AddClient<TLoadBalancing>() where TLoadBalancing : class, ILoadBalancing
         {
             AddClient(typeof(TLoadBalancing));
         }
@@ -102,7 +102,7 @@ namespace Uragano.Core
         #endregion
 
         #region Global interceptor
-        public void AddClientGlobalInterceptor<TInterceptor>() where TInterceptor : IInterceptor
+        public void AddClientGlobalInterceptor<TInterceptor>() where TInterceptor : class, IInterceptor
         {
             if (UraganoSettings.ClientGlobalInterceptors.Any(p => p == typeof(TInterceptor)))
                 return;
@@ -110,7 +110,7 @@ namespace Uragano.Core
             RegisterScopedService(typeof(TInterceptor));
         }
 
-        public void AddServerGlobalInterceptor<TInterceptor>() where TInterceptor : IInterceptor
+        public void AddServerGlobalInterceptor<TInterceptor>() where TInterceptor : class, IInterceptor
         {
             if (UraganoSettings.ServerGlobalInterceptors.Any(p => p == typeof(TInterceptor)))
                 return;
@@ -125,7 +125,7 @@ namespace Uragano.Core
         /// </summary>
         /// <typeparam name="TServiceDiscovery"></typeparam>
         /// <param name="serviceDiscoveryClientConfiguration"></param>
-        public void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration) where TServiceDiscovery : IServiceDiscovery
+        public void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration) where TServiceDiscovery : class, IServiceDiscovery
         {
             AddServiceDiscovery(typeof(TServiceDiscovery), serviceDiscoveryClientConfiguration);
         }
@@ -145,7 +145,7 @@ namespace Uragano.Core
         /// <param name="serviceDiscoveryClientConfiguration"></param>
         /// <param name="serviceRegisterConfiguration"></param>
         public void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration,
-            IServiceRegisterConfiguration serviceRegisterConfiguration) where TServiceDiscovery : IServiceDiscovery
+            IServiceRegisterConfiguration serviceRegisterConfiguration) where TServiceDiscovery : class, IServiceDiscovery
         {
             AddServiceDiscovery(typeof(TServiceDiscovery), serviceDiscoveryClientConfiguration, serviceRegisterConfiguration);
         }
@@ -164,12 +164,12 @@ namespace Uragano.Core
         #endregion
 
         #region Option
-        public void Option<T>(UraganoOption<T> option, T value)
+        public void AddOption<T>(UraganoOption<T> option, T value)
         {
             UraganoOptions.SetOption(option, value);
         }
 
-        public void Options(IConfigurationSection configuration)
+        public void AddOptions(IConfigurationSection configuration)
         {
             foreach (var section in configuration.GetChildren())
             {
@@ -266,16 +266,26 @@ namespace Uragano.Core
 
         #region Caching
 
-        public void AddCaching<TCaching>(ICachingOptions cachingOptions) where TCaching : ICaching
+        public void AddCaching<TCaching>(ICachingOptions cachingOptions) where TCaching : class, ICaching
         {
-            AddCaching(typeof(TCaching), cachingOptions);
+            AddCaching(typeof(TCaching), typeof(CachingKeyGenerator), cachingOptions);
+        }
+
+        public void AddCaching<TCaching, TKeyGenerator>(ICachingOptions cachingOptions) where TCaching : class, ICaching where TKeyGenerator : class, ICachingKeyGenerator
+        {
+            AddCaching(typeof(TCaching), typeof(TKeyGenerator), cachingOptions);
         }
 
         public void AddCaching(Type caching, ICachingOptions cachingOptions)
         {
+            AddCaching(caching, typeof(CachingKeyGenerator), cachingOptions);
+        }
+
+        public void AddCaching(Type caching, Type keyGenerator, ICachingOptions cachingOptions)
+        {
             UraganoSettings.CachingOptions = cachingOptions;
             ServiceCollection.AddSingleton(typeof(ICaching), caching);
-            ServiceCollection.AddSingleton(typeof(ICachingKeyGenerator), cachingOptions.KeyGenerator);
+            ServiceCollection.AddSingleton(typeof(ICachingKeyGenerator), keyGenerator);
             RegisterSingletonService<CachingDefaultInterceptor>();
         }
 
@@ -290,7 +300,7 @@ namespace Uragano.Core
 
         #endregion
 
-        #region StartUp Task
+        #region Hosted service
         public void AddHostedService<THostedService>() where THostedService : class, IHostedService
         {
             if (ServiceCollection.Any(p => p.ServiceType == typeof(IHostedService) && p.ImplementationType == typeof(THostedService)))
@@ -445,9 +455,9 @@ namespace Uragano.Core
             AddServer(Configuration.GetSection("Uragano:Server"));
         }
 
-        public void Options()
+        public void AddOptions()
         {
-            Options(Configuration.GetSection("Uragano:Options"));
+            AddOptions(Configuration.GetSection("Uragano:Options"));
         }
 
         public void AddCircuitBreaker()

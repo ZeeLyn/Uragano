@@ -41,7 +41,6 @@ namespace Sample.Server
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddUragano(Configuration, builder =>
              {
-                 //builder.IsDevelopment(true);
                  builder.AddClient();
                  builder.AddServer();
 
@@ -52,8 +51,10 @@ namespace Sample.Server
                  //builder.AddLog4NetLogger();
                  //builder.AddNLogLogger();
                  //builder.AddRedisPartitionCaching();
+                 builder.AddRedisCaching();
                  //builder.AddMemoryCaching();
-                 builder.Options();
+                 builder.AddOption(UraganoOptions.Remoting_Invoke_CancellationTokenSource_Timeout, TimeSpan.FromSeconds(10));
+                 builder.AddOptions();
              });
         }
 

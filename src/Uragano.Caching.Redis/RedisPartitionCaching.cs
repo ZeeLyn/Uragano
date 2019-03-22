@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
@@ -15,12 +16,12 @@ namespace Uragano.Caching.Redis
         public RedisPartitionCaching(UraganoSettings uraganoSettings, IServiceProvider serviceProvider)
         {
             var redisOptions = (RedisOptions)uraganoSettings.CachingOptions;
-            var policy = serviceProvider.GetService<IRedisPartitionPolicy>();
+            var policy = serviceProvider.GetService<Func<string, IEnumerable<RedisConnection>, RedisConnection>>();
             if (policy != null)
             {
                 string NodeRule(string key)
                 {
-                    var connection = policy.Policy(key, redisOptions.ConnectionStrings);
+                    var connection = policy(key, redisOptions.ConnectionStrings);
                     return $"{connection.Host}:{connection.Port}/{connection.DefaultDatabase}";
                 }
 

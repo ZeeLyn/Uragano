@@ -38,7 +38,7 @@ namespace Sample.WebApi
                  //builder.DependencyServices(("RPC", "", ""));
                  //builder.DependencyServices(Configuration.GetSection("Uragano:DependencyServices"));
                  //builder.Option(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromSeconds(10));
-                 builder.Options();
+                 builder.AddOptions();
              });
         }
 

@@ -10,9 +10,12 @@ namespace Uragano.Caching.Redis
 
         public string KeyPrefix { get; set; } = "Uragano";
 
-        public Type KeyGenerator { get; set; } = typeof(CachingKeyGenerator);
-
         public IEnumerable<RedisConnection> ConnectionStrings { get; set; }
+    }
+
+    public class PartitionRedisOptions : RedisOptions
+    {
+        public Func<string, IEnumerable<RedisConnection>, RedisConnection> PartitionPolicy { get; set; }
     }
 
 

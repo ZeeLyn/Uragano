@@ -16,22 +16,22 @@ namespace Uragano.Abstractions
 
         void AddServer(IConfigurationSection configurationSection);
 
-        void AddClient<TLoadBalancing>() where TLoadBalancing : ILoadBalancing;
+        void AddClient<TLoadBalancing>() where TLoadBalancing : class, ILoadBalancing;
 
         void AddClient(Type loadBalancing);
 
         void AddClient();
 
-        void AddClientGlobalInterceptor<TInterceptor>() where TInterceptor : IInterceptor;
+        void AddClientGlobalInterceptor<TInterceptor>() where TInterceptor : class, IInterceptor;
 
-        void AddServerGlobalInterceptor<TInterceptor>() where TInterceptor : IInterceptor;
+        void AddServerGlobalInterceptor<TInterceptor>() where TInterceptor : class, IInterceptor;
 
         /// <summary>
         /// For client
         /// </summary>
         /// <typeparam name="TServiceDiscovery"></typeparam>
         /// <param name="serviceDiscoveryClientConfiguration"></param>
-        void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration) where TServiceDiscovery : IServiceDiscovery;
+        void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration) where TServiceDiscovery : class, IServiceDiscovery;
 
         void AddServiceDiscovery(Type serviceDiscovery,
             IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration);
@@ -42,14 +42,14 @@ namespace Uragano.Abstractions
         /// <typeparam name="TServiceDiscovery"></typeparam>
         /// <param name="serviceDiscoveryClientConfiguration"></param>
         /// <param name="serviceRegisterConfiguration"></param>
-        void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, IServiceRegisterConfiguration serviceRegisterConfiguration) where TServiceDiscovery : IServiceDiscovery;
+        void AddServiceDiscovery<TServiceDiscovery>(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, IServiceRegisterConfiguration serviceRegisterConfiguration) where TServiceDiscovery : class, IServiceDiscovery;
 
         void AddServiceDiscovery(Type serviceDiscovery, IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration,
             IServiceRegisterConfiguration serviceRegisterConfiguration);
 
-        void Option<T>(UraganoOption<T> option, T value);
+        void AddOption<T>(UraganoOption<T> option, T value);
 
-        void Options(IConfigurationSection configuration);
+        void AddOptions(IConfigurationSection configuration);
 
 
         void AddCircuitBreaker<TCircuitBreakerEvent>(int timeout = 3000, int retry = 3, int exceptionsAllowedBeforeBreaking = 10, int durationOfBreak = 60 * 1000) where TCircuitBreakerEvent : ICircuitBreakerEvent;
@@ -61,9 +61,13 @@ namespace Uragano.Abstractions
 
         void AddCodec<TCodec>() where TCodec : ICodec;
 
-        void AddCaching<TCaching>(ICachingOptions cachingOptions) where TCaching : ICaching;
+        void AddCaching<TCaching>(ICachingOptions cachingOptions) where TCaching : class, ICaching;
+
+        void AddCaching<TCaching, TKeyGenerator>(ICachingOptions cachingOptions) where TCaching : class, ICaching where TKeyGenerator : class, ICachingKeyGenerator;
 
         void AddCaching(Type caching, ICachingOptions cachingOptions);
+
+        void AddCaching(Type caching, Type keyGenerator, ICachingOptions cachingOptions);
 
         void AddLogger(ILoggerProvider loggerProvider);
 
@@ -77,7 +81,7 @@ namespace Uragano.Abstractions
 
         void AddServer();
 
-        void Options();
+        void AddOptions();
 
         void AddCircuitBreaker();
     }
