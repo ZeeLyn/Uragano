@@ -64,7 +64,6 @@ namespace Uragano.Remoting
                         Body = new ServiceResult(e.Message, RemotingStatus.Error)
                     });
                 }
-
             });
         }
 

@@ -26,5 +26,9 @@ namespace Sample.Service.Interfaces
 
         [ServiceRoute("say/int")]
         Task<int> Age();
+
+        Task<ResponseResult<string>> Test();
+
+        Task Test(ResponseResult<string> r);
     }
 }

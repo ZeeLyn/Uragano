@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Uragano.Abstractions;
 
@@ -8,9 +9,10 @@ namespace Uragano.Caching.Redis
     {
         private ICodec Codec { get; }
 
-        public RedisCaching(ICodec codec)
+        public RedisCaching(ICodec codec, UraganoSettings uraganoSettings)
         {
             Codec = codec;
+            RedisHelper.Initialization(new CSRedis.CSRedisClient(((RedisOptions)uraganoSettings.CachingOptions).ConnectionStrings.First().ToString()));
         }
 
         public async Task Set<TValue>(string key, TValue value, int expireSeconds = -1)

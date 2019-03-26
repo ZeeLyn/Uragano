@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.0.1-preview.313</Version>
+    <Version>0.0.1-preview.315</Version>
     <Description>A simple, high performance RPC library.</Description>
     <PackageProjectUrl>https://github.com/ww198643/Uragano</PackageProjectUrl>
     <PackageIconUrl>https://github.com/ww198643/Uragano/blob/master/icon.png?raw=true</PackageIconUrl>

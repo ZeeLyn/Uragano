@@ -8,7 +8,7 @@
     <PackageTags>Uragano,RPC,DotNetty,Microservice,MessagePack,DynamicProxy</PackageTags>
     <PackageProjectUrl>https://github.com/ww198643/Uragano</PackageProjectUrl>
     <Description>A simple, high performance RPC library.</Description>
-    <Version>0.0.1-preview.313</Version>
+    <Version>0.0.1-preview.315</Version>
     <PackageLicenseUrl>https://github.com/ww198643/Uragano/blob/master/LICENSE</PackageLicenseUrl>
     <Authors>Owen</Authors>
     <Company>Owen</Company>

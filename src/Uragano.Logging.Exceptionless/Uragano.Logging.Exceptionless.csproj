@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.0.1-preview.313</Version>
+    <Version>0.0.1-preview.315</Version>
     <Authors>Owen</Authors>
     <Company>Owen</Company>
     <Description>A simple, high performance RPC library.</Description>

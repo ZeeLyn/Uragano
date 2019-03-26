@@ -22,14 +22,16 @@ namespace Uragano.DynamicProxy
 
             var assemblies = DependencyContext.Default.RuntimeLibraries.SelectMany(i => i.GetDefaultAssemblyNames(DependencyContext.Default).Select(z => Assembly.Load(new AssemblyName(z.Name)))).Where(i => !i.IsDynamic);
 
-            var types = assemblies.Select(p => p.GetType());
-            types = types.Except(interfaces);
-            foreach (var type in types)
-            {
-                assemblies = assemblies.Append(type.Assembly);
-            }
+            var types = assemblies.Select(p => p.GetType()).Except(interfaces);
+            assemblies = types.Aggregate(assemblies, (current, type) => current.Append(type.Assembly));
 
             var trees = interfaces.Select(GenerateProxyTree).ToList();
+            //for (var i = 0; i < trees.Count; i++)
+            //{
+            //    File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), $"{interfaces[i].Name}.Imp.cs"),
+            //        trees[i].ToString());
+            //}
+
             using (var stream = CompileClientProxy(trees,
                 assemblies.Select(x => MetadataReference.CreateFromFile(x.Location))
                     .Concat(new[]
@@ -45,19 +47,45 @@ namespace Uragano.DynamicProxy
 
         private static SyntaxTree GenerateProxyTree(Type @interface)
         {
+            var namespaces = FindAllNamespace(@interface).Distinct().Select(p => SyntaxFactory.UsingDirective(GenerateQualifiedNameSyntax(p))).ToList();
+            namespaces.Add(SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("System")));
+
             var syntax = SyntaxFactory.CompilationUnit()
-                .WithUsings(SyntaxFactory.List(new[]
-                {
-                    SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("System")),
-                    SyntaxFactory.UsingDirective(GenerateQualifiedNameSyntax("System.Threading.Tasks")),
-                    SyntaxFactory.UsingDirective(GenerateQualifiedNameSyntax("System.Collections.Generic")),
-                    SyntaxFactory.UsingDirective(GenerateQualifiedNameSyntax(typeof(DynamicProxyAbstract).Namespace)),
-                    SyntaxFactory.UsingDirective(GenerateQualifiedNameSyntax(typeof(IRemotingInvoke).Namespace)),
-                    SyntaxFactory.UsingDirective(GenerateQualifiedNameSyntax(@interface.Namespace))
-                }))
+                .WithUsings(SyntaxFactory.List(namespaces))
                 .WithMembers(GenerateNamespace(@interface));
 
             return syntax.NormalizeWhitespace().SyntaxTree;
+        }
+
+        private static List<string> FindAllNamespace(Type @interface)
+        {
+            var namespaces = new List<string>{
+                "System.Threading.Tasks","System.Collections.Generic",typeof(DynamicProxyAbstract).Namespace,typeof(IRemotingInvoke).Namespace,@interface.Namespace
+            };
+            foreach (var method in @interface.GetMethods())
+            {
+                var returnType = method.ReturnType;
+                FindNamespace(returnType, namespaces);
+                foreach (var arg in method.GetParameters())
+                {
+                    FindNamespace(arg.ParameterType, namespaces);
+                }
+            }
+
+            return namespaces;
+        }
+
+        private static void FindNamespace(Type type, List<string> namespaces)
+        {
+            if (type.Namespace == "System.Threading.Tasks" && !type.IsGenericType || type.Namespace == "System" || type.Namespace == "System.Collections.Generic")
+                return;
+
+            namespaces.Add(type.Namespace);
+            if (!type.IsGenericType) return;
+            foreach (var item in type.GetGenericArguments())
+            {
+                FindNamespace(item, namespaces);
+            }
         }
 
         /// <summary>
@@ -217,15 +245,18 @@ namespace Uragano.DynamicProxy
         {
             if (!type.IsGenericType)
                 return GenerateQualifiedNameSyntax(type);
+
+
             var list = new List<SyntaxNodeOrToken>();
             foreach (var genericType in type.GetGenericArguments())
             {
                 list.Add(genericType.IsGenericType ? GenerateType(genericType) : GenerateQualifiedNameSyntax(genericType.FullName));
                 list.Add(SyntaxFactory.Token(SyntaxKind.CommaToken));
             }
-
             var typeArgumentList = SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList<TypeSyntax>(list.Take(list.Count - 1)));
+            //if (type.Namespace == typeof(Task).Namespace)
             return SyntaxFactory.GenericName(type.Name.Substring(0, type.Name.IndexOf('`'))).WithTypeArgumentList(typeArgumentList);
+            //return SyntaxFactory.GenericName(type.FullName?.Substring(0, type.FullName.IndexOf('`'))).WithTypeArgumentList(typeArgumentList);
         }
 
 

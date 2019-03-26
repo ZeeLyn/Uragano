@@ -12,7 +12,6 @@ namespace Uragano.Caching.Redis
         public static void AddRedisCaching(this IUraganoBuilder builder, RedisOptions redisOptions)
         {
             builder.AddCaching<RedisCaching>(redisOptions);
-            builder.AddHostedService<InitializationRedis>();
         }
 
         public static void AddRedisCaching(this IUraganoBuilder builder, IConfigurationSection configurationSection)
@@ -30,7 +29,6 @@ namespace Uragano.Caching.Redis
         public static void AddRedisCaching<TKeyGenerator>(this IUraganoBuilder builder, RedisOptions redisOptions) where TKeyGenerator : class, ICachingKeyGenerator
         {
             builder.AddCaching<RedisCaching, TKeyGenerator>(redisOptions);
-            builder.AddHostedService<InitializationRedis>();
         }
 
         public static void AddRedisCaching<TKeyGenerator>(this IUraganoBuilder builder, IConfigurationSection configurationSection) where TKeyGenerator : class, ICachingKeyGenerator

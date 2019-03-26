@@ -37,5 +37,19 @@ namespace Sample.Server
             //await Task.Delay(2000);
             return await Task.FromResult(18);
         }
+
+        public async Task<ResponseResult<string>> Test()
+        {
+            return await Task.FromResult(new ResponseResult<string>
+            {
+                Success = true,
+                Result = "OK"
+            });
+        }
+
+        public Task Test(ResponseResult<string> r)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
