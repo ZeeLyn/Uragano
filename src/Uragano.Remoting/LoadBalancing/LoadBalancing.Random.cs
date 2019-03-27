@@ -12,7 +12,6 @@ namespace Uragano.Remoting.LoadBalancing
     {
         private IServiceStatusManage ServiceStatusManageFactory { get; }
 
-        private static readonly object LockObject = new object();
         public LoadBalancingRandom(IServiceStatusManage serviceStatusManageFactory)
         {
             ServiceStatusManageFactory = serviceStatusManageFactory;
