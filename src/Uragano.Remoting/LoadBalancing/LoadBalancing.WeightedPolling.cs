@@ -19,10 +19,10 @@ namespace Uragano.Remoting.LoadBalancing
         public async Task<ServiceNodeInfo> GetNextNode(string serviceName, string serviceRoute, object[] serviceArgs, Dictionary<string, string> serviceMeta)
         {
             var nodes = await ServiceStatusManageFactory.GetServiceNodes(serviceName);
+            if (!nodes.Any())
+                throw new NotFoundNodeException(serviceName);
             lock (LockObject)
             {
-                if (!nodes.Any())
-                    throw new NotFoundNodeException(serviceName);
                 var index = -1;
                 var total = 0;
                 for (var i = 0; i < nodes.Count; i++)
