@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -171,6 +170,8 @@ namespace Uragano.Core
 
         public void AddOptions(IConfigurationSection configuration)
         {
+            if (!configuration.Exists())
+                return;
             foreach (var section in configuration.GetChildren())
             {
                 switch (section.Key.ToLower())
@@ -197,7 +198,10 @@ namespace Uragano.Core
                         UraganoOptions.SetOption(UraganoOptions.DotNetty_Event_Loop_Count, configuration.GetValue<int>(section.Key));
                         break;
                     case "remoting_invoke_cancellationtokensource_timeout":
-                        UraganoOptions.SetOption(UraganoOptions.Remoting_Invoke_CancellationTokenSource_Timeout, configuration.GetValue<TimeSpan>(section.Key));
+                        UraganoOptions.SetOption(UraganoOptions.Remoting_Invoke_CancellationTokenSource_Timeout, TimeSpan.FromMilliseconds(configuration.GetValue<int>(section.Key)));
+                        break;
+                    case "output_dynamicproxy_sourcecode":
+                        UraganoOptions.SetOption(UraganoOptions.Output_DynamicProxy_SourceCode, configuration.GetValue<bool>(section.Key));
                         break;
                 }
 

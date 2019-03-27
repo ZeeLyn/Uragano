@@ -22,6 +22,7 @@ using Uragano.Core;
 using Uragano.Logging.Exceptionless;
 using Uragano.Logging.Log4Net;
 using Uragano.Logging.NLog;
+using Uragano.Remoting.LoadBalancing;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace Sample.Server
@@ -41,7 +42,7 @@ namespace Sample.Server
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddUragano(Configuration, builder =>
              {
-                 builder.AddClient();
+                 builder.AddClient<LoadBalancingConsistentHash>();
                  builder.AddServer();
 
                  builder.AddConsul();

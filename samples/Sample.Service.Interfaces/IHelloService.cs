@@ -28,7 +28,5 @@ namespace Sample.Service.Interfaces
         Task<int> Age();
 
         Task<ResponseResult<string>> Test();
-
-        Task Test(ResponseResult<string> r);
     }
 }

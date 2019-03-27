@@ -35,6 +35,8 @@ namespace Uragano.Abstractions
 
         public static UraganoOption<TimeSpan> Remoting_Invoke_CancellationTokenSource_Timeout { get; } = new UraganoOption<TimeSpan>(TimeSpan.FromSeconds(60));
 
+        public static UraganoOption<bool> Output_DynamicProxy_SourceCode { get; } = new UraganoOption<bool>(false);
+
 
         public static void SetOption<T>(UraganoOption<T> option, T value)
         {

@@ -36,6 +36,11 @@ namespace Uragano.Core
             if (ServiceNodes.TryGetValue(serviceName, out var result))
                 return result.FindAll(p => p.Alive == alive);
             var serviceNodes = await ServiceDiscovery.QueryServiceAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, serviceName);
+            if (!serviceNodes.Any())
+            {
+                return new List<ServiceNodeInfo>();
+            }
+
             var nodes = serviceNodes.Select(p => new ServiceNodeInfo
             {
                 Address = p.Address,
