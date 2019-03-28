@@ -31,6 +31,9 @@ namespace Uragano.Core
             UraganoSettings = uraganoSettings;
         }
 
+        public event NodeLeaveHandler OnNodeLeave;
+        public event NodeJoinHandler OnNodeJoin;
+
         public async Task<List<ServiceNodeInfo>> GetServiceNodes(string serviceName, bool alive = true)
         {
             if (ServiceNodes.TryGetValue(serviceName, out var result))
@@ -59,15 +62,15 @@ namespace Uragano.Core
 
         public async Task Refresh(CancellationToken cancellationToken)
         {
-            Logger.LogTrace("------------> Start refresh service status...");
-            Logger.LogTrace("------------> Waiting for locking...");
+            Logger.LogTrace("Start refresh service status,waiting for locking...");
             using (await AsyncLock.LockAsync(cancellationToken))
             {
                 if (cancellationToken.IsCancellationRequested)
                     return;
-                Logger.LogTrace("------------> Refreshing...");
+
                 foreach (var service in ServiceNodes)
                 {
+                    Logger.LogTrace($"Service {service.Key} refreshing...");
                     var healthNodes = await ServiceDiscovery.QueryServiceAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, service.Key, ServiceStatus.Alive, cancellationToken);
                     if (cancellationToken.IsCancellationRequested)
                         break;
@@ -82,7 +85,8 @@ namespace Uragano.Core
                         {
                             if (node.Alive) continue;
                             node.Alive = true;
-                            Logger.LogTrace($"------------> The status of node {node.Address}:{node.Port} changes to alive.");
+                            OnNodeJoin?.Invoke(service.Key, node);
+                            Logger.LogTrace($"The status of node {node.Address}:{node.Port} changes to alive.");
                         }
                         else
                         {
@@ -90,7 +94,8 @@ namespace Uragano.Core
                                 continue;
                             node.Alive = false;
                             node.CurrentWeight = 0;
-                            Logger.LogTrace($"------------> The status of node {node.Address}:{node.Port} changes to dead.");
+                            OnNodeLeave?.Invoke(service.Key, node);
+                            Logger.LogTrace($"The status of node {node.Address}:{node.Port} changes to dead.");
                         }
                     }
 
@@ -103,15 +108,16 @@ namespace Uragano.Core
                             Weight = int.Parse(p.Meta.FirstOrDefault(m => m.Key == "X-Weight").Value),
                             ServiceId = p.ServiceId,
                             Meta = p.Meta
-                        }).ToList();
+                        }).ToArray();
 
                     if (newEndPoints.Any())
                     {
                         service.Value.AddRange(newEndPoints);
-                        Logger.LogTrace($"------------> New nodes added:{string.Join(",", newEndPoints.Select(p => p.Address + ":" + p.Port))}");
+                        OnNodeJoin?.Invoke(service.Key, newEndPoints);
+                        Logger.LogTrace($"New nodes added:{string.Join(",", newEndPoints.Select(p => p.Address + ":" + p.Port))}");
                     }
                 }
-                Logger.LogTrace("------------> Complete refresh.");
+                Logger.LogTrace("Complete refresh.");
             }
         }
     }

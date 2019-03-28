@@ -5,7 +5,7 @@ using Uragano.Abstractions.Service;
 
 namespace Uragano.DynamicProxy.Interceptor
 {
-    public class CachingDefaultInterceptor : InterceptorAbstract
+    public sealed class CachingDefaultInterceptor : InterceptorAbstract
     {
         private ICaching Caching { get; }
         private ICachingKeyGenerator KeyGenerator { get; }

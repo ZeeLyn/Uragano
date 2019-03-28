@@ -1,6 +1,8 @@
 # Uragano
 A simple, high performance RPC library.
 
+Support load balancing, circuit breaker, fallback, caching, intercepting.
+
 ## Package & Status
 Package | NuGet
 --------|------

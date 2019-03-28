@@ -42,7 +42,8 @@ namespace Sample.Server
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddUragano(Configuration, builder =>
              {
-                 builder.AddClient<LoadBalancingConsistentHash>();
+
+                 builder.AddClient(LoadBalancing.ConsistentHash);
                  builder.AddServer();
 
                  builder.AddConsul();

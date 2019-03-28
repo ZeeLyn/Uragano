@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Uragano.Abstractions.ConsistentHash
 {
-    public class ConsistentHash<T>
+    public class ConsistentHash<T> : IConsistentHash<T>
     {
         private SortedDictionary<int, T> Ring { get; } = new SortedDictionary<int, T>();
 
@@ -14,6 +14,11 @@ namespace Uragano.Abstractions.ConsistentHash
         public ConsistentHash(int virtualReplication = 200)
         {
             VirtualReplication = virtualReplication;
+        }
+
+        public List<T> GetAllNodes()
+        {
+            return Ring.Select(p => p.Value).Distinct().ToList();
         }
 
         public void AddNode(T node, string key)
@@ -49,7 +54,7 @@ namespace Uragano.Abstractions.ConsistentHash
         }
     }
 
-    public class HashAlgorithm
+    internal class HashAlgorithm
     {
         private const uint m = 0x5bd1e995;
         private const int r = 24;
@@ -89,8 +94,6 @@ namespace Uragano.Abstractions.ConsistentHash
                 case 1:
                     h ^= data[c];
                     h *= m;
-                    break;
-                default:
                     break;
             }
 

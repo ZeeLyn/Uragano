@@ -16,11 +16,35 @@ namespace Uragano.Remoting.LoadBalancing
 
         private static readonly object LockObject = new object();
 
-        private static ConcurrentDictionary<string, ServiceInfo> ServicesInfo { get; } = new ConcurrentDictionary<string, ServiceInfo>();
+        private static ConcurrentDictionary<string, ConsistentHash<ServiceNodeInfo>> ServicesInfo { get; } = new ConcurrentDictionary<string, ConsistentHash<ServiceNodeInfo>>();
 
         public LoadBalancingConsistentHash(IServiceStatusManage serviceStatusManageFactory)
         {
             ServiceStatusManageFactory = serviceStatusManageFactory;
+            ServiceStatusManageFactory.OnNodeJoin += OnNodeJoin;
+            ServiceStatusManageFactory.OnNodeLeave += OnNodeLeave;
+        }
+
+
+        private void OnNodeLeave(string serviceName, params ServiceNodeInfo[] nodeInfo)
+        {
+            if (!nodeInfo.Any()) return;
+            if (!ServicesInfo.TryGetValue(serviceName, out var service)) return;
+            foreach (var node in nodeInfo)
+            {
+                service.RemoveNode(node.ServiceId);
+            }
+        }
+
+        private void OnNodeJoin(string serviceName, params ServiceNodeInfo[] nodeInfo)
+        {
+            if (!nodeInfo.Any())
+                return;
+            if (!ServicesInfo.TryGetValue(serviceName, out var service)) return;
+            foreach (var node in nodeInfo)
+            {
+                service.AddNode(node, node.ServiceId);
+            }
         }
 
         public async Task<ServiceNodeInfo> GetNextNode(string serviceName, string serviceRoute, object[] serviceArgs,
@@ -37,46 +61,18 @@ namespace Uragano.Remoting.LoadBalancing
                     throw new ArgumentNullException(nameof(serviceMeta), "Service metadata [x-consistent-hash-key]  is empty,Please call SetMeta method to pass in.");
                 }
 
-
-                if (!ServicesInfo.TryGetValue(serviceName, out var info))
+                return ServicesInfo.GetOrAdd(serviceName, k =>
                 {
                     var consistentHash = new ConsistentHash<ServiceNodeInfo>();
-                    ServicesInfo.TryAdd(serviceName, new ServiceInfo
-                    {
-                        ConsistentHash = consistentHash,
-                        Nodes = nodes
-                    });
                     foreach (var node in nodes)
                     {
                         consistentHash.AddNode(node, node.ServiceId);
                     }
 
-                    return consistentHash.GetNodeForKey(key);
-                }
-
-                var removedNodes = info.Nodes.FindAll(p => nodes.All(i => i != p));
-                foreach (var node in removedNodes)
-                {
-                    info.ConsistentHash.RemoveNode(node.ServiceId);
-                    info.Nodes.Remove(node);
-                }
-
-                var addedNodes = nodes.FindAll(p => info.Nodes.All(i => i != p));
-                foreach (var node in addedNodes)
-                {
-                    info.ConsistentHash.AddNode(node, node.ServiceId);
-                    info.Nodes.Add(node);
-                }
-
-                return info.ConsistentHash.GetNodeForKey(key);
+                    ServicesInfo.TryAdd(serviceName, consistentHash);
+                    return consistentHash;
+                }).GetNodeForKey(key);
             }
-        }
-
-        private class ServiceInfo
-        {
-            public ConsistentHash<ServiceNodeInfo> ConsistentHash { get; set; }
-
-            public List<ServiceNodeInfo> Nodes { get; set; }
         }
     }
 }

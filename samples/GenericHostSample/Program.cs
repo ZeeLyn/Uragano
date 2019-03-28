@@ -35,7 +35,6 @@ namespace GenericHostSample
 
         static async Task Main(string[] args)
         {
-
             var nodes = new List<Node> {
                 new Node("139f9cbb-be67-460c-9092-b4b29a6e574a"),
                 new Node("3f8fa9c8-4c56-486a-baca-bd7d4639e95b"),
