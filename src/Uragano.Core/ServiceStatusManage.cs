@@ -80,13 +80,14 @@ namespace Uragano.Core
                     {
                         if (cancellationToken.IsCancellationRequested)
                             break;
-
-                        if (healthNodes.Any(p => node.Address == p.Address && node.Port == p.Port))
+                        var existNode = healthNodes.FirstOrDefault(p => node.Address == p.Address && node.Port == p.Port);
+                        if (existNode != null)
                         {
                             if (node.Alive) continue;
                             node.Alive = true;
+                            node.Weight = int.Parse(existNode.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0");
                             OnNodeJoin?.Invoke(service.Key, node);
-                            Logger.LogTrace($"The status of node {node.Address}:{node.Port} changes to alive.");
+                            Logger.LogTrace($"The status of node {node.Address}:{node.Port} changed to alive.");
                         }
                         else
                         {
@@ -95,7 +96,7 @@ namespace Uragano.Core
                             node.Alive = false;
                             node.CurrentWeight = 0;
                             OnNodeLeave?.Invoke(service.Key, node);
-                            Logger.LogTrace($"The status of node {node.Address}:{node.Port} changes to dead.");
+                            Logger.LogTrace($"The status of node {node.Address}:{node.Port} changed to dead.");
                         }
                     }
 
@@ -105,7 +106,7 @@ namespace Uragano.Core
                             Address = p.Address,
                             Port = p.Port,
                             Alive = true,
-                            Weight = int.Parse(p.Meta.FirstOrDefault(m => m.Key == "X-Weight").Value),
+                            Weight = int.Parse(p.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0"),
                             ServiceId = p.ServiceId,
                             Meta = p.Meta
                         }).ToArray();

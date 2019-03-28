@@ -16,7 +16,7 @@ namespace Uragano.Remoting.LoadBalancing
 
         private static readonly object LockObject = new object();
 
-        private static ConcurrentDictionary<string, ConsistentHash<ServiceNodeInfo>> ServicesInfo { get; } = new ConcurrentDictionary<string, ConsistentHash<ServiceNodeInfo>>();
+        private static ConcurrentDictionary<string, IConsistentHash<ServiceNodeInfo>> ServicesInfo { get; } = new ConcurrentDictionary<string, IConsistentHash<ServiceNodeInfo>>();
 
         public LoadBalancingConsistentHash(IServiceStatusManage serviceStatusManageFactory)
         {
