@@ -53,14 +53,14 @@ namespace Uragano.Remoting
                 Body = message
             };
             if (Logger.IsEnabled(LogLevel.Trace))
-                Logger.LogTrace($"\nSending message to node {Node}:\nMessage id:{transportMessage.Id}\nArgs:{Codec.ToJson(message.Args)}\n\n");
+                Logger.LogTrace($"Sending message to node {Node}:\nMessage id:{transportMessage.Id}\nArgs:{Codec.ToJson(message.Args)}\n\n");
             var tcs = new TaskCompletionSource<IServiceResult>(TaskCreationOptions.RunContinuationsAsynchronously);
             using (var ct = new CancellationTokenSource(UraganoOptions.Remoting_Invoke_CancellationTokenSource_Timeout.Value))
             {
                 ct.Token.Register(() =>
                 {
                     tcs.TrySetResult(new ServiceResult("Remoting invoke timeout!", RemotingStatus.Timeout));
-                    Logger.LogWarning("\nRemoting invoke timeout,You can set the wait time with the Remoting_Invoke_CancellationTokenSource_Timeout option.\nSend to node:{1}\nMessage id:{0}\n\n", transportMessage.Id, Node);
+                    Logger.LogWarning("Remoting invoke timeout,You can set the wait time with the Remoting_Invoke_CancellationTokenSource_Timeout option.\nSend to node:{1}\nMessage id:{0}\n\n", transportMessage.Id, Node);
                 }, false);
 
                 if (!_resultCallbackTask.TryAdd(transportMessage.Id, tcs)) throw new Exception("Failed to send.");
@@ -68,10 +68,10 @@ namespace Uragano.Remoting
                 {
                     await Channel.WriteAndFlushAsync(transportMessage);
                     if (Logger.IsEnabled(LogLevel.Trace))
-                        Logger.LogTrace($"\nSend completed, waiting for node {Node} to return results:\nMessage id:{transportMessage.Id}\n\n");
+                        Logger.LogTrace($"Send completed, waiting for node {Node} to return results:\nMessage id:{transportMessage.Id}\n\n");
                     var result = await tcs.Task;
                     if (Logger.IsEnabled(LogLevel.Trace))
-                        Logger.LogTrace($"\nThe client received the return result of node {Node}:\nMessage id:{transportMessage.Id}\nBody:{Codec.ToJson(result)}\n\n");
+                        Logger.LogTrace($"The client received the return result of node {Node}:\nMessage id:{transportMessage.Id}\nBody:{Codec.ToJson(result)}\n\n");
                     return result;
                 }
                 finally

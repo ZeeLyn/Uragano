@@ -40,7 +40,7 @@ namespace Uragano.Remoting
                 try
                 {
                     if (Logger.IsEnabled(LogLevel.Trace))
-                        Logger.LogTrace($"\nThe server received the message:\nCurrent node:{ServerSettings}\nRoute:{transportMessage.Body.Route}\nMessage id:{transportMessage.Id}\nArgs:{Codec.ToJson(transportMessage.Body.Args)}\nMeta:{Codec.ToJson(transportMessage.Body.Meta)}\n\n");
+                        Logger.LogTrace($"The server received the message:\nCurrent node:{ServerSettings}\nRoute:{transportMessage.Body.Route}\nMessage id:{transportMessage.Id}\nArgs:{Codec.ToJson(transportMessage.Body.Args)}\nMeta:{Codec.ToJson(transportMessage.Body.Meta)}\n\n");
                     var result = await ServiceFactory.InvokeAsync(transportMessage.Body.Route, transportMessage.Body.Args,
                         transportMessage.Body.Meta);
                     await context.WriteAndFlushAsync(new TransportMessage<IServiceResult>
@@ -51,7 +51,7 @@ namespace Uragano.Remoting
                 }
                 catch (NotFoundRouteException e)
                 {
-                    Logger.LogError(e, $"\nThe server message processing failed:{e.Message}.\nCurrent node:{ServerSettings}\nRoute:{transportMessage.Body.Route}\nMessage id:{transportMessage.Id}\n\n");
+                    Logger.LogError(e, $"The server message processing failed:{e.Message}.\nCurrent node:{ServerSettings}\nRoute:{transportMessage.Body.Route}\nMessage id:{transportMessage.Id}\n\n");
                     await context.WriteAndFlushAsync(new TransportMessage<IServiceResult>
                     {
                         Id = transportMessage.Id,
@@ -60,7 +60,7 @@ namespace Uragano.Remoting
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError(e, $"\nThe server message processing failed:{e.Message}.\nCurrent node:{ServerSettings}\nRoute:{transportMessage.Body.Route}\nMessage id:{transportMessage.Id}\n\n");
+                    Logger.LogError(e, $"The server message processing failed:{e.Message}.\nCurrent node:{ServerSettings}\nRoute:{transportMessage.Body.Route}\nMessage id:{transportMessage.Id}\n\n");
                     await context.WriteAndFlushAsync(new TransportMessage<IServiceResult>
                     {
                         Id = transportMessage.Id,

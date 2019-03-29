@@ -30,7 +30,7 @@ namespace Uragano.Abstractions.ConsistentHash
         {
             for (var i = 0; i < VirtualReplication; i++)
             {
-                var hash = HashAlgorithm.Hash(key + i, 0);
+                var hash = HashAlgorithm.Hash(key + i);
                 Ring.Add(hash, node);
             }
         }
@@ -39,7 +39,7 @@ namespace Uragano.Abstractions.ConsistentHash
         {
             for (var i = 0; i < VirtualReplication; i++)
             {
-                var hash = HashAlgorithm.Hash(key + i, 0);
+                var hash = HashAlgorithm.Hash(key + i);
                 Ring.Remove(hash);
             }
         }
@@ -49,7 +49,7 @@ namespace Uragano.Abstractions.ConsistentHash
             if (!Ring.Any())
                 throw new InvalidOperationException("Can not find the available nodes, please call the AddNode method to add nodes.");
 
-            var hash = HashAlgorithm.Hash(key, 0);
+            var hash = HashAlgorithm.Hash(key);
             if (Ring.ContainsKey(hash))
                 return Ring[hash];
             var node = Ring.Where(p => p.Key > hash).OrderBy(i => i.Key).Select(p => p.Value).FirstOrDefault();
@@ -108,7 +108,7 @@ namespace Uragano.Abstractions.ConsistentHash
             return (int)h;
         }
 
-        public static int Hash(string data, uint seed)
+        public static int Hash(string data, uint seed = 0xc58f1a7b)
         {
             return Hash(Encoding.UTF8.GetBytes(data), seed);
         }

@@ -4,12 +4,12 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>7.1</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageIconUrl>https://github.com/ww198643/Uragano/blob/master/icon.png?raw=true</PackageIconUrl>
+    <PackageIconUrl>https://github.com/1100100/Uragano/blob/master/icon.png?raw=true</PackageIconUrl>
     <PackageTags>Uragano,RPC,DotNetty,Microservice,MessagePack,DynamicProxy</PackageTags>
-    <PackageProjectUrl>https://github.com/ww198643/Uragano</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/1100100/Uragano</PackageProjectUrl>
     <Description>A simple, high performance RPC library.</Description>
-    <Version>0.0.1-preview.315</Version>
-    <PackageLicenseUrl>https://github.com/ww198643/Uragano/blob/master/LICENSE</PackageLicenseUrl>
+    <Version>0.0.1-preview.400</Version>
+    <PackageLicenseUrl>https://github.com/1100100/Uragano/blob/master/LICENSE</PackageLicenseUrl>
     <Authors>Owen</Authors>
     <Company>Owen</Company>
   </PropertyGroup>
