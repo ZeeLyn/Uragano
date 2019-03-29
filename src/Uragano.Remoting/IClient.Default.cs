@@ -22,7 +22,9 @@ namespace Uragano.Remoting
 
         private ICodec Codec { get; }
 
-        public Client(IChannel channel, IEventLoopGroup eventLoopGroup, IMessageListener messageListener, ILogger logger, ICodec codec)
+        private string Node { get; }
+
+        public Client(IChannel channel, IEventLoopGroup eventLoopGroup, IMessageListener messageListener, ILogger logger, ICodec codec, string node)
         {
             Channel = channel;
             MessageListener = messageListener;
@@ -30,6 +32,7 @@ namespace Uragano.Remoting
             EventLoopGroup = eventLoopGroup;
             Logger = logger;
             Codec = codec;
+            Node = node;
         }
 
         private void MessageListener_OnReceived(TransportMessage<IServiceResult> message)
@@ -50,14 +53,14 @@ namespace Uragano.Remoting
                 Body = message
             };
             if (Logger.IsEnabled(LogLevel.Trace))
-                Logger.LogTrace($"\nSending message.\nMessage id:{transportMessage.Id}\nArgs:{Codec.ToJson(message.Args)}");
+                Logger.LogTrace($"\nSending message to node {Node}:\nMessage id:{transportMessage.Id}\nArgs:{Codec.ToJson(message.Args)}\n\n");
             var tcs = new TaskCompletionSource<IServiceResult>(TaskCreationOptions.RunContinuationsAsynchronously);
             using (var ct = new CancellationTokenSource(UraganoOptions.Remoting_Invoke_CancellationTokenSource_Timeout.Value))
             {
                 ct.Token.Register(() =>
                 {
                     tcs.TrySetResult(new ServiceResult("Remoting invoke timeout!", RemotingStatus.Timeout));
-                    Logger.LogWarning("\nRemoting invoke timeout,You can set the wait time with the Remoting_Invoke_CancellationTokenSource_Timeout option.\n[Message id:{0}]", transportMessage.Id);
+                    Logger.LogWarning("\nRemoting invoke timeout,You can set the wait time with the Remoting_Invoke_CancellationTokenSource_Timeout option.\nSend to node:{1}\nMessage id:{0}\n\n", transportMessage.Id, Node);
                 }, false);
 
                 if (!_resultCallbackTask.TryAdd(transportMessage.Id, tcs)) throw new Exception("Failed to send.");
@@ -65,8 +68,11 @@ namespace Uragano.Remoting
                 {
                     await Channel.WriteAndFlushAsync(transportMessage);
                     if (Logger.IsEnabled(LogLevel.Trace))
-                        Logger.LogTrace($"\nSend completed, waiting for results.\nMessage id:{transportMessage.Id}");
-                    return await tcs.Task;
+                        Logger.LogTrace($"\nSend completed, waiting for node {Node} to return results:\nMessage id:{transportMessage.Id}\n\n");
+                    var result = await tcs.Task;
+                    if (Logger.IsEnabled(LogLevel.Trace))
+                        Logger.LogTrace($"\nThe client received the return result of node {Node}:\nMessage id:{transportMessage.Id}\nBody:{Codec.ToJson(result)}\n\n");
+                    return result;
                 }
                 finally
                 {

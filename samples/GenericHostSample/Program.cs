@@ -81,31 +81,31 @@ namespace GenericHostSample
                 }
             }
 
-            //var hostBuilder = new HostBuilder().ConfigureHostConfiguration(builder =>
-            //    {
-            //        builder.SetBasePath(Directory.GetCurrentDirectory());
-            //    }).ConfigureAppConfiguration((context, builder) =>
-            //    {
-            //        builder.AddJsonFile("uragano.json", false, true);
-            //        //builder.AddEnvironmentVariables("uragano");
-            //        builder.AddCommandLine(args);
-            //    })
-            //    .ConfigureServices((context, service) =>
-            //    {
-            //        service.AddUragano(context.Configuration, builder =>
-            //        {
-            //            builder.AddServer();
-            //            builder.AddClient();
-            //            builder.AddCircuitBreaker();
-            //            builder.AddExceptionlessLogger();
-            //            builder.AddConsul();
-            //        });
-            //    }).ConfigureLogging((context, builder) =>
-            //    {
-            //        builder.AddConfiguration(context.Configuration.GetSection("Logging"));
-            //        builder.AddConsole();
-            //    });
-            //await hostBuilder.RunConsoleAsync();
+            var hostBuilder = new HostBuilder().ConfigureHostConfiguration(builder =>
+                {
+                    builder.SetBasePath(Directory.GetCurrentDirectory());
+                }).ConfigureAppConfiguration((context, builder) =>
+                {
+                    builder.AddJsonFile("uragano.json", false, true);
+                    builder.AddCommandLine(args);
+                })
+                .ConfigureServices((context, service) =>
+                {
+                    service.AddUragano(context.Configuration, builder =>
+                    {
+                        builder.AddServer();
+                        builder.AddClient();
+                        builder.AddCircuitBreaker();
+                        builder.AddExceptionlessLogger();
+                        builder.AddConsul();
+                    });
+
+                }).ConfigureLogging((context, builder) =>
+                {
+                    builder.AddConfiguration(context.Configuration.GetSection("Logging"));
+                    builder.AddConsole();
+                });
+            await hostBuilder.RunConsoleAsync();
         }
     }
 }

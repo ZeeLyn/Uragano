@@ -79,7 +79,7 @@ namespace Uragano.Remoting
                         pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
                         pipeline.AddLast(new MessageDecoder<IInvokeMessage>(Codec));
                         pipeline.AddLast(new MessageEncoder<IServiceResult>(Codec));
-                        pipeline.AddLast(new ServerMessageHandler(ServiceFactory, ServiceProvider, Logger, Codec));
+                        pipeline.AddLast(new ServerMessageHandler(ServiceFactory, ServiceProvider, Logger, Codec, ServerSettings));
                     }));
 
                 EndPoint endPoint;
