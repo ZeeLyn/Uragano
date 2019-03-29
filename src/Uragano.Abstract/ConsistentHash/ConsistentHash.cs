@@ -9,11 +9,16 @@ namespace Uragano.Abstractions.ConsistentHash
     {
         private SortedDictionary<int, T> Ring { get; } = new SortedDictionary<int, T>();
 
-        private int VirtualReplication { get; }
+        private int VirtualReplication { get; set; }
 
         public ConsistentHash(int virtualReplication = 200)
         {
             VirtualReplication = virtualReplication;
+        }
+
+        public void SetVirtualReplicationCount(int count)
+        {
+            VirtualReplication = count;
         }
 
         public List<T> GetAllNodes()

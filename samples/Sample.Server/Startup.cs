@@ -43,7 +43,7 @@ namespace Sample.Server
             services.AddUragano(Configuration, builder =>
              {
 
-                 builder.AddClient(LoadBalancing.ConsistentHash);
+                 builder.AddClient(LoadBalancing.Polling);
                  builder.AddServer();
 
                  builder.AddConsul();
@@ -52,8 +52,8 @@ namespace Sample.Server
                  builder.AddExceptionlessLogger();
                  //builder.AddLog4NetLogger();
                  //builder.AddNLogLogger();
-                 //builder.AddRedisPartitionCaching();
-                 builder.AddRedisCaching();
+                 builder.AddRedisPartitionCaching();
+                 //builder.AddRedisCaching();
                  //builder.AddMemoryCaching();
                  builder.AddOption(UraganoOptions.Remoting_Invoke_CancellationTokenSource_Timeout, TimeSpan.FromSeconds(10));
                  builder.AddOptions();
