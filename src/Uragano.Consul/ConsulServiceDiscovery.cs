@@ -159,9 +159,12 @@ namespace Uragano.Consul
                     }
                     if (result.StatusCode != HttpStatusCode.OK)
                     {
-                        Logger.LogError("Get the service{1} error:{0}", result.StatusCode, serviceName);
+                        Logger.LogError("Query the service {0} failed:{0}", serviceName, result.StatusCode);
+                        return new List<ServiceDiscoveryInfo>();
                     }
 
+                    if (!result.Response.Any())
+                        return new List<ServiceDiscoveryInfo>();
                     return result.Response.Select(p => new ServiceDiscoveryInfo
                     {
                         ServiceId = p.Service.ID,
@@ -173,7 +176,7 @@ namespace Uragano.Consul
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("Get the service{2} error:{0}\n{1}", ex.Message, ex.StackTrace, serviceName);
+                    Logger.LogError("Query the service {2} error:{0}\n{1}", ex.Message, ex.StackTrace, serviceName);
                     throw;
                 }
             }

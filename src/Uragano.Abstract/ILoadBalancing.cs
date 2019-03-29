@@ -1,15 +1,16 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Uragano.Abstractions.ServiceDiscovery;
 
 namespace Uragano.Abstractions
 {
-	public interface ILoadBalancing
-	{
-		//public static Type Polling = typeof(LoadBalancingPolling);
+    public interface ILoadBalancing
+    {
+        //public static Type Polling = typeof(LoadBalancingPolling);
 
-		//public static Type WeightedPolling = typeof(LoadBalancingWeightedPolling);
+        //public static Type WeightedPolling = typeof(LoadBalancingWeightedPolling);
 
 
-		Task<ServiceNodeInfo> GetNextNode(string serviceName);
-	}
+        Task<ServiceNodeInfo> GetNextNode(string serviceName, string serviceRoute, object[] serviceArgs, Dictionary<string, string> serviceMeta);
+    }
 }

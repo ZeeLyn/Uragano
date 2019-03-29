@@ -20,25 +20,28 @@ namespace Uragano.DynamicProxy
             RemotingInvoke = remotingInvoke;
         }
 
-        protected void Invoke(object[] args, string route, string serviceName)
-        {
-            RemotingInvoke.InvokeAsync<object>(args, route, serviceName, Meta).ConfigureAwait(false).GetAwaiter().GetResult();
-        }
+        //protected void Invoke(object[] args, string route, string serviceName)
+        //{
+        //    RemotingInvoke.InvokeAsync<object>(args, route, serviceName, Meta).ConfigureAwait(false).GetAwaiter().GetResult();
+        //}
 
-        protected T Invoke<T>(object[] args, string route, string serviceName)
-        {
-            return RemotingInvoke.InvokeAsync<T>(args, route, serviceName, Meta).ConfigureAwait(false).GetAwaiter().GetResult();
-        }
+        //protected T Invoke<T>(object[] args, string route, string serviceName)
+        //{
+        //    return RemotingInvoke.InvokeAsync<T>(args, route, serviceName, Meta).ConfigureAwait(false).GetAwaiter().GetResult();
+        //}
 
 
         protected async Task InvokeAsync(object[] args, string route, string serviceName)
         {
             await RemotingInvoke.InvokeAsync(args, route, serviceName, Meta);
+            Meta = null;
         }
 
         protected async Task<T> InvokeAsync<T>(object[] args, string route, string serviceName)
         {
-            return await RemotingInvoke.InvokeAsync<T>(args, route, serviceName, Meta);
+            var result = await RemotingInvoke.InvokeAsync<T>(args, route, serviceName, Meta);
+            Meta = null;
+            return result;
         }
     }
 }

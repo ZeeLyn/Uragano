@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uragano.Core", "src\Uragano
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uragano.DynamicProxy", "src\Uragano.DynamicProxy\Uragano.DynamicProxy.csproj", "{C6AE65C3-DFC2-484F-937E-482363581DE1}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{37596B72-254F-41F3-AD1C-F7F421EB5F02}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{37596B72-254F-41F3-AD1C-F7F421EB5F02}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.WebApi", "samples\Sample.WebApi\Sample.WebApi.csproj", "{3F8DE4D5-C985-438C-B144-13813CD1583C}"
 EndProject

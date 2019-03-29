@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions.CircuitBreaker;
@@ -10,7 +9,6 @@ namespace Uragano.Abstractions
 {
     public class UraganoSettings
     {
-        public bool IsDevelopment { get; set; }
         public ServerSettings ServerSettings { get; set; }
 
         public IServiceDiscoveryClientConfiguration ServiceDiscoveryClientConfiguration { get; set; }

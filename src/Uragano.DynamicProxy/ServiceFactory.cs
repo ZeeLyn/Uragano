@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Uragano.Abstractions.Exceptions;
@@ -144,13 +143,6 @@ namespace Uragano.DynamicProxy
                 {
                     context.Interceptors.Push(interceptor);
                 }
-                //if (UraganoSettings.ServerGlobalInterceptors.Any())
-                //{
-                //    foreach (var interceptor in UraganoSettings.ServerGlobalInterceptors)
-                //    {
-                //        context.Interceptors.Push(interceptor);
-                //    }
-                //}
 
                 return await ((IInterceptor)scope.ServiceProvider.GetRequiredService(context.Interceptors.Pop()))
                       .Intercept(context);

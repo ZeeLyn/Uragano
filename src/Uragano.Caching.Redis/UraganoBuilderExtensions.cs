@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
+using Uragano.Abstractions.ConsistentHash;
 
 namespace Uragano.Caching.Redis
 {
@@ -52,6 +53,7 @@ namespace Uragano.Caching.Redis
             if (partitionPolicy != null)
                 builder.ServiceCollection.AddSingleton(partitionPolicy);
             builder.AddCaching<RedisPartitionCaching, TKeyGenerator>(redisOptions);
+            builder.ServiceCollection.AddSingleton<IConsistentHash<RedisConnection>, ConsistentHash<RedisConnection>>();
         }
 
         public static void AddRedisPartitionCaching<TKeyGenerator>(this IUraganoBuilder builder, IConfigurationSection configurationSection, Func<string, IEnumerable<RedisConnection>, RedisConnection> partitionPolicy = null) where TKeyGenerator : class, ICachingKeyGenerator
@@ -71,6 +73,7 @@ namespace Uragano.Caching.Redis
             if (partitionPolicy != null)
                 builder.ServiceCollection.AddSingleton(partitionPolicy);
             builder.AddCaching<RedisPartitionCaching>(redisOptions);
+            builder.ServiceCollection.AddSingleton<IConsistentHash<RedisConnection>, ConsistentHash<RedisConnection>>();
         }
 
         public static void AddRedisPartitionCaching(this IUraganoBuilder builder, IConfigurationSection configurationSection, Func<string, IEnumerable<RedisConnection>, RedisConnection> partitionPolicy = null)

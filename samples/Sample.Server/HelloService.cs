@@ -46,10 +46,5 @@ namespace Sample.Server
                 Result = "OK"
             });
         }
-
-        public Task Test(ResponseResult<string> r)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Uragano.Abstractions;
+using Uragano.Abstractions.ConsistentHash;
 
 namespace Uragano.Caching.Redis
 {
@@ -14,27 +15,30 @@ namespace Uragano.Caching.Redis
 
         private ICodec Codec { get; }
 
-        public RedisPartitionCaching(UraganoSettings uraganoSettings, IServiceProvider serviceProvider, ICodec codec)
+        private IConsistentHash<RedisConnection> ConsistentHash { get; }
+
+        public RedisPartitionCaching(UraganoSettings uraganoSettings, IServiceProvider serviceProvider, ICodec codec, IConsistentHash<RedisConnection> consistentHash)
         {
             Codec = codec;
             var redisOptions = (RedisOptions)uraganoSettings.CachingOptions;
+            ConsistentHash = consistentHash;
             var policy = serviceProvider.GetService<Func<string, IEnumerable<RedisConnection>, RedisConnection>>();
-            if (policy != null)
+            if (policy == null)
             {
-                string NodeRule(string key)
+                foreach (var item in redisOptions.ConnectionStrings)
                 {
-                    var connection = policy(key, redisOptions.ConnectionStrings);
-                    return $"{connection.Host}:{connection.Port}/{connection.DefaultDatabase}";
+                    ConsistentHash.AddNode(item, item.ToString());
                 }
-
-                RedisHelper.Initialization(new CSRedis.CSRedisClient(NodeRule,
-                    redisOptions.ConnectionStrings.Select(p => p.ToString()).ToArray()));
+                policy = (key, connections) => ConsistentHash.GetNodeForKey(key);
             }
-            else
+
+            string NodeRule(string key)
             {
-                RedisHelper.Initialization(new CSRedis.CSRedisClient(NodeRule: null, redisOptions.ConnectionStrings.Select(p => p.ToString()).ToArray()));
+                var connection = policy(key, redisOptions.ConnectionStrings);
+                return $"{connection.Host}:{connection.Port}/{connection.DefaultDatabase}";
             }
 
+            RedisHelper.Initialization(new CSRedis.CSRedisClient(NodeRule, redisOptions.ConnectionStrings.Select(p => p.ToString()).ToArray()));
             Cache = new Microsoft.Extensions.Caching.Redis.CSRedisCache(RedisHelper.Instance);
         }
 

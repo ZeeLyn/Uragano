@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Uragano.Abstractions;
@@ -7,17 +8,15 @@ using Uragano.Abstractions.ServiceDiscovery;
 
 namespace Uragano.Remoting.LoadBalancing
 {
-    public class LoadBalancingPolling : ILoadBalancing
+    public class LoadBalancingWeightedRandom : ILoadBalancing
     {
         private IServiceStatusManage ServiceStatusManageFactory { get; }
 
-        private static int _index = -1;
         private static readonly object LockObject = new object();
-        public LoadBalancingPolling(IServiceStatusManage serviceStatusManageFactory)
+        public LoadBalancingWeightedRandom(IServiceStatusManage serviceStatusManageFactory)
         {
             ServiceStatusManageFactory = serviceStatusManageFactory;
         }
-
         public async Task<ServiceNodeInfo> GetNextNode(string serviceName, string serviceRoute, object[] serviceArgs, Dictionary<string, string> serviceMeta)
         {
             var nodes = await ServiceStatusManageFactory.GetServiceNodes(serviceName);
@@ -25,10 +24,16 @@ namespace Uragano.Remoting.LoadBalancing
                 throw new NotFoundNodeException(serviceName);
             lock (LockObject)
             {
-                _index++;
-                if (_index > nodes.Count - 1)
-                    _index = 0;
-                return nodes[_index];
+                var total = nodes.Sum(p => p.Weight);
+                var offset = new Random().Next(0, total);
+                var currentSum = 0;
+                foreach (var node in nodes.OrderByDescending(p => p.Weight))
+                {
+                    currentSum += node.Weight;
+                    if (offset <= currentSum)
+                        return node;
+                }
+                return nodes[new Random().Next(0, nodes.Count)];
             }
         }
     }

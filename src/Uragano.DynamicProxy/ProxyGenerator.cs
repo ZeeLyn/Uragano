@@ -26,11 +26,15 @@ namespace Uragano.DynamicProxy
             assemblies = types.Aggregate(assemblies, (current, type) => current.Append(type.Assembly));
 
             var trees = interfaces.Select(GenerateProxyTree).ToList();
-            //for (var i = 0; i < trees.Count; i++)
-            //{
-            //    File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), $"{interfaces[i].Name}.Imp.cs"),
-            //        trees[i].ToString());
-            //}
+
+            if (UraganoOptions.Output_DynamicProxy_SourceCode.Value)
+            {
+                for (var i = 0; i < trees.Count; i++)
+                {
+                    File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), $"{interfaces[i].Name}.Implement.cs"),
+                        trees[i].ToString());
+                }
+            }
 
             using (var stream = CompileClientProxy(trees,
                 assemblies.Select(x => MetadataReference.CreateFromFile(x.Location))
