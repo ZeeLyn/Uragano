@@ -343,7 +343,6 @@ namespace Uragano.Core
         {
             if (!RegisterSingletonService<IServiceStatusManage, ServiceStatusManage>())
                 return;
-            AddHostedService<ServiceStatusManageStartup>();
             AddHostedService<RemotingClientStartup>();
             RegisterSingletonService<ClientDefaultInterceptor>();
             RegisterSingletonService<IClientFactory, ClientFactory>();

@@ -69,7 +69,7 @@ namespace XUnitTest
 
         public void Dispose()
         {
-            ConsulServiceDiscovery.DeregisterAsync(ConsulFixture.UraganoSettings.ServiceDiscoveryClientConfiguration, "123").GetAwaiter().GetResult();
+            ConsulServiceDiscovery.DeregisterAsync(ConsulFixture.UraganoSettings.ServiceDiscoveryClientConfiguration, "", "123").GetAwaiter().GetResult();
         }
     }
 

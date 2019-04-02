@@ -1,23 +1,43 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Uragano.Abstractions.ServiceDiscovery
 {
-	public class ServiceDiscoveryInfo
-	{
-		public string ServiceId { get; set; }
-		public string Address { get; set; }
+    public class ServiceDiscoveryBase
+    {
+        public ServiceDiscoveryBase(string address, int port, IDictionary<string, string> meta)
+        {
+            Address = address;
+            Port = port;
+            Meta = meta;
+        }
 
-		public int Port { get; set; }
+        public string Address { get; }
 
-		public IDictionary<string, string> Meta { get; set; }
+        public int Port { get; }
 
-		public bool Alive { get; set; }
-	}
+        public IDictionary<string, string> Meta { get; }
+    }
 
-	public class ServiceNodeInfo : ServiceDiscoveryInfo
-	{
-		public int Weight { get; set; }
+    public class ServiceDiscoveryInfo : ServiceDiscoveryBase
+    {
+        public ServiceDiscoveryInfo(string serviceId, string address, int port, IDictionary<string, string> meta) : base(address, port, meta)
+        {
+            ServiceId = serviceId;
+        }
 
-		public int CurrentWeight { get; set; }
-	}
+        public string ServiceId { get; }
+    }
+
+    public class ServiceNodeInfo : ServiceDiscoveryInfo
+    {
+        public ServiceNodeInfo(string serviceId, string address, int port, int weight, IDictionary<string, string> meta) : base(serviceId, address, port, meta)
+        {
+            Weight = weight;
+        }
+
+        public int Weight { get; }
+
+        public ConcurrentDictionary<string, object> Attach { get; } = new ConcurrentDictionary<string, object>();
+    }
 }

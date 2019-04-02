@@ -12,48 +12,49 @@ namespace Uragano.Remoting.LoadBalancing
 {
     public class LoadBalancingConsistentHash : ILoadBalancing
     {
-        private IServiceStatusManage ServiceStatusManageFactory { get; }
-
         private static readonly object LockObject = new object();
+
+        private IServiceDiscovery ServiceDiscovery { get; }
 
         private static ConcurrentDictionary<string, IConsistentHash<ServiceNodeInfo>> ServicesInfo { get; } = new ConcurrentDictionary<string, IConsistentHash<ServiceNodeInfo>>();
 
-        public LoadBalancingConsistentHash(IServiceStatusManage serviceStatusManageFactory)
+        public LoadBalancingConsistentHash(IServiceDiscovery serviceDiscovery)
         {
-            ServiceStatusManageFactory = serviceStatusManageFactory;
-            ServiceStatusManageFactory.OnNodeJoin += OnNodeJoin;
-            ServiceStatusManageFactory.OnNodeLeave += OnNodeLeave;
+            ServiceDiscovery.OnNodeJoin += OnNodeJoin;
+            ServiceDiscovery.OnNodeLeave += OnNodeLeave;
+            ServiceDiscovery = serviceDiscovery;
         }
 
 
-        private void OnNodeLeave(string serviceName, params ServiceNodeInfo[] nodeInfo)
+        private void OnNodeLeave(string serviceName, IReadOnlyList<string> servicesId)
         {
-            if (!nodeInfo.Any()) return;
+            if (!servicesId.Any()) return;
             if (!ServicesInfo.TryGetValue(serviceName, out var service)) return;
-            foreach (var node in nodeInfo)
+            foreach (var node in servicesId)
             {
-                service.RemoveNode(node.ServiceId);
+                service.RemoveNode(node);
             }
         }
 
-        private void OnNodeJoin(string serviceName, params ServiceNodeInfo[] nodeInfo)
+        private void OnNodeJoin(string serviceName, IReadOnlyList<ServiceNodeInfo> nodes)
         {
-            if (!nodeInfo.Any())
+            if (!nodes.Any())
                 return;
             if (!ServicesInfo.TryGetValue(serviceName, out var service)) return;
-            foreach (var node in nodeInfo)
+            foreach (var node in nodes)
             {
                 service.AddNode(node, node.ServiceId);
             }
         }
 
-        public async Task<ServiceNodeInfo> GetNextNode(string serviceName, string serviceRoute, object[] serviceArgs,
-            Dictionary<string, string> serviceMeta)
+        public async Task<ServiceNodeInfo> GetNextNode(string serviceName, string serviceRoute, IReadOnlyList<object> serviceArgs,
+            IReadOnlyDictionary<string, string> serviceMeta)
         {
-            var nodes = await ServiceStatusManageFactory.GetServiceNodes(serviceName);
+            var nodes = await ServiceDiscovery.GetServiceNodes(serviceName);
             if (!nodes.Any())
                 throw new NotFoundNodeException(serviceName);
-
+            if (nodes.Count == 1)
+                return nodes.First();
             lock (LockObject)
             {
                 if (serviceMeta == null || !serviceMeta.TryGetValue("x-consistent-hash-key", out var key) || string.IsNullOrWhiteSpace(key))

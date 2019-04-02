@@ -7,16 +7,18 @@ namespace Uragano.Consul
     {
         public static void AddConsul(this IUraganoBuilder builder, ConsulClientConfigure consulClientConfiguration)
         {
+            builder.AddHostedService<ServiceStatusManageStartup>();
             builder.AddServiceDiscovery<ConsulServiceDiscovery>(consulClientConfiguration);
         }
 
         public static void AddConsul(this IUraganoBuilder builder, IConfigurationSection clientConfigurationSection)
         {
-            builder.AddServiceDiscovery<ConsulServiceDiscovery>(CommonMethods.ReadConsulClientConfigure(clientConfigurationSection));
+            builder.AddConsul(CommonMethods.ReadConsulClientConfigure(clientConfigurationSection));
         }
 
         public static void AddConsul(this IUraganoBuilder builder, ConsulClientConfigure consulClientConfiguration, ConsulRegisterServiceConfiguration consulAgentServiceConfiguration)
         {
+            builder.AddHostedService<ServiceStatusManageStartup>();
             builder.AddServiceDiscovery<ConsulServiceDiscovery>(consulClientConfiguration, consulAgentServiceConfiguration);
         }
 
@@ -24,7 +26,8 @@ namespace Uragano.Consul
             IConfigurationSection serviceConfigurationSection)
         {
             var service = CommonMethods.ReadRegisterServiceConfiguration(serviceConfigurationSection);
-            builder.AddServiceDiscovery<ConsulServiceDiscovery>(CommonMethods.ReadConsulClientConfigure(clientConfigurationSection), service);
+            var client = CommonMethods.ReadConsulClientConfigure(clientConfigurationSection);
+            builder.AddConsul(client, service);
         }
 
         public static void AddConsul(this IUraganoSampleBuilder builder)

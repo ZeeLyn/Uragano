@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -16,7 +17,11 @@ namespace Uragano.Consul
         private ILogger Logger { get; }
         private UraganoSettings UraganoSettings { get; }
 
+        private static readonly ConcurrentDictionary<string, List<ServiceNodeInfo>> ServiceNodes =
+            new ConcurrentDictionary<string, List<ServiceNodeInfo>>();
 
+        public event NodeLeaveHandler OnNodeLeave;
+        public event NodeJoinHandler OnNodeJoin;
         public ConsulServiceDiscovery(UraganoSettings uraganoSettings, ILogger<ConsulServiceDiscovery> logger)
         {
             UraganoSettings = uraganoSettings;
@@ -92,7 +97,7 @@ namespace Uragano.Consul
             }
         }
 
-        public async Task<bool> DeregisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceId)
+        public async Task<bool> DeregisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName, string serviceId)
         {
             if (!(serviceDiscoveryClientConfiguration is ConsulClientConfigure client))
                 throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
@@ -127,7 +132,7 @@ namespace Uragano.Consul
             }
         }
 
-        public async Task<List<ServiceDiscoveryInfo>> QueryServiceAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName,
+        public async Task<IReadOnlyList<ServiceDiscoveryInfo>> QueryServiceAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName,
             ServiceStatus serviceStatus = ServiceStatus.Alive, CancellationToken cancellationToken = default)
         {
             if (!(serviceDiscoveryClientConfiguration is ConsulClientConfigure client))
@@ -165,14 +170,8 @@ namespace Uragano.Consul
 
                     if (!result.Response.Any())
                         return new List<ServiceDiscoveryInfo>();
-                    return result.Response.Select(p => new ServiceDiscoveryInfo
-                    {
-                        ServiceId = p.Service.ID,
-                        Address = p.Service.Address,
-                        Port = p.Service.Port,
-                        Meta = p.Service.Meta,
-                        Alive = p.Checks.All(s => s.Status.Equals(HealthStatus.Passing))
-                    }).ToList();
+
+                    return result.Response.Select(p => new ServiceDiscoveryInfo(p.Service.ID, p.Service.Address, p.Service.Port, p.Service.Meta)).ToList();
                 }
                 catch (Exception ex)
                 {
@@ -180,6 +179,45 @@ namespace Uragano.Consul
                     throw;
                 }
             }
+        }
+
+        public IReadOnlyDictionary<string, IReadOnlyList<ServiceNodeInfo>> GetAllService()
+        {
+            return ServiceNodes.ToDictionary(k => k.Key, v => (IReadOnlyList<ServiceNodeInfo>)v.Value);
+        }
+
+        public async Task<IReadOnlyList<ServiceNodeInfo>> GetServiceNodes(string serviceName)
+        {
+            if (ServiceNodes.TryGetValue(serviceName, out var result))
+                return result;
+            var serviceNodes = await QueryServiceAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, serviceName);
+            if (!serviceNodes.Any())
+            {
+                return new List<ServiceNodeInfo>();
+            }
+            var nodes = serviceNodes.Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, int.Parse(p.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0"), p.Meta)).ToList();
+
+            if (ServiceNodes.TryAdd(serviceName, nodes))
+                return nodes;
+
+            throw new InvalidOperationException($"Service {serviceName} not found.");
+        }
+
+        public void AddNode(string serviceName, params ServiceNodeInfo[] nodeInfo)
+        {
+            if (ServiceNodes.TryGetValue(serviceName, out var services))
+                services.AddRange(nodeInfo);
+            else
+                ServiceNodes.TryAdd(serviceName, nodeInfo.ToList());
+
+            OnNodeJoin?.Invoke(serviceName, nodeInfo);
+        }
+
+        public void RemoveNode(string serviceName, params string[] servicesId)
+        {
+            if (!ServiceNodes.TryGetValue(serviceName, out var services)) return;
+            services.RemoveAll(p => servicesId.Any(n => n == p.ServiceId));
+            OnNodeLeave?.Invoke(serviceName, servicesId);
         }
     }
 }

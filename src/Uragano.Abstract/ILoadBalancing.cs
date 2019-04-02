@@ -6,11 +6,6 @@ namespace Uragano.Abstractions
 {
     public interface ILoadBalancing
     {
-        //public static Type Polling = typeof(LoadBalancingPolling);
-
-        //public static Type WeightedPolling = typeof(LoadBalancingWeightedPolling);
-
-
-        Task<ServiceNodeInfo> GetNextNode(string serviceName, string serviceRoute, object[] serviceArgs, Dictionary<string, string> serviceMeta);
+        Task<ServiceNodeInfo> GetNextNode(string serviceName, string serviceRoute, IReadOnlyList<object> serviceArgs, IReadOnlyDictionary<string, string> serviceMeta);
     }
 }

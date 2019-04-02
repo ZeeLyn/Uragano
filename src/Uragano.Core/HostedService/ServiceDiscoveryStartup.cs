@@ -44,7 +44,7 @@ namespace Uragano.Core.HostedService
         {
             if (UraganoSettings.ServerSettings == null)
                 return;
-            await ServiceDiscovery.DeregisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration.Id);
+            await ServiceDiscovery.DeregisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration.Name, UraganoSettings.ServiceRegisterConfiguration.Id);
         }
     }
 }

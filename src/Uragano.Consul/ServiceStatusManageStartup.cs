@@ -5,11 +5,11 @@ using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceDiscovery;
 
-namespace Uragano.Core.HostedService
+namespace Uragano.Consul
 {
     public class ServiceStatusManageStartup : BackgroundService
     {
-        private IServiceStatusManage ServiceStatusManageFactory { get; }
+        private IServiceStatusManage ServiceStatusManage { get; }
 
         private static System.Timers.Timer Timer { get; set; }
 
@@ -19,7 +19,7 @@ namespace Uragano.Core.HostedService
 
         public ServiceStatusManageStartup(IServiceStatusManage serviceStatusManageFactory, UraganoSettings uraganoSettings, ILogger<ServiceStatusManageStartup> logger)
         {
-            ServiceStatusManageFactory = serviceStatusManageFactory;
+            ServiceStatusManage = serviceStatusManageFactory;
             UraganoSettings = uraganoSettings;
             Logger = logger;
         }
@@ -34,7 +34,7 @@ namespace Uragano.Core.HostedService
                 {
                     if (stoppingToken.IsCancellationRequested)
                         return;
-                    await ServiceStatusManageFactory.Refresh(stoppingToken);
+                    await ServiceStatusManage.Refresh(stoppingToken);
                 };
                 Timer.Enabled = true;
             }

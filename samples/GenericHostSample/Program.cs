@@ -13,6 +13,7 @@ using Uragano.Consul;
 using Uragano.Core;
 using Uragano.Logging.Exceptionless;
 using Uragano.Remoting.LoadBalancing;
+using Uragano.ZooKeeper;
 
 namespace GenericHostSample
 {
@@ -54,6 +55,7 @@ namespace GenericHostSample
                         builder.AddCircuitBreaker();
                         builder.AddExceptionlessLogger();
                         builder.AddConsul();
+                        //builder.AddZooKeeper();
                     });
 
                 }).ConfigureLogging((context, builder) =>

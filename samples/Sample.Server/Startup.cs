@@ -11,6 +11,7 @@ using Uragano.Consul;
 using Uragano.Core;
 using Uragano.Logging.Exceptionless;
 using Uragano.Remoting.LoadBalancing;
+using Uragano.ZooKeeper;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace Sample.Server
@@ -31,9 +32,9 @@ namespace Sample.Server
             services.AddUragano(Configuration, builder =>
              {
 
-                 builder.AddClient(LoadBalancing.Polling);
+                 builder.AddClient(LoadBalancing.WeightedPolling);
                  builder.AddServer();
-
+                 //builder.AddZooKeeper();
                  builder.AddConsul();
                  builder.AddClientGlobalInterceptor<ClientGlobalInterceptor>();
                  builder.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
