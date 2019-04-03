@@ -132,8 +132,7 @@ namespace Uragano.Consul
             }
         }
 
-        public async Task<IReadOnlyList<ServiceDiscoveryInfo>> QueryServiceAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName,
-            ServiceStatus serviceStatus = ServiceStatus.Alive, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<ServiceDiscoveryInfo>> QueryServiceAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName, CancellationToken cancellationToken = default)
         {
             if (!(serviceDiscoveryClientConfiguration is ConsulClientConfigure client))
                 throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
@@ -149,19 +148,8 @@ namespace Uragano.Consul
             {
                 try
                 {
-                    QueryResult<ServiceEntry[]> result;
-                    switch (serviceStatus)
-                    {
-                        case ServiceStatus.Alive:
-                            result = await consul.Health.Service(serviceName, "", true, cancellationToken);
-                            break;
-                        case ServiceStatus.All:
-                            result = await consul.Health.Service(serviceName, "", false, cancellationToken);
-                            break;
-                        default:
-                            result = await consul.Health.Service(serviceName, cancellationToken);
-                            break;
-                    }
+                    var result = await consul.Health.Service(serviceName, "", true, cancellationToken);
+
                     if (result.StatusCode != HttpStatusCode.OK)
                     {
                         Logger.LogError("Query the service {0} failed:{0}", serviceName, result.StatusCode);

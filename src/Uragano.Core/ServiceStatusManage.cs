@@ -36,7 +36,7 @@ namespace Uragano.Core
                 foreach (var service in ServiceDiscovery.GetAllService())
                 {
                     Logger.LogTrace($"Service {service.Key} refreshing...");
-                    var healthNodes = await ServiceDiscovery.QueryServiceAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, service.Key, ServiceStatus.Alive, cancellationToken);
+                    var healthNodes = await ServiceDiscovery.QueryServiceAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, service.Key, cancellationToken);
                     if (cancellationToken.IsCancellationRequested)
                         break;
 
@@ -69,6 +69,7 @@ namespace Uragano.Core
                     if (leavedNodes.Any())
                     {
                         ServiceDiscovery.RemoveNode(service.Key, leavedNodes);
+                        Logger.LogTrace($"These nodes are gone:{string.Join(",", leavedNodes)}");
                     }
 
                     var addedNodes = healthNodes.Where(p =>

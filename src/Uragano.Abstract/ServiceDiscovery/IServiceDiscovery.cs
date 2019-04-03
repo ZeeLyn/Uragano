@@ -16,7 +16,7 @@ namespace Uragano.Abstractions.ServiceDiscovery
 
         Task<bool> DeregisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName, string serviceId);
 
-        Task<IReadOnlyList<ServiceDiscoveryInfo>> QueryServiceAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName, ServiceStatus serviceStatus = ServiceStatus.Alive, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<ServiceDiscoveryInfo>> QueryServiceAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName, CancellationToken cancellationToken = default);
 
         IReadOnlyDictionary<string, IReadOnlyList<ServiceNodeInfo>> GetAllService();
 

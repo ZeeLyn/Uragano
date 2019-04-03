@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,9 +14,13 @@ namespace Uragano.Remoting.LoadBalancing
         private static readonly object LockObject = new object();
 
         private IServiceDiscovery ServiceDiscovery { get; }
-        public LoadBalancingWeightedRandom(IServiceDiscovery serviceDiscovery)
+
+        private ILogger Logger { get; }
+
+        public LoadBalancingWeightedRandom(IServiceDiscovery serviceDiscovery,ILogger<LoadBalancingWeightedRandom> logger)
         {
             ServiceDiscovery = serviceDiscovery;
+            Logger = logger;
         }
         public async Task<ServiceNodeInfo> GetNextNode(string serviceName, string serviceRoute, IReadOnlyList<object> serviceArgs, IReadOnlyDictionary<string, string> serviceMeta)
         {
@@ -27,15 +32,22 @@ namespace Uragano.Remoting.LoadBalancing
             lock (LockObject)
             {
                 var total = nodes.Sum(p => p.Weight);
-                var offset = new Random().Next(0, total);
+                var offset = new Random().Next(0, total+1);
                 var currentSum = 0;
                 foreach (var node in nodes.OrderByDescending(p => p.Weight))
                 {
                     currentSum += node.Weight;
                     if (offset <= currentSum)
+                    {
+                        if (Logger.IsEnabled(LogLevel.Trace))
+                            Logger.LogTrace($"Load to node {node.ServiceId}.");
                         return node;
+                    }
                 }
-                return nodes[new Random().Next(0, nodes.Count)];
+                var result= nodes[new Random().Next(0, nodes.Count)];
+                if (Logger.IsEnabled(LogLevel.Trace))
+                    Logger.LogTrace($"Load to node {result.ServiceId}.");
+                return result;
             }
         }
     }

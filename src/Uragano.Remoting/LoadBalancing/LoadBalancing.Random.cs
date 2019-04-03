@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,9 +13,12 @@ namespace Uragano.Remoting.LoadBalancing
     {
         private IServiceDiscovery ServiceDiscovery { get; }
 
-        public LoadBalancingRandom(IServiceDiscovery serviceDiscovery)
+        private ILogger Logger { get; }
+
+        public LoadBalancingRandom(IServiceDiscovery serviceDiscovery,ILogger<LoadBalancingRandom> logger)
         {
             ServiceDiscovery = serviceDiscovery;
+            Logger = logger;
         }
         public async Task<ServiceNodeInfo> GetNextNode(string serviceName, string serviceRoute, IReadOnlyList<object> serviceArgs, IReadOnlyDictionary<string, string> serviceMeta)
         {
@@ -23,7 +27,10 @@ namespace Uragano.Remoting.LoadBalancing
                 throw new NotFoundNodeException(serviceName);
             if (nodes.Count == 1)
                 return nodes.First();
-            return nodes[new Random().Next(0, nodes.Count)];
+            var node= nodes[new Random().Next(0, nodes.Count)];
+            if (Logger.IsEnabled(LogLevel.Trace))
+                Logger.LogTrace($"Load to node {node.ServiceId}.");
+            return node;
         }
     }
 }

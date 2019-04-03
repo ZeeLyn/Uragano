@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,13 +17,16 @@ namespace Uragano.Remoting.LoadBalancing
 
         private IServiceDiscovery ServiceDiscovery { get; }
 
+        private ILogger Logger { get; }
+
         private static ConcurrentDictionary<string, IConsistentHash<ServiceNodeInfo>> ServicesInfo { get; } = new ConcurrentDictionary<string, IConsistentHash<ServiceNodeInfo>>();
 
-        public LoadBalancingConsistentHash(IServiceDiscovery serviceDiscovery)
+        public LoadBalancingConsistentHash(IServiceDiscovery serviceDiscovery,ILogger<LoadBalancingConsistentHash> logger)
         {
+            ServiceDiscovery = serviceDiscovery;
+            Logger = logger;
             ServiceDiscovery.OnNodeJoin += OnNodeJoin;
             ServiceDiscovery.OnNodeLeave += OnNodeLeave;
-            ServiceDiscovery = serviceDiscovery;
         }
 
 
@@ -33,6 +37,7 @@ namespace Uragano.Remoting.LoadBalancing
             foreach (var node in servicesId)
             {
                 service.RemoveNode(node);
+                Logger.LogTrace($"Removed node {node}");
             }
         }
 
@@ -44,6 +49,7 @@ namespace Uragano.Remoting.LoadBalancing
             foreach (var node in nodes)
             {
                 service.AddNode(node, node.ServiceId);
+                Logger.LogTrace($"Added node {node.ServiceId}");
             }
         }
 
@@ -59,20 +65,22 @@ namespace Uragano.Remoting.LoadBalancing
             {
                 if (serviceMeta == null || !serviceMeta.TryGetValue("x-consistent-hash-key", out var key) || string.IsNullOrWhiteSpace(key))
                 {
-                    throw new ArgumentNullException(nameof(serviceMeta), "Service metadata [x-consistent-hash-key]  is empty,Please call SetMeta method to pass in.");
+                    throw new ArgumentNullException(nameof(serviceMeta), "Service metadata [x-consistent-hash-key]  is null,Please call SetMeta method to pass in.");
                 }
 
-                return ServicesInfo.GetOrAdd(serviceName, k =>
+                var selectedNode= ServicesInfo.GetOrAdd(serviceName, k =>
                 {
                     var consistentHash = new ConsistentHash<ServiceNodeInfo>();
                     foreach (var node in nodes)
                     {
                         consistentHash.AddNode(node, node.ServiceId);
                     }
-
                     ServicesInfo.TryAdd(serviceName, consistentHash);
                     return consistentHash;
                 }).GetNodeForKey(key);
+                if(Logger.IsEnabled( LogLevel.Trace))
+                    Logger.LogTrace($"Load to node {selectedNode.ServiceId}.");
+                return selectedNode;
             }
         }
     }

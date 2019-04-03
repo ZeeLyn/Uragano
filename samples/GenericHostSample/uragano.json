@@ -2,8 +2,8 @@
   "Logging": {
     "LogLevel": {
       "Default": "Trace",
-      "System": "Information",
-      "Microsoft": "Information"
+      "System": "Warning",
+      "Microsoft": "Warning"
     }
   },
   "AllowedHosts": "*",

@@ -32,7 +32,7 @@ namespace Sample.Server
             services.AddUragano(Configuration, builder =>
              {
 
-                 builder.AddClient(LoadBalancing.WeightedPolling);
+                 builder.AddClient(LoadBalancing.WeightedRandom);
                  builder.AddServer();
                  //builder.AddZooKeeper();
                  builder.AddConsul();

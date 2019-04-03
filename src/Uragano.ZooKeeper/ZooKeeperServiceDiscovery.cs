@@ -13,7 +13,7 @@ namespace Uragano.ZooKeeper
 {
     public class ZooKeeperServiceDiscovery : IServiceDiscovery, IDisposable
     {
-        private ZooKeeperClientConfigure ZooKeeperClient { get; }
+        private ZooKeeperClientConfigure ZooKeeperClientConfigure { get; }
 
         private ICodec Codec { get; }
 
@@ -23,9 +23,9 @@ namespace Uragano.ZooKeeper
 
         private org.apache.zookeeper.ZooKeeper ZooKeeper { get; set; }
 
-        public ZooKeeperServiceDiscovery(ZooKeeperClientConfigure zooKeeperClient, ICodec codec, ILogger<ZooKeeperServiceDiscovery> logger)
+        public ZooKeeperServiceDiscovery(ZooKeeperClientConfigure zooKeeperClientConfigure, ICodec codec, ILogger<ZooKeeperServiceDiscovery> logger)
         {
-            ZooKeeperClient = zooKeeperClient;
+            ZooKeeperClientConfigure = zooKeeperClientConfigure;
             Codec = codec;
             Logger = logger;
             CreateZooKeeperClient();
@@ -71,8 +71,7 @@ namespace Uragano.ZooKeeper
             }
         }
 
-        public async Task<IReadOnlyList<ServiceDiscoveryInfo>> QueryServiceAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName,
-            ServiceStatus serviceStatus = ServiceStatus.Alive, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<ServiceDiscoveryInfo>> QueryServiceAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName, CancellationToken cancellationToken = default)
         {
             if (await ZooKeeper.existsAsync($"{Root}/{serviceName}", true) == null)
                 return new List<ServiceDiscoveryInfo>();
@@ -128,11 +127,11 @@ namespace Uragano.ZooKeeper
         {
             var watcher = new UraganoWatcher();
             watcher.OnChange += Watcher_OnChange;
-            ZooKeeper = new org.apache.zookeeper.ZooKeeper(ZooKeeperClient.ConnectionString,
-                ZooKeeperClient.SessionTimeout, watcher, ZooKeeperClient.SessionId,
-                string.IsNullOrWhiteSpace(ZooKeeperClient.SessionPassword)
+            ZooKeeper = new org.apache.zookeeper.ZooKeeper(ZooKeeperClientConfigure.ConnectionString,
+                ZooKeeperClientConfigure.SessionTimeout, watcher, ZooKeeperClientConfigure.SessionId,
+                string.IsNullOrWhiteSpace(ZooKeeperClientConfigure.SessionPassword)
                     ? null
-                    : Encoding.UTF8.GetBytes(ZooKeeperClient.SessionPassword), ZooKeeperClient.CanBeReadOnly);
+                    : Encoding.UTF8.GetBytes(ZooKeeperClientConfigure.SessionPassword), ZooKeeperClientConfigure.CanBeReadOnly);
         }
 
         private void Watcher_OnChange(string path, Watcher.Event.KeeperState keeperState, Watcher.Event.EventType eventType)

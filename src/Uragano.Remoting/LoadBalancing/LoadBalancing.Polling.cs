@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Uragano.Abstractions;
@@ -13,9 +14,12 @@ namespace Uragano.Remoting.LoadBalancing
 
         private static int _index = -1;
         private static readonly object LockObject = new object();
-        public LoadBalancingPolling(IServiceDiscovery serviceDiscovery)
+
+        private ILogger Logger { get; }
+        public LoadBalancingPolling(IServiceDiscovery serviceDiscovery,ILogger<LoadBalancingPolling> logger)
         {
             ServiceDiscovery = serviceDiscovery;
+            Logger = logger;
         }
 
         public async Task<ServiceNodeInfo> GetNextNode(string serviceName, string serviceRoute, IReadOnlyList<object> serviceArgs, IReadOnlyDictionary<string, string> serviceMeta)
@@ -30,6 +34,8 @@ namespace Uragano.Remoting.LoadBalancing
                 _index++;
                 if (_index > nodes.Count - 1)
                     _index = 0;
+                if(Logger.IsEnabled( LogLevel.Trace))
+                    Logger.LogTrace($"Load to node {nodes[_index].ServiceId}.");
                 return nodes[_index];
             }
         }

@@ -62,8 +62,7 @@ namespace XUnitTest
         public void QueryServiceAsync()
         {
             var result = ConsulServiceDiscovery
-                .QueryServiceAsync(ConsulFixture.UraganoSettings.ServiceDiscoveryClientConfiguration, "XUnitTest1",
-                    Uragano.Abstractions.ServiceDiscovery.ServiceStatus.All).GetAwaiter().GetResult();
+                .QueryServiceAsync(ConsulFixture.UraganoSettings.ServiceDiscoveryClientConfiguration, "XUnitTest1").GetAwaiter().GetResult();
             Assert.True(result.Count >= 0);
         }
 
