@@ -7,22 +7,17 @@ using Uragano.Abstractions;
 using Uragano.Abstractions.Exceptions;
 using Uragano.Abstractions.Service;
 using Uragano.DynamicProxy.Interceptor;
-using Uragano.Remoting;
 
 namespace Uragano.DynamicProxy
 {
     public class RemotingInvoke : IRemotingInvoke
     {
-        private ILoadBalancing LoadBalancing { get; }
-        private IClientFactory ClientFactory { get; }
         private IServiceFactory ServiceFactory { get; }
         private UraganoSettings UraganoSettings { get; }
         private IServiceProvider ServiceProvider { get; }
 
-        public RemotingInvoke(ILoadBalancing loadBalancing, IClientFactory clientFactory, IServiceFactory serviceFactory, UraganoSettings uraganoSettings, IServiceProvider serviceProvider)
+        public RemotingInvoke(IServiceFactory serviceFactory, UraganoSettings uraganoSettings, IServiceProvider serviceProvider)
         {
-            LoadBalancing = loadBalancing;
-            ClientFactory = clientFactory;
             ServiceFactory = serviceFactory;
             UraganoSettings = uraganoSettings;
             ServiceProvider = serviceProvider;
