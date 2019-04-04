@@ -12,11 +12,11 @@ namespace Uragano.Abstractions.ServiceDiscovery
         event NodeLeaveHandler OnNodeLeave;
         event NodeJoinHandler OnNodeJoin;
 
-        Task<bool> RegisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, IServiceRegisterConfiguration serviceRegisterConfiguration, int? weight = default, CancellationToken cancellationToken = default);
+        Task<bool> RegisterAsync(CancellationToken cancellationToken = default);
 
-        Task<bool> DeregisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName, string serviceId);
+        Task<bool> DeregisterAsync();
 
-        Task<IReadOnlyList<ServiceDiscoveryInfo>> QueryServiceAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<ServiceDiscoveryInfo>> QueryServiceAsync(string serviceName, CancellationToken cancellationToken = default);
 
         IReadOnlyDictionary<string, IReadOnlyList<ServiceNodeInfo>> GetAllService();
 

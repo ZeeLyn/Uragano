@@ -3,7 +3,7 @@ using org.apache.zookeeper;
 
 namespace Uragano.ZooKeeper
 {
-    delegate void ZooKeeperHandler(string path, Watcher.Event.KeeperState keeperState, Watcher.Event.EventType eventType);
+    delegate Task ZooKeeperHandler(string path, Watcher.Event.KeeperState keeperState, Watcher.Event.EventType eventType);
     internal class UraganoWatcher : Watcher
     {
         public event ZooKeeperHandler OnChange;

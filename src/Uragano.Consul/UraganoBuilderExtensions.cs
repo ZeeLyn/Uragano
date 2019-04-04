@@ -7,7 +7,7 @@ namespace Uragano.Consul
     {
         public static void AddConsul(this IUraganoBuilder builder, ConsulClientConfigure consulClientConfiguration)
         {
-            builder.AddHostedService<ServiceStatusManageStartup>();
+            builder.AddHostedService<ServiceStatusManageService>();
             builder.AddServiceDiscovery<ConsulServiceDiscovery>(consulClientConfiguration);
         }
 
@@ -18,7 +18,7 @@ namespace Uragano.Consul
 
         public static void AddConsul(this IUraganoBuilder builder, ConsulClientConfigure consulClientConfiguration, ConsulRegisterServiceConfiguration consulAgentServiceConfiguration)
         {
-            builder.AddHostedService<ServiceStatusManageStartup>();
+            builder.AddHostedService<ServiceStatusManageService>();
             builder.AddServiceDiscovery<ConsulServiceDiscovery>(consulClientConfiguration, consulAgentServiceConfiguration);
         }
 

@@ -7,20 +7,17 @@ using Uragano.Abstractions.ServiceDiscovery;
 
 namespace Uragano.Consul
 {
-    public class ServiceStatusManageStartup : BackgroundService
+    public class ServiceStatusManageService : BackgroundService
     {
         private IServiceStatusManage ServiceStatusManage { get; }
 
         private static System.Timers.Timer Timer { get; set; }
 
-        private UraganoSettings UraganoSettings { get; }
-
         private ILogger Logger { get; }
 
-        public ServiceStatusManageStartup(IServiceStatusManage serviceStatusManageFactory, UraganoSettings uraganoSettings, ILogger<ServiceStatusManageStartup> logger)
+        public ServiceStatusManageService(IServiceStatusManage serviceStatusManage, ILogger<ServiceStatusManageService> logger)
         {
-            ServiceStatusManage = serviceStatusManageFactory;
-            UraganoSettings = uraganoSettings;
+            ServiceStatusManage = serviceStatusManage;
             Logger = logger;
         }
 

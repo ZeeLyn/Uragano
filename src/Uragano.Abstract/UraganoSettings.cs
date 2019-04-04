@@ -3,17 +3,12 @@ using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions.CircuitBreaker;
-using Uragano.Abstractions.ServiceDiscovery;
 
 namespace Uragano.Abstractions
 {
     public class UraganoSettings
     {
         public ServerSettings ServerSettings { get; set; }
-
-        public IServiceDiscoveryClientConfiguration ServiceDiscoveryClientConfiguration { get; set; }
-
-        public IServiceRegisterConfiguration ServiceRegisterConfiguration { get; set; }
 
         public List<Type> ClientGlobalInterceptors { get; } = new List<Type>();
 

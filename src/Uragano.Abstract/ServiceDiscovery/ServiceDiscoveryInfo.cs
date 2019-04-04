@@ -21,22 +21,25 @@ namespace Uragano.Abstractions.ServiceDiscovery
 
     public class ServiceDiscoveryInfo : ServiceDiscoveryBase
     {
-        public ServiceDiscoveryInfo(string serviceId, string address, int port, IDictionary<string, string> meta) : base(address, port, meta)
+        public ServiceDiscoveryInfo(string serviceId, string address, int port, int weight, IDictionary<string, string> meta) : base(address, port, meta)
         {
             ServiceId = serviceId;
+            Weight = weight;
         }
 
         public string ServiceId { get; }
+
+        public int Weight { get; }
     }
 
     public class ServiceNodeInfo : ServiceDiscoveryInfo
     {
-        public ServiceNodeInfo(string serviceId, string address, int port, int weight, IDictionary<string, string> meta) : base(serviceId, address, port, meta)
+        public ServiceNodeInfo(string serviceId, string address, int port, int weight, IDictionary<string, string> meta) : base(serviceId, address, port,weight, meta)
         {
-            Weight = weight;
+           
         }
 
-        public int Weight { get; }
+       
 
         public ConcurrentDictionary<string, object> Attach { get; } = new ConcurrentDictionary<string, object>();
     }

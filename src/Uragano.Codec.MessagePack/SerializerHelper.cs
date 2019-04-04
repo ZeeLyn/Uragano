@@ -18,12 +18,12 @@ namespace Uragano.Codec.MessagePack
 
         public static object Deserialize(byte[] data)
         {
-            return data == null ? null : MP.MessagePackSerializer.Typeless.Deserialize(data);
+            return data == null || data.Length==0 ? null : MP.MessagePackSerializer.Typeless.Deserialize(data);
         }
 
         public static T Deserialize<T>(byte[] data)
         {
-            return data == null ? default : (T)Deserialize(data);
+            return data == null || data.Length == 0 ? default : (T)Deserialize(data);
         }
     }
 }

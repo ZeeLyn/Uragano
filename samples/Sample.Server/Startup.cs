@@ -34,8 +34,8 @@ namespace Sample.Server
 
                  builder.AddClient(LoadBalancing.WeightedRandom);
                  builder.AddServer();
-                 //builder.AddZooKeeper();
-                 builder.AddConsul();
+                 builder.AddZooKeeper();
+                 //builder.AddConsul();
                  builder.AddClientGlobalInterceptor<ClientGlobalInterceptor>();
                  builder.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
                  builder.AddExceptionlessLogger();

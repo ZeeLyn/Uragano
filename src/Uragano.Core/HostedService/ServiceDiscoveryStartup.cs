@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Uragano.Abstractions;
@@ -11,40 +10,26 @@ namespace Uragano.Core.HostedService
     {
         private IServiceDiscovery ServiceDiscovery { get; }
 
-        private UraganoSettings UraganoSettings { get; }
+        private ServerSettings ServerSettings { get; }
 
         public ServiceDiscoveryStartup(IServiceDiscovery serviceDiscovery, UraganoSettings uraganoSettings)
         {
             ServiceDiscovery = serviceDiscovery;
-            UraganoSettings = uraganoSettings;
+            ServerSettings = uraganoSettings.ServerSettings;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            if (UraganoSettings.ServerSettings == null)
+            if (ServerSettings == null)
                 return;
-            if (UraganoSettings.ServiceRegisterConfiguration == null) return;
-            if (UraganoSettings.ServiceDiscoveryClientConfiguration == null)
-                throw new ArgumentNullException(nameof(UraganoSettings.ServiceDiscoveryClientConfiguration));
-
-            if (string.IsNullOrWhiteSpace(UraganoSettings.ServiceRegisterConfiguration.Id))
-            {
-                UraganoSettings.ServiceRegisterConfiguration.Id = UraganoSettings.ServerSettings.ToString();
-            }
-
-            if (string.IsNullOrWhiteSpace(UraganoSettings.ServiceRegisterConfiguration.Name))
-            {
-                UraganoSettings.ServiceRegisterConfiguration.Name = UraganoSettings.ServerSettings.ToString();
-            }
-
-            await ServiceDiscovery.RegisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration, UraganoSettings.ServerSettings.Weight, cancellationToken);
+            await ServiceDiscovery.RegisterAsync(cancellationToken);
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            if (UraganoSettings.ServerSettings == null)
+            if (ServerSettings == null)
                 return;
-            await ServiceDiscovery.DeregisterAsync(UraganoSettings.ServiceDiscoveryClientConfiguration, UraganoSettings.ServiceRegisterConfiguration.Name, UraganoSettings.ServiceRegisterConfiguration.Id);
+            await ServiceDiscovery.DeregisterAsync();
         }
     }
 }

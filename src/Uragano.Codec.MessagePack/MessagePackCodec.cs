@@ -20,12 +20,12 @@ namespace Uragano.Codec.MessagePack
 
         public object Deserialize(byte[] data, Type type)
         {
-            return data == null ? null : MessagePackSerializer.Typeless.Deserialize(data);
+            return data == null || data.Length == 0 ? null : MessagePackSerializer.Typeless.Deserialize(data);
         }
 
         public T Deserialize<T>(byte[] data)
         {
-            return data == null ? default : (T)MessagePackSerializer.Typeless.Deserialize(data);
+            return data == null || data.Length == 0 ? default : (T)MessagePackSerializer.Typeless.Deserialize(data);
         }
 
         public string ToJson<TData>(TData data)

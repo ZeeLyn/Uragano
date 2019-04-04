@@ -9,7 +9,6 @@ namespace Uragano.ZooKeeper
     {
         public static void AddZooKeeper(this IUraganoBuilder builder, ZooKeeperClientConfigure zookeeperClientConfiguration)
         {
-            builder.ServiceCollection.AddSingleton(zookeeperClientConfiguration);
             builder.AddServiceDiscovery<ZooKeeperServiceDiscovery>(zookeeperClientConfiguration);
         }
 
@@ -20,7 +19,6 @@ namespace Uragano.ZooKeeper
 
         public static void AddZooKeeper(this IUraganoBuilder builder, ZooKeeperClientConfigure zookeeperClientConfiguration, ZooKeeperRegisterServiceConfiguration zookeeperAgentServiceConfiguration)
         {
-            builder.ServiceCollection.AddSingleton(zookeeperClientConfiguration);
             builder.AddServiceDiscovery<ZooKeeperServiceDiscovery>(zookeeperClientConfiguration, zookeeperAgentServiceConfiguration);
         }
 
