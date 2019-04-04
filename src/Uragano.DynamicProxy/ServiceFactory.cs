@@ -38,15 +38,8 @@ namespace Uragano.DynamicProxy
             if (ServiceInvokers.ContainsKey(route))
                 throw new DuplicateRouteException(route);
             var enableClient = ServiceProvider.GetService<ILoadBalancing>() != null;
-            var serviceDescriptor = new ServiceDescriptor
-            {
-                Route = route,
-                ServerMethodInfo = serverMethodInfo,
-                ClientMethodInfo = clientMethodInfo,
-                MethodInvoker = serverMethodInfo == null ? null : new MethodInvoker(serverMethodInfo),
-                ServerInterceptors = serverInterceptors,
-                ClientInterceptors = clientInterceptors
-            };
+            ServiceCircuitBreakerOptions breaker = null;
+            CachingConfig cachingConfig = null;
             if (enableClient)
             {
                 #region Circuit breaker
@@ -57,7 +50,7 @@ namespace Uragano.DynamicProxy
                     var globalCircuitBreaker = UraganoSettings.CircuitBreakerOptions;
                     if (globalCircuitBreaker != null || circuitBreakerAttr != null)
                     {
-                        var breaker = new ServiceCircuitBreakerOptions();
+                        breaker = new ServiceCircuitBreakerOptions();
                         if (globalCircuitBreaker != null)
                         {
                             breaker.Timeout = globalCircuitBreaker.Timeout;
@@ -91,8 +84,6 @@ namespace Uragano.DynamicProxy
                             if (circuitBreakerAttr.MaxQueuingActions > -1)
                                 breaker.MaxQueuingActions = circuitBreakerAttr.MaxQueuingActions;
                         }
-
-                        serviceDescriptor.ServiceCircuitBreakerOptions = breaker;
                     }
                 }
                 #endregion
@@ -105,15 +96,11 @@ namespace Uragano.DynamicProxy
                     var keyGenerator = ServiceProvider.GetRequiredService<ICachingKeyGenerator>();
                     var key = keyGenerator.GenerateKeyPlaceholder(UraganoSettings.CachingOptions.KeyPrefix, UraganoSettings.CachingOptions.ExpireSeconds, route, clientMethodInfo, attr);
 
-                    serviceDescriptor.CachingConfig = new CachingConfig
-                    {
-                        CustomKey = attr != null && !string.IsNullOrWhiteSpace(attr.Key),
-                        KeyPlaceholder = key,
-                        ExpireSeconds = attr != null && attr.ExpireSeconds != -1 ? attr.ExpireSeconds : UraganoSettings.CachingOptions.ExpireSeconds
-                    };
+                    cachingConfig = new CachingConfig(key, attr != null && !string.IsNullOrWhiteSpace(attr.Key), attr != null && attr.ExpireSeconds != -1 ? attr.ExpireSeconds : UraganoSettings.CachingOptions.ExpireSeconds);
                 }
                 #endregion
             }
+            var serviceDescriptor = new ServiceDescriptor(route, serverMethodInfo, clientMethodInfo, serverMethodInfo == null ? null : new MethodInvoker(serverMethodInfo), serverInterceptors, clientInterceptors, breaker, cachingConfig);
             ServiceInvokers.TryAdd(route, serviceDescriptor);
         }
 

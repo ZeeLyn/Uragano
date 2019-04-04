@@ -8,30 +8,47 @@ namespace Uragano.Abstractions
 {
     public class ServiceDescriptor
     {
-        public string Route { get; set; }
+        public ServiceDescriptor(string route, MethodInfo serverMethodInfo, MethodInfo clientMethodInfo, IMethodInvoker methodInvoker, List<Type> serverInterceptors, List<Type> clientInterceptors, ServiceCircuitBreakerOptions serviceCircuitBreakerOptions, CachingConfig cachingConfig)
+        {
+            Route = route;
+            ServerMethodInfo = serverMethodInfo;
+            ClientMethodInfo = clientMethodInfo;
+            MethodInvoker = methodInvoker;
+            ServerInterceptors = serverInterceptors;
+            ClientInterceptors = clientInterceptors;
+            ServiceCircuitBreakerOptions = serviceCircuitBreakerOptions;
+            CachingConfig = cachingConfig;
+        }
+        public string Route { get; }
 
-        public MethodInfo ServerMethodInfo { get; set; }
+        public MethodInfo ServerMethodInfo { get; }
 
-        public MethodInfo ClientMethodInfo { get; set; }
+        public MethodInfo ClientMethodInfo { get; }
 
-        public IMethodInvoker MethodInvoker { get; set; }
+        public IMethodInvoker MethodInvoker { get; }
 
-        public List<Type> ServerInterceptors { get; set; }
+        public List<Type> ServerInterceptors { get; }
 
-        public List<Type> ClientInterceptors { get; set; }
+        public List<Type> ClientInterceptors { get; }
 
-        public ServiceCircuitBreakerOptions ServiceCircuitBreakerOptions { get; set; }
+        public ServiceCircuitBreakerOptions ServiceCircuitBreakerOptions { get; }
 
-        public CachingConfig CachingConfig { get; set; }
+        public CachingConfig CachingConfig { get; }
     }
 
 
     public class CachingConfig
     {
-        public string KeyPlaceholder { get; set; }
+        public CachingConfig(string keyPlaceholder, bool customKey, int expireSeconds = -1)
+        {
+            KeyPlaceholder = keyPlaceholder;
+            CustomKey = customKey;
+            ExpireSeconds = expireSeconds;
+        }
+        public string KeyPlaceholder { get; }
 
-        public bool CustomKey { get; set; }
+        public bool CustomKey { get; }
 
-        public int ExpireSeconds { get; set; } = -1;
+        public int ExpireSeconds { get; } = -1;
     }
 }
