@@ -9,15 +9,14 @@ namespace Uragano.Consul
 {
     public class ServiceStatusManageService : BackgroundService
     {
-        private IServiceStatusManage ServiceStatusManage { get; }
-
+        private IServiceDiscovery ServiceDiscovery { get; }
         private static System.Timers.Timer Timer { get; set; }
 
         private ILogger Logger { get; }
 
-        public ServiceStatusManageService(IServiceStatusManage serviceStatusManage, ILogger<ServiceStatusManageService> logger)
+        public ServiceStatusManageService(IServiceDiscovery serviceDiscovery, ILogger<ServiceStatusManageService> logger)
         {
-            ServiceStatusManage = serviceStatusManage;
+            ServiceDiscovery = serviceDiscovery;
             Logger = logger;
         }
 
@@ -31,7 +30,7 @@ namespace Uragano.Consul
                 {
                     if (stoppingToken.IsCancellationRequested)
                         return;
-                    await ServiceStatusManage.Refresh(stoppingToken);
+                    await ServiceDiscovery.NodeMonitor(stoppingToken);
                 };
                 Timer.Enabled = true;
             }

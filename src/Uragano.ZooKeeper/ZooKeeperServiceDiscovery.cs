@@ -25,11 +25,11 @@ namespace Uragano.ZooKeeper
 
         private const string Root = "/Uragano";
 
-         private ServerSettings ServerSettings { get; }
+        private ServerSettings ServerSettings { get; }
 
         private org.apache.zookeeper.ZooKeeper ZooKeeper { get; set; }
 
-        private static readonly ConcurrentDictionary<string, List<ServiceNodeInfo>> ServiceNodes =  new ConcurrentDictionary<string, List<ServiceNodeInfo>>();
+        private static readonly ConcurrentDictionary<string, List<ServiceNodeInfo>> ServiceNodes = new ConcurrentDictionary<string, List<ServiceNodeInfo>>();
 
         public event NodeLeaveHandler OnNodeLeave;
         public event NodeJoinHandler OnNodeJoin;
@@ -38,7 +38,7 @@ namespace Uragano.ZooKeeper
 
         private long ZooKeeperSessionId { get; set; }
 
-        public ZooKeeperServiceDiscovery( ICodec codec, ILogger<ZooKeeperServiceDiscovery> logger, UraganoSettings uraganoSettings, IServiceDiscoveryClientConfiguration clientConfiguration, IServiceProvider service)
+        public ZooKeeperServiceDiscovery(ICodec codec, ILogger<ZooKeeperServiceDiscovery> logger, UraganoSettings uraganoSettings, IServiceDiscoveryClientConfiguration clientConfiguration, IServiceProvider service)
         {
             if (!(clientConfiguration is ZooKeeperClientConfigure client))
                 throw new ArgumentNullException(nameof(clientConfiguration));
@@ -132,7 +132,7 @@ namespace Uragano.ZooKeeper
                     var serviceData = Codec.Deserialize<ZooKeeperNodeInfo>(data.Data);
                     if (serviceData == null)
                         continue;
-                    result.Add(new ServiceDiscoveryInfo(node, serviceData.Address, serviceData.Port,serviceData.Weight, null));
+                    result.Add(new ServiceDiscoveryInfo(node, serviceData.Address, serviceData.Port, serviceData.Weight, null));
                 }
                 return result;
             }
@@ -165,21 +165,9 @@ namespace Uragano.ZooKeeper
             throw new InvalidOperationException($"Service {serviceName} not found.");
         }
 
-        public void AddNode(string serviceName, params ServiceNodeInfo[] nodes)
+        public Task NodeMonitor(CancellationToken cancellationToken = default)
         {
-            if (ServiceNodes.TryGetValue(serviceName, out var services))
-                services.AddRange(nodes);
-            else
-                ServiceNodes.TryAdd(serviceName, nodes.ToList());
-
-            OnNodeJoin?.Invoke(serviceName, nodes);
-        }
-
-        public void RemoveNode(string serviceName, params string[] servicesId)
-        {
-            if(!ServiceNodes.TryGetValue(serviceName, out var services)) return;
-            services.RemoveAll(p => servicesId.Any(n => n == p.ServiceId));
-            OnNodeLeave?.Invoke(serviceName, servicesId);
+            throw new NotImplementedException();
         }
 
         private async Task CreatePath(string path, byte[] data)
@@ -215,7 +203,7 @@ namespace Uragano.ZooKeeper
             }
             else
                 ZooKeeper = new org.apache.zookeeper.ZooKeeper(ZooKeeperClientConfigure.ConnectionString,
-                    ZooKeeperClientConfigure.SessionTimeout, ZooKeeperWatcher,ZooKeeperSessionId,null, ZooKeeperClientConfigure.CanBeReadOnly);
+                    ZooKeeperClientConfigure.SessionTimeout, ZooKeeperWatcher, ZooKeeperSessionId, null, ZooKeeperClientConfigure.CanBeReadOnly);
         }
 
         private async Task Watcher_OnChange(string path, Watcher.Event.KeeperState keeperState, Watcher.Event.EventType eventType)
@@ -228,30 +216,16 @@ namespace Uragano.ZooKeeper
                     CreateZooKeeperClient();
                     break;
                 case Watcher.Event.KeeperState.SyncConnected:
-                    if(ZooKeeperSessionId==0)
+                    if (ZooKeeperSessionId == 0)
                         ZooKeeperSessionId = ZooKeeper.getSessionId();
-                    if (eventType== Watcher.Event.EventType.NodeChildrenChanged)
+                    if (eventType == Watcher.Event.EventType.NodeChildrenChanged)
                     {
-                       
-                            await RegisterWatcher(path);
+                        var children = await ZooKeeper.getChildrenAsync(path, true);
+                        if (children == null)
+                            await CreatePath(path, null);
+
                     }
                     break;
-            }
-        }
-
-        private async Task RegisterWatcher(string path)
-        {
-            try
-            {
-                var state = await ZooKeeper.getChildrenAsync(path, true);
-                if (state == null)
-                {
-                    await CreatePath(path, null);
-                }
-            }
-            catch (Exception e)
-            {
-                var msg = e.Message;
             }
         }
 

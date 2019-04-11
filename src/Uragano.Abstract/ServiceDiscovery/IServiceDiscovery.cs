@@ -22,8 +22,6 @@ namespace Uragano.Abstractions.ServiceDiscovery
 
         Task<IReadOnlyList<ServiceNodeInfo>> GetServiceNodes(string serviceName);
 
-        void AddNode(string serviceName, params ServiceNodeInfo[] nodes);
-
-        void RemoveNode(string serviceName, params string[] servicesId);
+        Task NodeMonitor(CancellationToken cancellationToken = default);
     }
 }

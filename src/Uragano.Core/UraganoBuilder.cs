@@ -132,7 +132,7 @@ namespace Uragano.Core
         public void AddServiceDiscovery(Type serviceDiscovery,
             IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration)
         {
-            if(serviceDiscoveryClientConfiguration==null) throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
+            if (serviceDiscoveryClientConfiguration == null) throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
             ServiceCollection.AddSingleton(serviceDiscoveryClientConfiguration);
             ServiceCollection.AddSingleton(typeof(IServiceDiscovery), serviceDiscovery);
             AddHostedService<ServiceDiscoveryStartup>();
@@ -154,8 +154,8 @@ namespace Uragano.Core
             IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration,
             IServiceRegisterConfiguration serviceRegisterConfiguration)
         {
-            if(serviceDiscoveryClientConfiguration==null) throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
-           if(serviceRegisterConfiguration==null) throw new ArgumentNullException(nameof(serviceRegisterConfiguration));
+            if (serviceDiscoveryClientConfiguration == null) throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
+            if (serviceRegisterConfiguration == null) throw new ArgumentNullException(nameof(serviceRegisterConfiguration));
             ServiceCollection.AddSingleton(serviceDiscoveryClientConfiguration);
             ServiceCollection.AddSingleton(serviceRegisterConfiguration);
             ServiceCollection.AddSingleton(typeof(IServiceDiscovery), serviceDiscovery);
@@ -343,11 +343,10 @@ namespace Uragano.Core
 
         private void RegisterClientServices()
         {
-            if (!RegisterSingletonService<IServiceStatusManage, ServiceStatusManage>())
+            if (!RegisterSingletonService<IClientFactory, ClientFactory>())
                 return;
             AddHostedService<RemotingClientStartup>();
             RegisterSingletonService<ClientDefaultInterceptor>();
-            RegisterSingletonService<IClientFactory, ClientFactory>();
             RegisterSingletonService<IRemotingInvoke, RemotingInvoke>();
             RegisterSingletonService<ICircuitBreaker, PollyCircuitBreaker>();
 

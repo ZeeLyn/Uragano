@@ -23,11 +23,13 @@ namespace Uragano.Consul
 
         private ConsulRegisterServiceConfiguration ConsulRegisterServiceConfiguration { get; set; }
 
+        private static readonly AsyncLock AsyncLock = new AsyncLock();
+
         private static readonly ConcurrentDictionary<string, List<ServiceNodeInfo>> ServiceNodes = new ConcurrentDictionary<string, List<ServiceNodeInfo>>();
 
         public event NodeLeaveHandler OnNodeLeave;
         public event NodeJoinHandler OnNodeJoin;
-        public ConsulServiceDiscovery(UraganoSettings uraganoSettings, ILogger<ConsulServiceDiscovery> logger, IServiceDiscoveryClientConfiguration clientConfiguration,IServiceProvider service)
+        public ConsulServiceDiscovery(UraganoSettings uraganoSettings, ILogger<ConsulServiceDiscovery> logger, IServiceDiscoveryClientConfiguration clientConfiguration, IServiceProvider service)
         {
             if (!(clientConfiguration is ConsulClientConfigure client))
                 throw new ArgumentNullException(nameof(clientConfiguration));
@@ -38,7 +40,7 @@ namespace Uragano.Consul
                     throw new ArgumentNullException(nameof(ConsulRegisterServiceConfiguration));
                 ConsulRegisterServiceConfiguration = serviceAgent;
             }
-            
+
 
             ConsulClientConfigure = client;
             ServerSettings = uraganoSettings.ServerSettings;
@@ -207,21 +209,49 @@ namespace Uragano.Consul
             throw new InvalidOperationException($"Service {serviceName} not found.");
         }
 
-        public void AddNode(string serviceName, params ServiceNodeInfo[] nodes)
+        public async Task NodeMonitor(CancellationToken cancellationToken)
         {
-            if (ServiceNodes.TryGetValue(serviceName, out var services))
-                services.AddRange(nodes);
-            else
-                ServiceNodes.TryAdd(serviceName, nodes.ToList());
+            Logger.LogTrace("Start refresh service status,waiting for locking...");
+            using (await AsyncLock.LockAsync(cancellationToken))
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    return;
 
-            OnNodeJoin?.Invoke(serviceName, nodes);
-        }
+                foreach (var service in ServiceNodes)
+                {
+                    Logger.LogTrace($"Service {service.Key} refreshing...");
+                    var healthNodes = await QueryServiceAsync(service.Key, cancellationToken);
+                    if (cancellationToken.IsCancellationRequested)
+                        break;
 
-        public void RemoveNode(string serviceName, params string[] servicesId)
-        {
-            if (!ServiceNodes.TryGetValue(serviceName, out var services)) return;
-            services.RemoveAll(p => servicesId.Any(n => n == p.ServiceId));
-            OnNodeLeave?.Invoke(serviceName, servicesId);
+                    var leavedNodes = service.Value.Where(p => healthNodes.All(a => a.ServiceId != p.ServiceId)).Select(p => p.ServiceId).ToArray();
+                    if (leavedNodes.Any())
+                    {
+                        //RemoveNode(service.Key, leavedNodes);
+                        if (!ServiceNodes.TryGetValue(service.Key, out var services)) return;
+                        services.RemoveAll(p => leavedNodes.Any(n => n == p.ServiceId));
+                        OnNodeLeave?.Invoke(service.Key, leavedNodes);
+                        Logger.LogTrace($"These nodes are gone:{string.Join(",", leavedNodes)}");
+                    }
+
+                    var addedNodes = healthNodes.Where(p =>
+                        service.Value.All(e => e.ServiceId != p.ServiceId)).Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, int.Parse(p.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0"), p.Meta)).ToList();
+
+                    if (addedNodes.Any())
+                    {
+                        //AddNode(service.Key, addedNodes);
+                        if (ServiceNodes.TryGetValue(service.Key, out var services))
+                            services.AddRange(addedNodes);
+                        else
+                            ServiceNodes.TryAdd(service.Key, addedNodes);
+
+                        OnNodeJoin?.Invoke(service.Key, addedNodes);
+
+                        Logger.LogTrace($"New nodes added:{string.Join(",", addedNodes.Select(p => p.Address + ":" + p.Port))}");
+                    }
+                }
+                Logger.LogTrace("Complete refresh.");
+            }
         }
     }
 }
