@@ -33,6 +33,9 @@ Samples|Average|Median|90% Line|95% Line|99% Line|Min|Max|Error %|Throughput|KB/
 250000|54|53|71|73|81|1|120|0.00%|8943.6/sec|1825.4
 
 
+## Use example
+Use the example to refer to another [simple micro-services shop](https://github.com/1100100/MicroServicesShop), using docker orchestration services.
+
 ## Docs
 See [wiki documentation](https://github.com/ww198643/Uragano/wiki).
 
