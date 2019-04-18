@@ -17,12 +17,6 @@ namespace Uragano.ZooKeeper
                 var sessionTimeout = configurationSection.GetSection("SessionTimeout");
                 if (sessionTimeout.Exists())
                     client.SessionTimeout = int.Parse(sessionTimeout.Value);
-                var sessionId = configurationSection.GetSection("SessionId");
-                if (sessionId.Exists())
-                    client.SessionId = long.Parse(sessionId.Value);
-                var sessionPassword = configurationSection.GetSection("SessionPassword");
-                if (sessionPassword.Exists())
-                    client.SessionPassword = sessionPassword.Value;
 
                 var canBeReadOnly = configurationSection.GetSection("CanBeReadOnly");
                 if (canBeReadOnly.Exists())

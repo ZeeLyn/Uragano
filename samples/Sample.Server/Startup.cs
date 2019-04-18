@@ -32,10 +32,10 @@ namespace Sample.Server
             services.AddUragano(Configuration, builder =>
              {
 
-                 builder.AddClient(LoadBalancing.WeightedRandom);
+                 builder.AddClient(LoadBalancing.ConsistentHash);
                  builder.AddServer();
-                 //builder.AddZooKeeper();
-                 builder.AddConsul();
+                 builder.AddZooKeeper();
+                 //builder.AddConsul();
                  builder.AddClientGlobalInterceptor<ClientGlobalInterceptor>();
                  builder.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
                  builder.AddExceptionlessLogger();

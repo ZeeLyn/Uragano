@@ -127,7 +127,7 @@ namespace Uragano.ZooKeeper
                 foreach (var node in nodes.Children)
                 {
                     var data = await ZooKeeper.getDataAsync($"{Root}/{serviceName}/{node}");
-                    if (data == null || data.Data == null)
+                    if (data?.Data == null)
                         throw new ArgumentNullException("data", "The node data is null.");
                     var serviceData = Codec.Deserialize<ZooKeeperNodeInfo>(data.Data);
                     if (serviceData == null)
@@ -194,8 +194,7 @@ namespace Uragano.ZooKeeper
 
         private void CreateZooKeeperClient()
         {
-            if (ZooKeeper != null)
-                ZooKeeper.closeAsync();
+            ZooKeeper?.closeAsync();
             if (ZooKeeperSessionId == 0)
             {
                 ZooKeeper = new org.apache.zookeeper.ZooKeeper(ZooKeeperClientConfigure.ConnectionString,
@@ -211,6 +210,9 @@ namespace Uragano.ZooKeeper
             switch (keeperState)
             {
                 case Watcher.Event.KeeperState.Expired:
+                    ZooKeeperSessionId = 0;
+                    CreateZooKeeperClient();
+                    break;
                 case Watcher.Event.KeeperState.Disconnected:
                     Logger.LogWarning($"ZooKeeper client has been {keeperState},Reconnecting...");
                     CreateZooKeeperClient();
@@ -218,18 +220,68 @@ namespace Uragano.ZooKeeper
                 case Watcher.Event.KeeperState.SyncConnected:
                     if (ZooKeeperSessionId == 0)
                         ZooKeeperSessionId = ZooKeeper.getSessionId();
-                    if (eventType == Watcher.Event.EventType.NodeChildrenChanged)
-                    {
-                        var children = await ZooKeeper.getChildrenAsync(path, true);
-                        if (children == null)
-                            await CreatePath(path, null);
+                    await SubscribeNodes(path, eventType);
+                    break;
+            }
+        }
 
+        private async Task SubscribeNodes(string path, Watcher.Event.EventType eventType)
+        {
+            var children = await ZooKeeper.getChildrenAsync(path, true);
+            switch (eventType)
+            {
+                case Watcher.Event.EventType.NodeChildrenChanged:
+                    var serviceName = GetServiceNameFromPath(path);
+                    if (children == null)
+                    {
+                        RefreshNodes(serviceName, new List<ServiceNodeInfo>());
+                    }
+                    else
+                    {
+                        var nodes = await QueryServiceAsync(serviceName);
+                        RefreshNodes(serviceName, nodes.Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, p.Weight, p.Meta)).ToList());
                     }
                     break;
             }
         }
 
-        class ZooKeeperNodeInfo
+        private void RefreshNodes(string serviceName, List<ServiceNodeInfo> currentNodes)
+        {
+            if (ServiceNodes.TryGetValue(serviceName, out var nodes))
+            {
+                if (!currentNodes.Any())
+                    nodes.Clear();
+
+                var leavedNodes = nodes.Where(p => currentNodes.All(c => c.ServiceId != p.ServiceId)).Select(p => p.ServiceId).ToList();
+                if (leavedNodes.Any())
+                {
+                    Logger.LogTrace($"These nodes are gone:{string.Join(",", leavedNodes)}");
+                    OnNodeLeave?.Invoke(serviceName, leavedNodes);
+                    nodes.RemoveAll(p => currentNodes.All(c => c.ServiceId != p.ServiceId));
+                }
+
+                var addedNodes = currentNodes.FindAll(p => nodes.All(c => c.ServiceId != p.ServiceId));
+                if (addedNodes.Any())
+                {
+                    nodes.AddRange(addedNodes);
+                    Logger.LogTrace(
+                        $"New nodes added:{string.Join(",", addedNodes.Select(p => p.ServiceId))}");
+                    OnNodeJoin?.Invoke(serviceName, addedNodes);
+                }
+            }
+            else
+            {
+                if (!currentNodes.Any())
+                    ServiceNodes.TryAdd(serviceName, currentNodes);
+            }
+        }
+
+        private static string GetServiceNameFromPath(string path)
+        {
+            return path.Replace(Root, "").TrimEnd('/').TrimStart('/');
+        }
+
+        private class ZooKeeperNodeInfo
         {
             public int Weight { get; set; }
 

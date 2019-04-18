@@ -254,7 +254,7 @@ namespace Uragano.Consul
                             OnNodeJoin?.Invoke(service.Key, addedNodes);
 
                             Logger.LogTrace(
-                                $"New nodes added:{string.Join(",", addedNodes.Select(p => p.Address + ":" + p.Port))}");
+                                $"New nodes added:{string.Join(",", addedNodes.Select(p => p.ServiceId))}");
                         }
                     }
                     catch

@@ -18,8 +18,6 @@ namespace Sample.Server.Controllers
     {
         private IHelloService HelloService { get; }
 
-        private IConfigurationBuilder ConfigurationBuilder { get; }
-
         public ValuesController(IHelloService helloService, IServiceProvider serviceProvider)
         {
             HelloService = helloService;

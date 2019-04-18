@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceDiscovery;
 
 namespace Uragano.ZooKeeper
 {
     public class ZooKeeperRegisterServiceConfiguration : IServiceRegisterConfiguration
     {
-        public string Id { get; set; }
-        public string Name { get; set; }
+        public string Id { get; set; } = EnvironmentVariableReader.Get<string>("uragano-service-id");
+        public string Name { get; set; } = EnvironmentVariableReader.Get<string>("uragano-service-name");
 
         public override string ToString()
         {
