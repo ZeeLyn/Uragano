@@ -220,34 +220,46 @@ namespace Uragano.Consul
                 foreach (var service in ServiceNodes)
                 {
                     Logger.LogTrace($"Service {service.Key} refreshing...");
-                    var healthNodes = await QueryServiceAsync(service.Key, cancellationToken);
-                    if (cancellationToken.IsCancellationRequested)
-                        break;
-
-                    var leavedNodes = service.Value.Where(p => healthNodes.All(a => a.ServiceId != p.ServiceId)).Select(p => p.ServiceId).ToArray();
-                    if (leavedNodes.Any())
+                    try
                     {
-                        //RemoveNode(service.Key, leavedNodes);
-                        if (!ServiceNodes.TryGetValue(service.Key, out var services)) return;
-                        services.RemoveAll(p => leavedNodes.Any(n => n == p.ServiceId));
-                        OnNodeLeave?.Invoke(service.Key, leavedNodes);
-                        Logger.LogTrace($"These nodes are gone:{string.Join(",", leavedNodes)}");
+                        var healthNodes = await QueryServiceAsync(service.Key, cancellationToken);
+                        if (cancellationToken.IsCancellationRequested)
+                            break;
+
+                        var leavedNodes = service.Value.Where(p => healthNodes.All(a => a.ServiceId != p.ServiceId))
+                            .Select(p => p.ServiceId).ToArray();
+                        if (leavedNodes.Any())
+                        {
+                            //RemoveNode(service.Key, leavedNodes);
+                            if (!ServiceNodes.TryGetValue(service.Key, out var services)) return;
+                            services.RemoveAll(p => leavedNodes.Any(n => n == p.ServiceId));
+                            OnNodeLeave?.Invoke(service.Key, leavedNodes);
+                            Logger.LogTrace($"These nodes are gone:{string.Join(",", leavedNodes)}");
+                        }
+
+                        var addedNodes = healthNodes.Where(p =>
+                                service.Value.All(e => e.ServiceId != p.ServiceId)).Select(p =>
+                                new ServiceNodeInfo(p.ServiceId, p.Address, p.Port,
+                                    int.Parse(p.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0"), p.Meta))
+                            .ToList();
+
+                        if (addedNodes.Any())
+                        {
+                            //AddNode(service.Key, addedNodes);
+                            if (ServiceNodes.TryGetValue(service.Key, out var services))
+                                services.AddRange(addedNodes);
+                            else
+                                ServiceNodes.TryAdd(service.Key, addedNodes);
+
+                            OnNodeJoin?.Invoke(service.Key, addedNodes);
+
+                            Logger.LogTrace(
+                                $"New nodes added:{string.Join(",", addedNodes.Select(p => p.Address + ":" + p.Port))}");
+                        }
                     }
-
-                    var addedNodes = healthNodes.Where(p =>
-                        service.Value.All(e => e.ServiceId != p.ServiceId)).Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, int.Parse(p.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0"), p.Meta)).ToList();
-
-                    if (addedNodes.Any())
+                    catch
                     {
-                        //AddNode(service.Key, addedNodes);
-                        if (ServiceNodes.TryGetValue(service.Key, out var services))
-                            services.AddRange(addedNodes);
-                        else
-                            ServiceNodes.TryAdd(service.Key, addedNodes);
-
-                        OnNodeJoin?.Invoke(service.Key, addedNodes);
-
-                        Logger.LogTrace($"New nodes added:{string.Join(",", addedNodes.Select(p => p.Address + ":" + p.Port))}");
+                        // ignored
                     }
                 }
                 Logger.LogTrace("Complete refresh.");
