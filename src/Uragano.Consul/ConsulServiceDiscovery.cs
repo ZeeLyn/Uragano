@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -8,71 +9,99 @@ using Consul;
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceDiscovery;
+using Microsoft.Extensions.DependencyInjection;
+
 
 namespace Uragano.Consul
 {
     public class ConsulServiceDiscovery : IServiceDiscovery
     {
         private ILogger Logger { get; }
-        private UraganoSettings UraganoSettings { get; }
+        private ServerSettings ServerSettings { get; }
 
+        private ConsulClientConfigure ConsulClientConfigure { get; }
 
-        public ConsulServiceDiscovery(UraganoSettings uraganoSettings, ILogger<ConsulServiceDiscovery> logger)
+        private ConsulRegisterServiceConfiguration ConsulRegisterServiceConfiguration { get; set; }
+
+        private static readonly AsyncLock AsyncLock = new AsyncLock();
+
+        private static readonly ConcurrentDictionary<string, List<ServiceNodeInfo>> ServiceNodes = new ConcurrentDictionary<string, List<ServiceNodeInfo>>();
+
+        public event NodeLeaveHandler OnNodeLeave;
+        public event NodeJoinHandler OnNodeJoin;
+        public ConsulServiceDiscovery(UraganoSettings uraganoSettings, ILogger<ConsulServiceDiscovery> logger, IServiceDiscoveryClientConfiguration clientConfiguration, IServiceProvider service)
         {
-            UraganoSettings = uraganoSettings;
+            if (!(clientConfiguration is ConsulClientConfigure client))
+                throw new ArgumentNullException(nameof(clientConfiguration));
+            var agent = service.GetService<IServiceRegisterConfiguration>();
+            if (agent != null)
+            {
+                if (!(agent is ConsulRegisterServiceConfiguration serviceAgent))
+                    throw new ArgumentNullException(nameof(ConsulRegisterServiceConfiguration));
+                ConsulRegisterServiceConfiguration = serviceAgent;
+            }
+
+
+            ConsulClientConfigure = client;
+            ServerSettings = uraganoSettings.ServerSettings;
             Logger = logger;
         }
 
-        public async Task<bool> RegisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, IServiceRegisterConfiguration serviceRegisterConfiguration, int? weight = default, CancellationToken cancellationToken = default)
+        public async Task<bool> RegisterAsync(CancellationToken cancellationToken = default)
         {
-            if (!(serviceDiscoveryClientConfiguration is ConsulClientConfigure client))
-                return false;
-
-            if (serviceRegisterConfiguration == null)
+            if (ConsulRegisterServiceConfiguration == null)
             {
-                serviceRegisterConfiguration = new ConsulRegisterServiceConfiguration();
+                ConsulRegisterServiceConfiguration = new ConsulRegisterServiceConfiguration();
             }
 
-            if (!(serviceRegisterConfiguration is ConsulRegisterServiceConfiguration service))
-                throw new ArgumentNullException(nameof(UraganoSettings.ServiceRegisterConfiguration));
+            if (string.IsNullOrWhiteSpace(ConsulRegisterServiceConfiguration.Id))
+            {
+                ConsulRegisterServiceConfiguration.Id = ServerSettings.ToString();
+            }
 
-            if (string.IsNullOrWhiteSpace(serviceRegisterConfiguration.Name))
-                throw new ArgumentNullException(nameof(serviceRegisterConfiguration.Name), "Service name value cannot be null.");
+            if (string.IsNullOrWhiteSpace(ConsulRegisterServiceConfiguration.Name))
+            {
+                ConsulRegisterServiceConfiguration.Name = ServerSettings.ToString();
+            }
 
-            Logger.LogTrace("Start registering with consul[{0}]...", client.Address);
+            if (string.IsNullOrWhiteSpace(ConsulRegisterServiceConfiguration.Name))
+                throw new ArgumentNullException(nameof(ConsulRegisterServiceConfiguration.Name), "Service name value cannot be null.");
+
+            Logger.LogTrace("Start registering with consul[{0}]...", ConsulClientConfigure.Address);
+
             try
             {
                 using (var consul = new ConsulClient(conf =>
                 {
-                    conf.Address = client.Address;
-                    conf.Datacenter = client.Datacenter;
-                    conf.Token = client.Token;
-                    conf.WaitTime = client.WaitTime;
+                    conf.Address = ConsulClientConfigure.Address;
+                    conf.Datacenter = ConsulClientConfigure.Datacenter;
+                    conf.Token = ConsulClientConfigure.Token;
+                    conf.WaitTime = ConsulClientConfigure.WaitTime;
                 }))
                 {
-                    if (weight.HasValue)
+                    if (ServerSettings.Weight.HasValue)
                     {
-                        if (service.Meta == null)
-                            service.Meta = new Dictionary<string, string>();
-                        service.Meta.Add("X-Weight", weight.ToString());
+                        if (ConsulRegisterServiceConfiguration.Meta == null)
+                            ConsulRegisterServiceConfiguration.Meta = new Dictionary<string, string>();
+                        ConsulRegisterServiceConfiguration.Meta.Add("X-Weight", ServerSettings.Weight.ToString());
                     }
 
                     //Register service to consul agent 
                     var result = await consul.Agent.ServiceRegister(new AgentServiceRegistration
                     {
-                        Address = UraganoSettings.ServerSettings.Address,
-                        Port = UraganoSettings.ServerSettings.Port,
-                        ID = service.Id,
-                        Name = service.Name,
-                        EnableTagOverride = service.EnableTagOverride,
-                        Meta = service.Meta,
-                        Tags = service.Tags,
+                        Address = ServerSettings.Address,
+                        Port = ServerSettings.Port,
+                        ID = ConsulRegisterServiceConfiguration.Id,
+                        Name = ConsulRegisterServiceConfiguration.Name,
+                        EnableTagOverride = ConsulRegisterServiceConfiguration.EnableTagOverride,
+                        Meta = ConsulRegisterServiceConfiguration.Meta,
+                        Tags = ConsulRegisterServiceConfiguration.Tags,
                         Check = new AgentServiceCheck
                         {
-                            TCP = UraganoSettings.ServerSettings.ToString(),
+                            TCP = ServerSettings.ToString(),
                             DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(20),
                             Timeout = TimeSpan.FromSeconds(3),
-                            Interval = service.HealthCheckInterval
+                            Interval = ConsulRegisterServiceConfiguration.HealthCheckInterval
                         }
                     }, cancellationToken);
                     if (result.StatusCode != HttpStatusCode.OK)
@@ -92,24 +121,20 @@ namespace Uragano.Consul
             }
         }
 
-        public async Task<bool> DeregisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceId)
+        public async Task<bool> DeregisterAsync()
         {
-            if (!(serviceDiscoveryClientConfiguration is ConsulClientConfigure client))
-                throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
-            if (string.IsNullOrWhiteSpace(serviceId))
-                throw new ArgumentNullException(nameof(serviceId));
             Logger.LogTrace("Start deregistration consul...");
             using (var consul = new ConsulClient(conf =>
             {
-                conf.Address = client.Address;
-                conf.Datacenter = client.Datacenter;
-                conf.Token = client.Token;
-                conf.WaitTime = client.WaitTime;
+                conf.Address = ConsulClientConfigure.Address;
+                conf.Datacenter = ConsulClientConfigure.Datacenter;
+                conf.Token = ConsulClientConfigure.Token;
+                conf.WaitTime = ConsulClientConfigure.WaitTime;
             }))
             {
                 try
                 {
-                    var result = await consul.Agent.ServiceDeregister(serviceId);
+                    var result = await consul.Agent.ServiceDeregister(ConsulRegisterServiceConfiguration.Id);
                     if (result.StatusCode != HttpStatusCode.OK)
                     {
                         Logger.LogError("Deregistration service failed:{0}", result.StatusCode);
@@ -127,36 +152,22 @@ namespace Uragano.Consul
             }
         }
 
-        public async Task<List<ServiceDiscoveryInfo>> QueryServiceAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName,
-            ServiceStatus serviceStatus = ServiceStatus.Alive, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<ServiceDiscoveryInfo>> QueryServiceAsync(string serviceName, CancellationToken cancellationToken = default)
         {
-            if (!(serviceDiscoveryClientConfiguration is ConsulClientConfigure client))
-                throw new ArgumentNullException(nameof(serviceDiscoveryClientConfiguration));
             if (string.IsNullOrWhiteSpace(serviceName))
                 throw new ArgumentNullException(nameof(serviceName));
             using (var consul = new ConsulClient(conf =>
             {
-                conf.Address = client.Address;
-                conf.Datacenter = client.Datacenter;
-                conf.Token = client.Token;
-                conf.WaitTime = client.WaitTime;
+                conf.Address = ConsulClientConfigure.Address;
+                conf.Datacenter = ConsulClientConfigure.Datacenter;
+                conf.Token = ConsulClientConfigure.Token;
+                conf.WaitTime = ConsulClientConfigure.WaitTime;
             }))
             {
                 try
                 {
-                    QueryResult<ServiceEntry[]> result;
-                    switch (serviceStatus)
-                    {
-                        case ServiceStatus.Alive:
-                            result = await consul.Health.Service(serviceName, "", true, cancellationToken);
-                            break;
-                        case ServiceStatus.All:
-                            result = await consul.Health.Service(serviceName, "", false, cancellationToken);
-                            break;
-                        default:
-                            result = await consul.Health.Service(serviceName, cancellationToken);
-                            break;
-                    }
+                    var result = await consul.Health.Service(serviceName, "", true, cancellationToken);
+
                     if (result.StatusCode != HttpStatusCode.OK)
                     {
                         Logger.LogError("Query the service {0} failed:{0}", serviceName, result.StatusCode);
@@ -165,20 +176,93 @@ namespace Uragano.Consul
 
                     if (!result.Response.Any())
                         return new List<ServiceDiscoveryInfo>();
-                    return result.Response.Select(p => new ServiceDiscoveryInfo
-                    {
-                        ServiceId = p.Service.ID,
-                        Address = p.Service.Address,
-                        Port = p.Service.Port,
-                        Meta = p.Service.Meta,
-                        Alive = p.Checks.All(s => s.Status.Equals(HealthStatus.Passing))
-                    }).ToList();
+
+                    return result.Response.Select(p => new ServiceDiscoveryInfo(p.Service.ID, p.Service.Address, p.Service.Port, int.Parse(p.Service.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0"), p.Service.Meta)).ToList();
                 }
                 catch (Exception ex)
                 {
                     Logger.LogError("Query the service {2} error:{0}\n{1}", ex.Message, ex.StackTrace, serviceName);
                     throw;
                 }
+            }
+        }
+
+        public IReadOnlyDictionary<string, IReadOnlyList<ServiceNodeInfo>> GetAllService()
+        {
+            return ServiceNodes.ToDictionary(k => k.Key, v => (IReadOnlyList<ServiceNodeInfo>)v.Value);
+        }
+
+        public async Task<IReadOnlyList<ServiceNodeInfo>> GetServiceNodes(string serviceName)
+        {
+            if (ServiceNodes.TryGetValue(serviceName, out var result))
+                return result;
+            var serviceNodes = await QueryServiceAsync(serviceName);
+            if (!serviceNodes.Any())
+            {
+                return new List<ServiceNodeInfo>();
+            }
+            var nodes = serviceNodes.Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, p.Weight, p.Meta)).ToList();
+
+            if (ServiceNodes.TryAdd(serviceName, nodes))
+                return nodes;
+
+            throw new InvalidOperationException($"Service {serviceName} not found.");
+        }
+
+        public async Task NodeMonitor(CancellationToken cancellationToken)
+        {
+            Logger.LogTrace("Start refresh service status,waiting for locking...");
+            using (await AsyncLock.LockAsync(cancellationToken))
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
+                foreach (var service in ServiceNodes)
+                {
+                    Logger.LogTrace($"Service {service.Key} refreshing...");
+                    try
+                    {
+                        var healthNodes = await QueryServiceAsync(service.Key, cancellationToken);
+                        if (cancellationToken.IsCancellationRequested)
+                            break;
+
+                        var leavedNodes = service.Value.Where(p => healthNodes.All(a => a.ServiceId != p.ServiceId))
+                            .Select(p => p.ServiceId).ToArray();
+                        if (leavedNodes.Any())
+                        {
+                            //RemoveNode(service.Key, leavedNodes);
+                            if (!ServiceNodes.TryGetValue(service.Key, out var services)) return;
+                            services.RemoveAll(p => leavedNodes.Any(n => n == p.ServiceId));
+                            OnNodeLeave?.Invoke(service.Key, leavedNodes);
+                            Logger.LogTrace($"These nodes are gone:{string.Join(",", leavedNodes)}");
+                        }
+
+                        var addedNodes = healthNodes.Where(p =>
+                                service.Value.All(e => e.ServiceId != p.ServiceId)).Select(p =>
+                                new ServiceNodeInfo(p.ServiceId, p.Address, p.Port,
+                                    int.Parse(p.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0"), p.Meta))
+                            .ToList();
+
+                        if (addedNodes.Any())
+                        {
+                            //AddNode(service.Key, addedNodes);
+                            if (ServiceNodes.TryGetValue(service.Key, out var services))
+                                services.AddRange(addedNodes);
+                            else
+                                ServiceNodes.TryAdd(service.Key, addedNodes);
+
+                            OnNodeJoin?.Invoke(service.Key, addedNodes);
+
+                            Logger.LogTrace(
+                                $"New nodes added:{string.Join(",", addedNodes.Select(p => p.ServiceId))}");
+                        }
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                }
+                Logger.LogTrace("Complete refresh.");
             }
         }
     }

@@ -8,14 +8,14 @@
     <PackageIconUrl>https://github.com/1100100/Uragano/blob/master/icon.png?raw=true</PackageIconUrl>
     <PackageProjectUrl>https://github.com/1100100/Uragano</PackageProjectUrl>
     <Description>A simple, high performance RPC library.</Description>
-    <Version>0.0.1-preview.400</Version>
+    <Version>0.0.1-preview.407</Version>
     <PackageLicenseUrl>https://github.com/1100100/Uragano/blob/master/LICENSE</PackageLicenseUrl>
     <Authors>Owen</Authors>
     <Company>Owen</Company>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.10.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>

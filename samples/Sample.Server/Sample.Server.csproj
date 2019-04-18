@@ -20,6 +20,7 @@
     <ProjectReference Include="..\..\src\Uragano.Logging.Exceptionless\Uragano.Logging.Exceptionless.csproj" />
     <ProjectReference Include="..\..\src\Uragano.Logging.Log4net\Uragano.Logging.Log4Net.csproj" />
     <ProjectReference Include="..\..\src\Uragano.Logging.NLog\Uragano.Logging.NLog.csproj" />
+    <ProjectReference Include="..\..\src\Uragano.ZooKeeper\Uragano.ZooKeeper.csproj" />
     <ProjectReference Include="..\Sample.Service.Interfaces\Sample.Service.Interfaces.csproj" />
   </ItemGroup>
 

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Uragano.Abstractions;
@@ -9,34 +11,51 @@ namespace Uragano.Remoting.LoadBalancing
 {
     public class LoadBalancingWeightedPolling : ILoadBalancing
     {
-        private IServiceStatusManage ServiceStatusManageFactory { get; }
-
         private static readonly object LockObject = new object();
-        public LoadBalancingWeightedPolling(IServiceStatusManage serviceStatusManageFactory)
+
+        private IServiceDiscovery ServiceDiscovery { get; }
+
+        private const string Key = "x-weighted-polling-current-value";
+
+        private ILogger Logger { get; }
+
+        public LoadBalancingWeightedPolling(IServiceDiscovery serviceDiscovery,ILogger<LoadBalancingWeightedPolling> logger)
         {
-            ServiceStatusManageFactory = serviceStatusManageFactory;
+            ServiceDiscovery = serviceDiscovery;
+            Logger = logger;
         }
-        public async Task<ServiceNodeInfo> GetNextNode(string serviceName, string serviceRoute, object[] serviceArgs, Dictionary<string, string> serviceMeta)
+        public async Task<ServiceNodeInfo> GetNextNode(string serviceName, string serviceRoute, IReadOnlyList<object> serviceArgs, IReadOnlyDictionary<string, string> serviceMeta)
         {
-            var nodes = await ServiceStatusManageFactory.GetServiceNodes(serviceName);
+            var nodes = await ServiceDiscovery.GetServiceNodes(serviceName);
             if (!nodes.Any())
                 throw new NotFoundNodeException(serviceName);
+            if (nodes.Count == 1)
+                return nodes.First();
             lock (LockObject)
             {
+
                 var index = -1;
                 var total = 0;
                 for (var i = 0; i < nodes.Count; i++)
                 {
-                    nodes[i].CurrentWeight += nodes[i].Weight;
+                    nodes[i].Attach.AddOrUpdate(Key, nodes[i].Weight, (key, old) => Convert.ToInt32(old) + nodes[i].Weight);
                     total += nodes[i].Weight;
-                    if (index == -1 || nodes[index].CurrentWeight < nodes[i].CurrentWeight)
+                    if (index == -1 || GetCurrentWeightValue(nodes[index]) < GetCurrentWeightValue(nodes[i]))
                     {
                         index = i;
                     }
                 }
-                nodes[index].CurrentWeight -= total;
-                return nodes[index];
+                nodes[index].Attach.AddOrUpdate(Key, -total, (k, old) => Convert.ToInt32(old) - total);
+                var node= nodes[index];
+                if (Logger.IsEnabled(LogLevel.Trace))
+                    Logger.LogTrace($"Load to node {node.ServiceId}.");
+                return node;
             }
+        }
+
+        private static int GetCurrentWeightValue(ServiceNodeInfo node)
+        {
+            return !node.Attach.TryGetValue(Key, out var val) ? 0 : Convert.ToInt32(val);
         }
     }
 }

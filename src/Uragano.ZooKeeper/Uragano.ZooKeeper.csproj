@@ -3,19 +3,18 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>0.0.1-preview.407</Version>
     <Authors>Owen</Authors>
-    <Company>Owen</Company>
+    <Product>Uragano.ZooKeeper</Product>
     <Description>A simple, high performance RPC library.</Description>
-    <PackageLicenseUrl>https://github.com/1100100/Uragano/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/1100100/Uragano</PackageProjectUrl>
     <PackageIconUrl>https://github.com/1100100/Uragano/blob/master/icon.png?raw=true</PackageIconUrl>
     <PackageTags>Uragano,RPC,DotNetty,Microservice,MessagePack,DynamicProxy</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Caching.CSRedis" Version="3.0.51" />
+    <PackageReference Include="ZooKeeperNetEx" Version="3.4.12.1" />
   </ItemGroup>
 
   <ItemGroup>

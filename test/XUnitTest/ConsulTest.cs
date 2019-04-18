@@ -28,17 +28,13 @@ namespace XUnitTest
             ConsulFixture = consulFixture;
             var logger = Mock.Of<ILogger<ConsulServiceDiscovery>>();
             Output.WriteLine((logger != null).ToString());
-            ConsulServiceDiscovery = new ConsulServiceDiscovery(consulFixture.UraganoSettings, logger);
+            //ConsulServiceDiscovery = new ConsulServiceDiscovery(consulFixture.UraganoSettings, logger,new );
         }
 
         [Fact]
         public void RegisterAsync_Success_Test()
         {
-            Assert.True(ConsulServiceDiscovery.RegisterAsync(ConsulFixture.UraganoSettings.ServiceDiscoveryClientConfiguration, new ConsulRegisterServiceConfiguration
-            {
-                Name = "XUnitTest1",
-                Id = "123"
-            }, 100).GetAwaiter().GetResult());
+            Assert.True(ConsulServiceDiscovery.RegisterAsync().GetAwaiter().GetResult());
         }
 
 
@@ -47,29 +43,20 @@ namespace XUnitTest
         {
             Assert.Throws<HttpRequestException>(() =>
             {
-                ConsulServiceDiscovery.RegisterAsync(new ConsulClientConfigure
-                {
-                    Address = new Uri("http://127.0.0.1:8600"),
-                    WaitTime = TimeSpan.FromSeconds(2),
-                    Token = "5ece74af-19d1-0e61-b25c-b9665d29f50b"
-                }, new ConsulRegisterServiceConfiguration
-                {
-
-                }).GetAwaiter().GetResult();
+                ConsulServiceDiscovery.RegisterAsync().GetAwaiter().GetResult();
             });
         }
         [Fact]
         public void QueryServiceAsync()
         {
             var result = ConsulServiceDiscovery
-                .QueryServiceAsync(ConsulFixture.UraganoSettings.ServiceDiscoveryClientConfiguration, "XUnitTest1",
-                    Uragano.Abstractions.ServiceDiscovery.ServiceStatus.All).GetAwaiter().GetResult();
+                .QueryServiceAsync( "XUnitTest1").GetAwaiter().GetResult();
             Assert.True(result.Count >= 0);
         }
 
         public void Dispose()
         {
-            ConsulServiceDiscovery.DeregisterAsync(ConsulFixture.UraganoSettings.ServiceDiscoveryClientConfiguration, "123").GetAwaiter().GetResult();
+            ConsulServiceDiscovery.DeregisterAsync().GetAwaiter().GetResult();
         }
     }
 
@@ -83,11 +70,11 @@ namespace XUnitTest
         {
             UraganoSettings = new UraganoSettings
             {
-                ServiceDiscoveryClientConfiguration = new ConsulClientConfigure
-                {
-                    Address = new Uri("http://192.168.1.254:8500"),
-                    Token = "5ece74af-19d1-0e61-b25c-b9665d29f50b"
-                },
+                //ServiceDiscoveryClientConfiguration = new ConsulClientConfigure
+                //{
+                //    Address = new Uri("http://192.168.1.254:8500"),
+                //    Token = "5ece74af-19d1-0e61-b25c-b9665d29f50b"
+                //},
                 ServerSettings = new ServerSettings
                 {
                     Address = "127.0.0.1",

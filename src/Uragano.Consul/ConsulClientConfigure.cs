@@ -1,5 +1,6 @@
 ﻿using System;
 using Consul;
+using Uragano.Abstractions;
 using Uragano.Abstractions.ServiceDiscovery;
 
 namespace Uragano.Consul
@@ -8,10 +9,10 @@ namespace Uragano.Consul
     {
         public ConsulClientConfigure()
         {
-            Address = new Uri(Environment.GetEnvironmentVariable("uragano-consul-addr") ?? "http://127.0.0.1:8500");
-            Token = Environment.GetEnvironmentVariable("uragano-consul-token");
-            Datacenter = Environment.GetEnvironmentVariable("uragano-consul-dc") ?? "dc1";
-            WaitTime = TimeSpan.FromSeconds(10);
+            Address = new Uri(EnvironmentVariableReader.Get("uragano-consul-addr", "http://127.0.0.1:8500"));
+            Token = EnvironmentVariableReader.Get<string>("uragano-consul-token");
+            Datacenter = EnvironmentVariableReader.Get("uragano-consul-dc", "dc1");
+            WaitTime = TimeSpan.FromSeconds(EnvironmentVariableReader.Get("uragano-consul-timeout", 10));
         }
     }
 }

@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.2.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
@@ -30,6 +30,7 @@
     <ProjectReference Include="..\..\src\Uragano.Consul\Uragano.Consul.csproj" />
     <ProjectReference Include="..\..\src\Uragano.Core\Uragano.Core.csproj" />
     <ProjectReference Include="..\..\src\Uragano.Logging.Exceptionless\Uragano.Logging.Exceptionless.csproj" />
+    <ProjectReference Include="..\..\src\Uragano.ZooKeeper\Uragano.ZooKeeper.csproj" />
     <ProjectReference Include="..\Sample.Common\Sample.Common.csproj" />
     <ProjectReference Include="..\Sample.Service.Interfaces\Sample.Service.Interfaces.csproj" />
   </ItemGroup>

@@ -48,7 +48,7 @@ namespace Uragano.Caching.Redis
 
         #region Partition redis
 
-        public static void AddRedisPartitionCaching<TKeyGenerator>(this IUraganoBuilder builder, RedisOptions redisOptions, Func<string, IEnumerable<RedisConnection>, RedisConnection> partitionPolicy = null) where TKeyGenerator : class, ICachingKeyGenerator
+        public static void AddRedisPartitionCaching<TKeyGenerator>(this IUraganoBuilder builder, RedisOptions redisOptions, Func<string, IReadOnlyList<RedisConnection>, RedisConnection> partitionPolicy = null) where TKeyGenerator : class, ICachingKeyGenerator
         {
             if (partitionPolicy != null)
                 builder.ServiceCollection.AddSingleton(partitionPolicy);
@@ -56,19 +56,19 @@ namespace Uragano.Caching.Redis
             builder.ServiceCollection.AddSingleton<IConsistentHash<RedisConnection>, ConsistentHash<RedisConnection>>();
         }
 
-        public static void AddRedisPartitionCaching<TKeyGenerator>(this IUraganoBuilder builder, IConfigurationSection configurationSection, Func<string, IEnumerable<RedisConnection>, RedisConnection> partitionPolicy = null) where TKeyGenerator : class, ICachingKeyGenerator
+        public static void AddRedisPartitionCaching<TKeyGenerator>(this IUraganoBuilder builder, IConfigurationSection configurationSection, Func<string, IReadOnlyList<RedisConnection>, RedisConnection> partitionPolicy = null) where TKeyGenerator : class, ICachingKeyGenerator
         {
             var options = configurationSection.Get<RedisOptions>();
             builder.AddRedisPartitionCaching<TKeyGenerator>(options, partitionPolicy);
         }
 
-        public static void AddRedisPartitionCaching<TKeyGenerator>(this IUraganoSampleBuilder builder, Func<string, IEnumerable<RedisConnection>, RedisConnection> partitionPolicy = null) where TKeyGenerator : class, ICachingKeyGenerator
+        public static void AddRedisPartitionCaching<TKeyGenerator>(this IUraganoSampleBuilder builder, Func<string, IReadOnlyList<RedisConnection>, RedisConnection> partitionPolicy = null) where TKeyGenerator : class, ICachingKeyGenerator
         {
             var options = builder.Configuration.GetSection("Uragano:Caching:Redis").Get<RedisOptions>();
             builder.AddRedisPartitionCaching<TKeyGenerator>(options, partitionPolicy);
         }
 
-        public static void AddRedisPartitionCaching(this IUraganoBuilder builder, RedisOptions redisOptions, Func<string, IEnumerable<RedisConnection>, RedisConnection> partitionPolicy = null)
+        public static void AddRedisPartitionCaching(this IUraganoBuilder builder, RedisOptions redisOptions, Func<string, IReadOnlyList<RedisConnection>, RedisConnection> partitionPolicy = null)
         {
             if (partitionPolicy != null)
                 builder.ServiceCollection.AddSingleton(partitionPolicy);
@@ -76,13 +76,13 @@ namespace Uragano.Caching.Redis
             builder.ServiceCollection.AddSingleton<IConsistentHash<RedisConnection>, ConsistentHash<RedisConnection>>();
         }
 
-        public static void AddRedisPartitionCaching(this IUraganoBuilder builder, IConfigurationSection configurationSection, Func<string, IEnumerable<RedisConnection>, RedisConnection> partitionPolicy = null)
+        public static void AddRedisPartitionCaching(this IUraganoBuilder builder, IConfigurationSection configurationSection, Func<string, IReadOnlyList<RedisConnection>, RedisConnection> partitionPolicy = null)
         {
             var options = configurationSection.Get<RedisOptions>();
             builder.AddRedisPartitionCaching(options, partitionPolicy);
         }
 
-        public static void AddRedisPartitionCaching(this IUraganoSampleBuilder builder, Func<string, IEnumerable<RedisConnection>, RedisConnection> partitionPolicy = null)
+        public static void AddRedisPartitionCaching(this IUraganoSampleBuilder builder, Func<string, IReadOnlyList<RedisConnection>, RedisConnection> partitionPolicy = null)
         {
             var options = builder.Configuration.GetSection("Uragano:Caching:Redis").Get<RedisOptions>();
             builder.AddRedisPartitionCaching(options, partitionPolicy);

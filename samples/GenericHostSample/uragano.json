@@ -2,8 +2,8 @@
   "Logging": {
     "LogLevel": {
       "Default": "Trace",
-      "System": "Information",
-      "Microsoft": "Information"
+      "System": "Warning",
+      "Microsoft": "Warning"
     }
   },
   "AllowedHosts": "*",
@@ -28,6 +28,15 @@
           "EnableTagOverride": false,
           "meta": null,
           "HealthCheckInterval": 10
+        }
+      },
+      "ZooKeeper": {
+        "Client": {
+          "ConnectionString": "localhost:2181"
+        },
+        "Service": {
+          "Name": "PersionService",
+          "Id": null
         }
       }
     },

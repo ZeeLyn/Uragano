@@ -4,12 +4,24 @@ using System.Threading.Tasks;
 
 namespace Uragano.Abstractions.ServiceDiscovery
 {
+    public delegate void NodeJoinHandler(string serviceName, IReadOnlyList<ServiceNodeInfo> nodes);
+
+    public delegate void NodeLeaveHandler(string serviceName, IReadOnlyList<string> nodes);
     public interface IServiceDiscovery
     {
-        Task<bool> RegisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, IServiceRegisterConfiguration serviceRegisterConfiguration, int? weight = default, CancellationToken cancellationToken = default);
+        event NodeLeaveHandler OnNodeLeave;
+        event NodeJoinHandler OnNodeJoin;
 
-        Task<bool> DeregisterAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceId);
+        Task<bool> RegisterAsync(CancellationToken cancellationToken = default);
 
-        Task<List<ServiceDiscoveryInfo>> QueryServiceAsync(IServiceDiscoveryClientConfiguration serviceDiscoveryClientConfiguration, string serviceName, ServiceStatus serviceStatus = ServiceStatus.Alive, CancellationToken cancellationToken = default);
+        Task<bool> DeregisterAsync();
+
+        Task<IReadOnlyList<ServiceDiscoveryInfo>> QueryServiceAsync(string serviceName, CancellationToken cancellationToken = default);
+
+        IReadOnlyDictionary<string, IReadOnlyList<ServiceNodeInfo>> GetAllService();
+
+        Task<IReadOnlyList<ServiceNodeInfo>> GetServiceNodes(string serviceName);
+
+        Task NodeMonitor(CancellationToken cancellationToken = default);
     }
 }

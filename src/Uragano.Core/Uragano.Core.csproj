@@ -7,7 +7,7 @@
     <PackageIconUrl>https://github.com/1100100/Uragano/blob/master/icon.png?raw=true</PackageIconUrl>
     <PackageProjectUrl>https://github.com/1100100/Uragano</PackageProjectUrl>
     <Description>A simple, high performance RPC library.</Description>
-    <Version>0.0.1-preview.400</Version>
+    <Version>0.0.1-preview.407</Version>
     <PackageLicenseUrl>https://github.com/1100100/Uragano/blob/master/LICENSE</PackageLicenseUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Owen</Authors>
@@ -17,7 +17,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.10.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.0.0" />
     <PackageReference Include="Polly" Version="7.1.0" />
   </ItemGroup>
 
