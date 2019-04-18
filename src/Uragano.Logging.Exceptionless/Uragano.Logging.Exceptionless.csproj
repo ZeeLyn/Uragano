@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Exceptionless.Extensions.Logging" Version="4.3.2022" />
+    <PackageReference Include="Exceptionless.Extensions.Logging" Version="4.3.2027" />
   </ItemGroup>
 
   <ItemGroup>
