@@ -9,6 +9,7 @@ Package | NuGet
 Uragano.Abstractions|[![NuGet package](https://buildstats.info/nuget/Uragano.Abstractions?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Abstractions)
 Uragano.Codec.MessagePack|[![NuGet package](https://buildstats.info/nuget/Uragano.Codec.MessagePack?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Codec.MessagePack)
 Uragano.Consul|[![NuGet package](https://buildstats.info/nuget/Uragano.Consul?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Consul)
+Uragano.ZooKeeper|[![NuGet package](https://buildstats.info/nuget/Uragano.ZooKeeper?includePreReleases=true)](https://www.nuget.org/packages/Uragano.ZooKeeper)
 Uragano.DynamicProxy|[![NuGet package](https://buildstats.info/nuget/Uragano.DynamicProxy?includePreReleases=true)](https://www.nuget.org/packages/Uragano.DynamicProxy)
 Uragano.Remoting|[![NuGet package](https://buildstats.info/nuget/Uragano.Remoting?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Remoting)
 Uragano.Core|[![NuGet package](https://buildstats.info/nuget/Uragano.Core?includePreReleases=true)](https://www.nuget.org/packages/Uragano.Core)
