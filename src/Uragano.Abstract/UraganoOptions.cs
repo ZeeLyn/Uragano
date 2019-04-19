@@ -17,7 +17,7 @@ namespace Uragano.Abstractions
             return completion;
         });
 
-        public static UraganoOption<TimeSpan> Client_Node_Status_Refresh_Interval { get; } =
+        public static UraganoOption<TimeSpan> Consul_Node_Status_Refresh_Interval { get; } =
             new UraganoOption<TimeSpan>(TimeSpan.FromSeconds(10));
 
         public static UraganoOption<int> Server_DotNetty_Channel_SoBacklog { get; } = new UraganoOption<int>(100);

@@ -184,8 +184,8 @@ namespace Uragano.Core
                     case "threadpool_completionportthreads":
                         UraganoOptions.SetOption(UraganoOptions.ThreadPool_CompletionPortThreads, configuration.GetValue<int>(section.Key));
                         break;
-                    case "client_node_status_refresh_interval":
-                        UraganoOptions.SetOption(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromMilliseconds(configuration.GetValue<int>(section.Key)));
+                    case "consul_node_status_refresh_interval":
+                        UraganoOptions.SetOption(UraganoOptions.Consul_Node_Status_Refresh_Interval, TimeSpan.FromMilliseconds(configuration.GetValue<int>(section.Key)));
                         break;
                     case "server_dotnetty_channel_sobacklog":
                         UraganoOptions.SetOption(UraganoOptions.Server_DotNetty_Channel_SoBacklog, configuration.GetValue<int>(section.Key));
