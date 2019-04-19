@@ -25,13 +25,13 @@ namespace Uragano.Abstractions
     public class ServerSettings
     {
         public string Address { get; set; } =
-            EnvironmentVariableReader.Get("uragano-server-addr", IpHelper.GetLocalInternetIp().ToString());
+            EnvironmentVariableReader.Get(EnvironmentVariables.uragano_server_addr, IpHelper.GetLocalInternetIp().ToString());
 
-        public int Port { get; set; } = EnvironmentVariableReader.Get("uragano-server-port", 5730);
+        public int Port { get; set; } = EnvironmentVariableReader.Get(EnvironmentVariables.uragano_server_port, 5730);
 
         public X509Certificate2 X509Certificate2 { get; set; }
 
-        public int? Weight { get; set; } = EnvironmentVariableReader.Get("uragano-server-weight", 0);
+        public int? Weight { get; set; } = EnvironmentVariableReader.Get(EnvironmentVariables.uragano_server_weight, 0);
 
         public override string ToString()
         {

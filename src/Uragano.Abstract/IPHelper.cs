@@ -8,6 +8,7 @@ namespace Uragano.Abstractions
     public static class IpHelper
     {
         private static readonly long IpABegin, IpAEnd, IpBBegin, IpBEnd, IpCBegin, IpCEnd;
+        private const string LocalIp = "{LOCALIP}";
         static IpHelper()
         {
             IpABegin = ConvertIpToNumber(IPAddress.Parse("192.168.0.0"));
@@ -45,7 +46,9 @@ namespace Uragano.Abstractions
 
         public static string ReplaceIpPlaceholder(this string text)
         {
-            return text.Replace("{LocalIP}", GetLocalInternetIp().ToString());
+            if (!text.Contains(LocalIp))
+                return text;
+            return text.Replace(LocalIp, GetLocalInternetIp().ToString());
         }
     }
 }
