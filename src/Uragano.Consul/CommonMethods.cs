@@ -22,7 +22,7 @@ namespace Uragano.Consul
                     client.Datacenter = dcSection.Value;
                 client.WaitTime = string.IsNullOrWhiteSpace(configurationSection.GetValue<string>("waittime"))
                     ? default
-                    : TimeSpan.FromMilliseconds(configurationSection.GetValue<int>("waittime"));
+                    : TimeSpan.FromSeconds(configurationSection.GetValue<int>("waittime"));
             }
             return client;
         }
@@ -40,7 +40,7 @@ namespace Uragano.Consul
             var hcSection = configurationSection.GetSection("HealthCheckInterval");
             if (hcSection.Exists())
                 service.HealthCheckInterval =
-                    TimeSpan.FromMilliseconds(configurationSection.GetValue<int>("HealthCheckInterval"));
+                    TimeSpan.FromSeconds(configurationSection.GetValue<int>("HealthCheckInterval"));
 
             service.EnableTagOverride = configurationSection.GetValue<bool>("EnableTagOverride");
             service.Meta = configurationSection.GetValue<Dictionary<string, string>>("meta");
