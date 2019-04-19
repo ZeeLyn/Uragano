@@ -20,9 +20,9 @@ namespace Uragano.Consul
                 var dcSection = configurationSection.GetSection("datacenter");
                 if (dcSection.Exists())
                     client.Datacenter = dcSection.Value;
-                client.WaitTime = string.IsNullOrWhiteSpace(configurationSection.GetValue<string>("waittime"))
+                client.WaitTime = string.IsNullOrWhiteSpace(configurationSection.GetValue<string>("timeout"))
                     ? default
-                    : TimeSpan.FromSeconds(configurationSection.GetValue<int>("waittime"));
+                    : TimeSpan.FromSeconds(configurationSection.GetValue<int>("timeout"));
             }
             return client;
         }

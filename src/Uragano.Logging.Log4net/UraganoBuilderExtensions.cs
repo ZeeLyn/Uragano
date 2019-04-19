@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Uragano.Abstractions;
+﻿using Uragano.Abstractions;
 
 namespace Uragano.Logging.Log4Net
 {
