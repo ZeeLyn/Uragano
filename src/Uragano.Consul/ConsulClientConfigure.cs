@@ -9,10 +9,10 @@ namespace Uragano.Consul
     {
         public ConsulClientConfigure()
         {
-            Address = new Uri(EnvironmentVariableReader.Get("uragano-consul-addr", "http://127.0.0.1:8500"));
-            Token = EnvironmentVariableReader.Get<string>("uragano-consul-token");
-            Datacenter = EnvironmentVariableReader.Get("uragano-consul-dc", "dc1");
-            WaitTime = TimeSpan.FromSeconds(EnvironmentVariableReader.Get("uragano-consul-timeout", 10));
+            Address = new Uri(EnvironmentVariableReader.Get(EnvironmentVariables.uragano_consul_addr, "http://127.0.0.1:8500"));
+            Token = EnvironmentVariableReader.Get<string>(EnvironmentVariables.uragano_consul_token);
+            Datacenter = EnvironmentVariableReader.Get(EnvironmentVariables.uragano_consul_dc, "dc1");
+            WaitTime = TimeSpan.FromSeconds(EnvironmentVariableReader.Get(EnvironmentVariables.uragano_consul_timeout, 10));
         }
     }
 }

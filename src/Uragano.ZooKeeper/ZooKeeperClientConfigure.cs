@@ -9,12 +9,12 @@ namespace Uragano.ZooKeeper
         /// comma separated host:port pairs, each corresponding to a zk server.
         /// </summary>
         public string ConnectionString { get; set; } =
-            EnvironmentVariableReader.Get("uragano-zk-addr", "localhost:2181");
+            EnvironmentVariableReader.Get(EnvironmentVariables.uragano_zk_addr, "127.0.0.1:2181");
 
         /// <summary>
         /// session timeout in milliseconds
         /// </summary>
-        public int SessionTimeout { get; set; } = EnvironmentVariableReader.Get("uragano-zk-session-timeout", 1000 * 10);
+        public int SessionTimeout { get; set; } = EnvironmentVariableReader.Get(EnvironmentVariables.uragano_zk_session_timeout, 1000 * 10);
 
 
         /// <summary>
@@ -23,6 +23,6 @@ namespace Uragano.ZooKeeper
         /// server it could reach, it connects to one in read-only mode, i.e. read requests are allowed while write requests are not.
         /// It continues seeking for majority in the background.
         /// </summary>
-        public bool CanBeReadOnly { get; set; } = EnvironmentVariableReader.Get("uragano-zk-readonly", false);
+        public bool CanBeReadOnly { get; set; } = EnvironmentVariableReader.Get(EnvironmentVariables.uragano_zk_readonly, false);
     }
 }

@@ -7,9 +7,9 @@ namespace Uragano.Consul
 {
     public class ConsulRegisterServiceConfiguration : IServiceRegisterConfiguration
     {
-        public string Id { get; set; } = EnvironmentVariableReader.Get<string>("uragano-service-id");
+        public string Id { get; set; } = EnvironmentVariableReader.Get<string>(EnvironmentVariables.uragano_service_id);
 
-        public string Name { get; set; } = EnvironmentVariableReader.Get<string>("uragano-service-name");
+        public string Name { get; set; } = EnvironmentVariableReader.Get<string>(EnvironmentVariables.uragano_service_name);
 
         public bool EnableTagOverride { get; set; }
 
@@ -20,6 +20,6 @@ namespace Uragano.Consul
         /// <summary>
         /// The default is 10 seconds
         /// </summary>
-        public TimeSpan HealthCheckInterval { get; set; } = TimeSpan.FromSeconds(EnvironmentVariableReader.Get("uragano-consul-hc-interval", 10));
+        public TimeSpan HealthCheckInterval { get; set; } = TimeSpan.FromSeconds(EnvironmentVariableReader.Get(EnvironmentVariables.uragano_consul_hc_interval, 10));
     }
 }
