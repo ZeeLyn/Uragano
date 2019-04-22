@@ -6,19 +6,21 @@ namespace Uragano.DynamicProxy
 {
     public abstract class DynamicProxyAbstract
     {
-        private Dictionary<string, string> Meta { get; set; }
-
-        public void SetMeta(Dictionary<string, string> meta)
-        {
-            Meta = meta;
-        }
+        private Dictionary<string, string> Meta { get; }
 
         private IRemotingInvoke RemotingInvoke { get; }
 
         protected DynamicProxyAbstract(IRemotingInvoke remotingInvoke)
         {
             RemotingInvoke = remotingInvoke;
+            Meta = new Dictionary<string, string>();
         }
+
+        public void SetMeta(string key, string value)
+        {
+            Meta.Add(key, value);
+        }
+
 
         //protected void Invoke(object[] args, string route, string serviceName)
         //{
@@ -34,13 +36,13 @@ namespace Uragano.DynamicProxy
         protected async Task InvokeAsync(object[] args, string route, string serviceName)
         {
             await RemotingInvoke.InvokeAsync(args, route, serviceName, Meta);
-            Meta = null;
+            Meta.Clear();
         }
 
         protected async Task<T> InvokeAsync<T>(object[] args, string route, string serviceName)
         {
             var result = await RemotingInvoke.InvokeAsync<T>(args, route, serviceName, Meta);
-            Meta = null;
+            Meta.Clear();
             return result;
         }
     }
