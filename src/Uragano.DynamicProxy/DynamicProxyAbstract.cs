@@ -6,18 +6,20 @@ namespace Uragano.DynamicProxy
 {
     public abstract class DynamicProxyAbstract
     {
-        private Dictionary<string, string> Meta { get; }
+        private Dictionary<string, string> Meta { get; set; }
 
         private IRemotingInvoke RemotingInvoke { get; }
 
         protected DynamicProxyAbstract(IRemotingInvoke remotingInvoke)
         {
             RemotingInvoke = remotingInvoke;
-            Meta = new Dictionary<string, string>();
+
         }
 
         public void SetMeta(string key, string value)
         {
+            if (Meta == null)
+                Meta = new Dictionary<string, string>();
             Meta.Add(key, value);
         }
 
