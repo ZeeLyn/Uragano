@@ -4,7 +4,7 @@
 // ARGUMENTS
 ///////////////////////////////////////////////////////////////////////////////
 
-var outputDirectory="Output";
+var output=Argument<string>("output", "Output");
 var version=Argument<string>("version", "0.0.1");
 var target = Argument<string>("target", "Default");
 var release = Argument<bool>("release", true);
@@ -53,9 +53,9 @@ Task("Build").Does(()=>{
 });
 
 Task("CleanPackage").Does(()=>{
-   if(DirectoryExists(outputDirectory))
+   if(DirectoryExists(output))
    {
-      DeleteDirectory(outputDirectory,true);
+      DeleteDirectory(output,true);
    }
 });
 
@@ -63,7 +63,7 @@ Task("Pack")
 .IsDependentOn("CleanPackage")
 .DoesForEach(GetFiles("**/Uragano.*.csproj"),(file)=>{
    DotNetCorePack(file.ToString(),new DotNetCorePackSettings{
-      OutputDirectory=outputDirectory,
+      OutputDirectory=output,
       Configuration=configuration
    });
 });
@@ -93,7 +93,7 @@ Task("Default")
 .IsDependentOn("Restore")
 .IsDependentOn("Build")
 .Does(() => {
-   Information("Hello Cake!");
+
 });
 
 
