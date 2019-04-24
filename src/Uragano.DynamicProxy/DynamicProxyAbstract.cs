@@ -13,7 +13,6 @@ namespace Uragano.DynamicProxy
         protected DynamicProxyAbstract(IRemotingInvoke remotingInvoke)
         {
             RemotingInvoke = remotingInvoke;
-
         }
 
         public void SetMeta(string key, string value)
