@@ -172,17 +172,17 @@ namespace Uragano.ZooKeeper
 
         private async Task CreatePath(string path, byte[] data)
         {
-            path = path.TrimStart('/').TrimEnd('/');
+            path = path.Trim('/');
             if (string.IsNullOrWhiteSpace(path))
                 return;
-            var childrens = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            var children = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
             var nodePath = new StringBuilder();
-            for (var i = 0; i < childrens.Length; i++)
+            for (var i = 0; i < children.Length; i++)
             {
-                nodePath.Append("/" + childrens[i]);
+                nodePath.Append("/" + children[i]);
                 if (await ZooKeeper.existsAsync(nodePath.ToString()) == null)
                 {
-                    await ZooKeeper.createAsync(nodePath.ToString(), i == childrens.Length - 1 ? data : null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                    await ZooKeeper.createAsync(nodePath.ToString(), i == children.Length - 1 ? data : null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
                 }
             }
         }
