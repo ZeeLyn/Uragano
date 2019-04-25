@@ -278,7 +278,7 @@ namespace Uragano.ZooKeeper
 
         private static string GetServiceNameFromPath(string path)
         {
-            return path.Replace(Root, "").TrimEnd('/').TrimStart('/');
+            return path.Replace(Root, "").Trim('/');
         }
 
         private class ZooKeeperNodeInfo
