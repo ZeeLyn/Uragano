@@ -210,11 +210,12 @@ namespace Uragano.ZooKeeper
             switch (keeperState)
             {
                 case Watcher.Event.KeeperState.Expired:
+                    Logger.LogWarning($"ZooKeeper has been {keeperState},Reconnecting...");
                     ZooKeeperSessionId = 0;
                     CreateZooKeeperClient();
                     break;
                 case Watcher.Event.KeeperState.Disconnected:
-                    Logger.LogWarning($"ZooKeeper client has been {keeperState},Reconnecting...");
+                    Logger.LogWarning($"ZooKeeper has been {keeperState},Reconnecting...");
                     CreateZooKeeperClient();
                     break;
                 case Watcher.Event.KeeperState.SyncConnected:
