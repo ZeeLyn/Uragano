@@ -82,10 +82,23 @@ namespace Uragano.Core
 
         #region Client
 
-        public void AddClient<TLoadBalancing>() where TLoadBalancing : class, ILoadBalancing
+        public void AddClient<TLoadBalancing>(ClientSettings settings) where TLoadBalancing : class, ILoadBalancing
         {
+            UraganoSettings.ClientSettings = settings;
             AddClient(typeof(TLoadBalancing));
         }
+
+        public void AddClient<TLoadBalancing>(IConfigurationSection configurationSection)
+        {
+            if (configurationSection != null && configurationSection.Exists())
+            {
+                var settings = configurationSection.Get<ClientSettings>();
+                AddClient(typeof(TLoadBalancing), settings);
+            }
+            else
+                AddClient(typeof(TLoadBalancing));
+        }
+
 
         public void AddClient(Type loadBalancing)
         {
@@ -93,10 +106,12 @@ namespace Uragano.Core
             RegisterClientServices();
         }
 
-        public void AddClient()
+        public void AddClient(Type loadBalancing, ClientSettings settings)
         {
-            AddClient<LoadBalancingPolling>();
+            UraganoSettings.ClientSettings = settings;
+            AddClient(loadBalancing);
         }
+
 
         #endregion
 
@@ -457,6 +472,18 @@ namespace Uragano.Core
         public void AddServer()
         {
             AddServer(Configuration.GetSection("Uragano:Server"));
+        }
+
+
+        public void AddClient()
+        {
+            AddClient<LoadBalancingPolling>(Configuration.GetSection("Uragano:Client"));
+        }
+
+        public void AddClient<TLoadBalancing>() where TLoadBalancing : class, ILoadBalancing
+        {
+            AddClient<TLoadBalancing>(Configuration.GetSection("Uragano:Client"));
+
         }
 
         public void AddOptions()

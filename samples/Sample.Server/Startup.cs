@@ -32,19 +32,19 @@ namespace Sample.Server
             services.AddUragano(Configuration, builder =>
              {
 
-                 builder.AddClient(LoadBalancing.ConsistentHash);
+                 builder.AddClient();
                  builder.AddServer();
                  //builder.AddZooKeeper();
                  builder.AddConsul();
                  builder.AddClientGlobalInterceptor<ClientGlobalInterceptor>();
                  builder.AddServerGlobalInterceptor<ServerGlobalInterceptor>();
-                 builder.AddExceptionlessLogger();
+                 //builder.AddExceptionlessLogger();
                  //builder.AddLog4NetLogger();
                  //builder.AddNLogLogger();
-                 builder.AddRedisPartitionCaching();
+                 //builder.AddRedisPartitionCaching();
                  //builder.AddRedisCaching();
                  //builder.AddMemoryCaching();
-                 builder.AddOption(UraganoOptions.Remoting_Invoke_CancellationTokenSource_Timeout, TimeSpan.FromSeconds(10));
+                 builder.AddOption(UraganoOptions.Remoting_Invoke_CancellationTokenSource_Timeout, TimeSpan.FromSeconds(60));
                  builder.AddOptions();
              });
         }

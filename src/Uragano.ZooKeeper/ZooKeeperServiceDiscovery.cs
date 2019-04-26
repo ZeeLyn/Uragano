@@ -86,7 +86,8 @@ namespace Uragano.ZooKeeper
                 {
                     Weight = ServerSettings.Weight ?? 0,
                     Address = ServerSettings.Address,
-                    Port = ServerSettings.Port
+                    Port = ServerSettings.Port,
+                    EnableTls = ServerSettings.X509Certificate2 != null
                 });
                 await CreatePath($"{Root}/{ZooKeeperRegisterServiceConfiguration.Name}/{ZooKeeperRegisterServiceConfiguration.Id}", data);
                 return true;
@@ -132,7 +133,7 @@ namespace Uragano.ZooKeeper
                     var serviceData = Codec.Deserialize<ZooKeeperNodeInfo>(data.Data);
                     if (serviceData == null)
                         continue;
-                    result.Add(new ServiceDiscoveryInfo(node, serviceData.Address, serviceData.Port, serviceData.Weight, null));
+                    result.Add(new ServiceDiscoveryInfo(node, serviceData.Address, serviceData.Port, serviceData.Weight, serviceData.EnableTls, null));
                 }
                 return result;
             }
@@ -158,7 +159,7 @@ namespace Uragano.ZooKeeper
             {
                 return new List<ServiceNodeInfo>();
             }
-            var nodes = serviceNodes.Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, p.Weight, p.Meta)).ToList();
+            var nodes = serviceNodes.Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, p.Weight, p.EnableTls, p.Meta)).ToList();
             if (ServiceNodes.TryAdd(serviceName, nodes))
                 return nodes;
 
@@ -240,9 +241,10 @@ namespace Uragano.ZooKeeper
                     else
                     {
                         var nodes = await QueryServiceAsync(serviceName);
-                        RefreshNodes(serviceName, nodes.Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, p.Weight, p.Meta)).ToList());
+                        RefreshNodes(serviceName, nodes.Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, p.Weight, p.EnableTls, p.Meta)).ToList());
                     }
                     break;
+
             }
         }
 
@@ -289,6 +291,8 @@ namespace Uragano.ZooKeeper
             public string Address { get; set; }
 
             public int Port { get; set; }
+
+            public bool EnableTls { get; set; }
         }
     }
 }

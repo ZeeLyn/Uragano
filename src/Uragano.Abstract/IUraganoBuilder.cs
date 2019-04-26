@@ -16,11 +16,13 @@ namespace Uragano.Abstractions
 
         void AddServer(IConfigurationSection configurationSection);
 
-        void AddClient<TLoadBalancing>() where TLoadBalancing : class, ILoadBalancing;
+        void AddClient<TLoadBalancing>(ClientSettings settings) where TLoadBalancing : class, ILoadBalancing;
 
         void AddClient(Type loadBalancing);
 
-        void AddClient();
+        void AddClient(Type loadBalancing, ClientSettings settings);
+
+        void AddClient<TLoadBalancing>(IConfigurationSection configurationSection);
 
         void AddClientGlobalInterceptor<TInterceptor>() where TInterceptor : class, IInterceptor;
 
@@ -80,6 +82,10 @@ namespace Uragano.Abstractions
         IConfiguration Configuration { get; }
 
         void AddServer();
+
+        void AddClient();
+
+        void AddClient<TLoadBalancing>() where TLoadBalancing : class, ILoadBalancing;
 
         void AddOptions();
 
