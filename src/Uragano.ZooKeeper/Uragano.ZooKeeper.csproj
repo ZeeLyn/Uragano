@@ -11,6 +11,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/1100100/Uragano/master/icon.png</PackageIconUrl>
     <PackageTags>Uragano,RPC,DotNetty,Microservice,MessagePack,DynamicProxy,dotnetcore,service-discovery,polly,circuit-breaker,consul,zookeeper,dependency-injection</PackageTags>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>

@@ -8,10 +8,11 @@
     <PackageProjectUrl>https://github.com/1100100/Uragano</PackageProjectUrl>
     <Description>A simple, high performance RPC library.</Description>
     <Version>0.0.3</Version>
-    <PackageLicenseUrl>https://github.com/1100100/Uragano/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>Owen</Authors>
     <Company>Owen</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>

@@ -40,6 +40,7 @@ Task("UpdateVersion").DoesForEach(GetFiles("**/Uragano.*.csproj"),(file)=>{
    XmlPoke(file,"/Project/PropertyGroup/PackageTags","Uragano,RPC,DotNetty,Microservice,MessagePack,DynamicProxy,dotnetcore,service-discovery,polly,circuit-breaker,consul,zookeeper,dependency-injection");
    XmlPoke(file,"/Project/PropertyGroup/PackageIconUrl","https://raw.githubusercontent.com/1100100/Uragano/master/icon.png");
    XmlPoke(file,"/Project/PropertyGroup/Authors","Owen");
+   XmlPoke(file,"/Project/PropertyGroup/PackageLicenseExpression","MIT");
 });
 
 Task("Restore").Does(()=>{
