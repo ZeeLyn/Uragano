@@ -8,10 +8,11 @@
     <Authors>Owen</Authors>
     <Company>Owen</Company>
     <Description>A simple, high performance RPC library.</Description>
-    <PackageLicenseUrl>https://github.com/1100100/Uragano/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/1100100/Uragano</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/1100100/Uragano/master/icon.png</PackageIconUrl>
     <PackageTags>Uragano,RPC,DotNetty,Microservice,MessagePack,DynamicProxy,dotnetcore,service-discovery,polly,circuit-breaker,consul,zookeeper,dependency-injection</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
