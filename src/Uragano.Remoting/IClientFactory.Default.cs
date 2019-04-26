@@ -85,11 +85,10 @@ namespace Uragano.Remoting
                             var pipeline = ch.Pipeline;
                             if (nodeInfo.EnableTls)
                             {
-
                                 var cert = ClientSettings?.ServicesCert?.FirstOrDefault(p => p.Key == serviceName).Value ?? ClientSettings?.DefaultCert;
                                 if (cert == null)
                                 {
-                                    Logger.LogCritical($"Service {serviceName}[{nodeInfo.Address}:{nodeInfo.Port}] has TLS enabled, please configure the certificate.");
+                                    Logger.LogError($"Service {serviceName}[{nodeInfo.Address}:{nodeInfo.Port}] has TLS enabled, please configure the certificate.");
                                     throw new InvalidOperationException(
                                         $"Service {serviceName}[{nodeInfo.Address}:{nodeInfo.Port}] has TLS enabled, please configure the certificate.");
                                 }
@@ -100,10 +99,10 @@ namespace Uragano.Remoting
                                     return new SslStream(stream, true,
                                         (sender, certificate, chain, errors) =>
                                         {
-                                            var success = SslPolicyErrors.None == errors;
-                                            if (!success)
+                                            var successful = SslPolicyErrors.None == errors;
+                                            if (!successful)
                                                 Logger.LogError("The remote certificate is invalid according to the validation procedure:{0}.", errors);
-                                            return success;
+                                            return successful;
                                         });
                                 }, new ClientTlsSettings(targetHost)));
                             }
@@ -113,7 +112,7 @@ namespace Uragano.Remoting
                             pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
                             pipeline.AddLast(new MessageDecoder<IServiceResult>(Codec));
                             pipeline.AddLast(new MessageEncoder<IInvokeMessage>(Codec));
-                            pipeline.AddLast(new ClientMessageHandler(this, Logger));
+                            pipeline.AddLast(new ClientMessageHandler(this));
                         }));
 
                     EndPoint endPoint;
@@ -145,12 +144,9 @@ namespace Uragano.Remoting
 
             private IClientFactory ClientFactory { get; }
 
-            private ILogger Logger { get; }
-
-            public ClientMessageHandler(IClientFactory clientFactory, ILogger logger)
+            public ClientMessageHandler(IClientFactory clientFactory)
             {
                 ClientFactory = clientFactory;
-                Logger = logger;
             }
 
             public override void ChannelRead(IChannelHandlerContext context, object message)
@@ -162,7 +158,7 @@ namespace Uragano.Remoting
 
             public override void ChannelInactive(IChannelHandlerContext context)
             {
-                Logger.LogCritical("The status of client {0} is unavailable,Please check the network and certificate!", context.Channel.RemoteAddress);
+                //Logger.LogCritical("The status of client {0} is unavailable,Please check the network and certificate!", context.Channel.RemoteAddress);
                 var ctx = context.Channel.GetAttribute(TransportContextAttributeKey).Get();
                 ClientFactory.RemoveClient(ctx.Host, ctx.Port).GetAwaiter().GetResult();
                 base.ChannelInactive(context);
