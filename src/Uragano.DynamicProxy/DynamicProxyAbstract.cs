@@ -37,13 +37,13 @@ namespace Uragano.DynamicProxy
         protected async Task InvokeAsync(object[] args, string route, string serviceName)
         {
             await RemotingInvoke.InvokeAsync(args, route, serviceName, Meta);
-            Meta.Clear();
+            Meta?.Clear();
         }
 
         protected async Task<T> InvokeAsync<T>(object[] args, string route, string serviceName)
         {
             var result = await RemotingInvoke.InvokeAsync<T>(args, route, serviceName, Meta);
-            Meta.Clear();
+            Meta?.Clear();
             return result;
         }
     }
