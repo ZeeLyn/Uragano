@@ -84,8 +84,7 @@ namespace Uragano.Core
 
         public void AddClient<TLoadBalancing>(ClientSettings settings) where TLoadBalancing : class, ILoadBalancing
         {
-            UraganoSettings.ClientSettings = settings;
-            AddClient(typeof(TLoadBalancing));
+            AddClient(typeof(TLoadBalancing), settings);
         }
 
         public void AddClient<TLoadBalancing>(IConfigurationSection configurationSection)

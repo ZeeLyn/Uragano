@@ -8,7 +8,7 @@
     <PackageTags>Uragano,RPC,DotNetty,Microservice,MessagePack,DynamicProxy,dotnetcore,service-discovery,polly,circuit-breaker,consul,zookeeper,dependency-injection</PackageTags>
     <PackageProjectUrl>https://github.com/1100100/Uragano</PackageProjectUrl>
     <Description>A simple, high performance RPC library.</Description>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <PackageLicenseUrl>https://github.com/1100100/Uragano/blob/master/LICENSE</PackageLicenseUrl>
     <Authors>Owen</Authors>
     <Company>Owen</Company>

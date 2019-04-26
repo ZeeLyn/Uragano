@@ -5,7 +5,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 var output=Argument<string>("output", "Output");
-var version=Argument<string>("version", "0.0.1");
+var version=Argument<string>("version", "0.0.2");
 var target = Argument<string>("target", "Default");
 var release = Argument<bool>("release", true);
 var nugetApiKey = Argument<string>("nugetApiKey", null);
@@ -61,6 +61,7 @@ Task("CleanPackage").Does(()=>{
 
 Task("Pack")
 .IsDependentOn("CleanPackage")
+.IsDependentOn("UpdateVersion")
 .DoesForEach(GetFiles("**/Uragano.*.csproj"),(file)=>{
    DotNetCorePack(file.ToString(),new DotNetCorePackSettings{
       OutputDirectory=output,
@@ -89,7 +90,6 @@ Task("Push")
 });
 
 Task("Default")
-.IsDependentOn("UpdateVersion")
 .IsDependentOn("Restore")
 .IsDependentOn("Build")
 .Does(() => {
