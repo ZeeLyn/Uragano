@@ -12,14 +12,27 @@ namespace Uragano.Core
         {
             if (service is DynamicProxyAbstract dynamicProxyAbstract)
             {
-                dynamicProxyAbstract.SetMeta(meta);
+                foreach (var item in meta)
+                {
+                    dynamicProxyAbstract.SetMeta(item.Key, item.Value);
+                }
             }
             return service;
         }
 
         public static TService SetMeta<TService>(this TService service, params (string key, string value)[] meta) where TService : IService
         {
+
             return service.SetMeta(meta.ToDictionary(key => key.key, value => value.value));
+        }
+
+        public static TService SetMeta<TService>(this TService service, string key, string value) where TService : IService
+        {
+            if (service is DynamicProxyAbstract dynamicProxyAbstract)
+            {
+                dynamicProxyAbstract.SetMeta(key, value);
+            }
+            return service;
         }
     }
 }

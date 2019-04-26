@@ -2,8 +2,8 @@
 
 namespace Uragano.Abstractions
 {
-	public interface IService
-	{
-		//void SetMeta(Dictionary<string, string> meta);
-	}
+    public interface IService
+    {
+        //void SetMeta(Dictionary<string, string> meta);
+    }
 }

@@ -2,16 +2,20 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Common.Utilities;
+using DotNetty.Handlers.Tls;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using DotNetty.Transport.Libuv;
 using Microsoft.Extensions.Logging;
 using Uragano.Abstractions;
+using Uragano.Abstractions.ServiceDiscovery;
 
 
 namespace Uragano.Remoting
@@ -28,10 +32,13 @@ namespace Uragano.Remoting
 
         private ILogger Logger { get; }
 
-        public ClientFactory(ICodec codec, ILogger<ClientFactory> logger)
+        private ClientSettings ClientSettings { get; }
+
+        public ClientFactory(ICodec codec, ILogger<ClientFactory> logger, UraganoSettings uraganoSettings)
         {
             Codec = codec;
             Logger = logger;
+            ClientSettings = uraganoSettings.ClientSettings;
         }
 
         public async Task RemoveClient(string host, int port)
@@ -48,9 +55,9 @@ namespace Uragano.Remoting
             }
         }
 
-        public async Task<IClient> CreateClientAsync(string host, int port)
+        public async Task<IClient> CreateClientAsync(string serviceName, ServiceNodeInfo nodeInfo)
         {
-            var key = (host, port);
+            var key = (nodeInfo.Address, nodeInfo.Port);
             try
             {
                 return await _clients.GetOrAdd(key, async k =>
@@ -76,10 +83,30 @@ namespace Uragano.Remoting
                         .Handler(new ActionChannelInitializer<IChannel>(ch =>
                         {
                             var pipeline = ch.Pipeline;
-                            //if (ServerSettings.X509Certificate2 != null)
-                            //{
-                            //pipeline.AddFirst(new TlsHandler(new ClientTlsSettings());
-                            //}
+                            if (nodeInfo.EnableTls)
+                            {
+                                var cert = ClientSettings?.ServicesCert?.FirstOrDefault(p => p.Key == serviceName).Value ?? ClientSettings?.DefaultCert;
+                                if (cert == null)
+                                {
+                                    Logger.LogError($"Service {serviceName}[{nodeInfo.Address}:{nodeInfo.Port}] has TLS enabled, please configure the certificate.");
+                                    throw new InvalidOperationException(
+                                        $"Service {serviceName}[{nodeInfo.Address}:{nodeInfo.Port}] has TLS enabled, please configure the certificate.");
+                                }
+
+                                var targetHost = cert.Cert.GetNameInfo(X509NameType.DnsName, false);
+                                pipeline.AddLast(new TlsHandler(stream =>
+                                {
+                                    return new SslStream(stream, true,
+                                        (sender, certificate, chain, errors) =>
+                                        {
+                                            var successful = SslPolicyErrors.None == errors;
+                                            if (!successful)
+                                                Logger.LogError("The remote certificate is invalid according to the validation procedure:{0}.", errors);
+                                            return successful;
+                                        });
+                                }, new ClientTlsSettings(targetHost)));
+                            }
+
                             //pipeline.AddLast(new LoggingHandler("SRV-CONN"));
                             pipeline.AddLast(new LengthFieldPrepender(4));
                             pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
@@ -89,19 +116,20 @@ namespace Uragano.Remoting
                         }));
 
                     EndPoint endPoint;
-                    if (IPAddress.TryParse(host, out var ip))
-                        endPoint = new IPEndPoint(ip, port);
+                    if (IPAddress.TryParse(nodeInfo.Address, out var ip))
+                        endPoint = new IPEndPoint(ip, nodeInfo.Port);
                     else
-                        endPoint = new DnsEndPoint(host, port);
+                        endPoint = new DnsEndPoint(nodeInfo.Address, nodeInfo.Port);
                     var channel = await bootstrap.ConnectAsync(endPoint);
                     channel.GetAttribute(TransportContextAttributeKey).Set(new TransportContext
                     {
-                        Host = host,
-                        Port = port
+                        Host = nodeInfo.Address,
+                        Port = nodeInfo.Port
                     });
+
                     var listener = new MessageListener();
                     channel.GetAttribute(MessageListenerAttributeKey).Set(listener);
-                    return new Client(channel, group, listener, Logger, Codec, $"{host}:{port}");
+                    return new Client(channel, group, listener, Logger, Codec, $"{nodeInfo.Address}:{ nodeInfo.Port}");
                 });
             }
             catch
@@ -115,7 +143,6 @@ namespace Uragano.Remoting
         {
 
             private IClientFactory ClientFactory { get; }
-
 
             public ClientMessageHandler(IClientFactory clientFactory)
             {
@@ -131,8 +158,10 @@ namespace Uragano.Remoting
 
             public override void ChannelInactive(IChannelHandlerContext context)
             {
+                //Logger.LogCritical("The status of client {0} is unavailable,Please check the network and certificate!", context.Channel.RemoteAddress);
                 var ctx = context.Channel.GetAttribute(TransportContextAttributeKey).Get();
                 ClientFactory.RemoveClient(ctx.Host, ctx.Port).GetAwaiter().GetResult();
+                base.ChannelInactive(context);
             }
         }
     }

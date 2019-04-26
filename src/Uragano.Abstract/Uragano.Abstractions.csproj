@@ -1,24 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>7.1</LangVersion>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.0.1-preview.408</Version>
+    <LangVersion>latest</LangVersion>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Version>0.0.2</Version>
     <Description>A simple, high performance RPC library.</Description>
     <PackageProjectUrl>https://github.com/1100100/Uragano</PackageProjectUrl>
-    <PackageTags>Uragano,RPC,DotNetty,Microservice,MessagePack,DynamicProxy</PackageTags>
-    <PackageIconUrl>https://github.com/1100100/Uragano/blob/master/icon.png?raw=true</PackageIconUrl>
+    <PackageTags>Uragano,RPC,DotNetty,Microservice,MessagePack,DynamicProxy,dotnetcore,service-discovery,polly,circuit-breaker,consul,zookeeper,dependency-injection</PackageTags>
+    <PackageIconUrl>https://raw.githubusercontent.com/1100100/Uragano/master/icon.png</PackageIconUrl>
     <PackageLicenseUrl>https://github.com/1100100Uragano/blob/master/LICENSE</PackageLicenseUrl>
     <Authors>Owen</Authors>
     <Company>Owen</Company>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Remoting\**" />
-    <EmbeddedResource Remove="Remoting\**" />
-    <None Remove="Remoting\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MessagePack" Version="1.7.3.4" />

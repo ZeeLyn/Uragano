@@ -79,10 +79,11 @@ namespace Uragano.Consul
                     conf.WaitTime = ConsulClientConfigure.WaitTime;
                 }))
                 {
+                    ConsulRegisterServiceConfiguration.Meta = new Dictionary<string, string>{
+                        {"X-Tls",(ServerSettings.X509Certificate2!=null).ToString()}
+                    };
                     if (ServerSettings.Weight.HasValue)
                     {
-                        if (ConsulRegisterServiceConfiguration.Meta == null)
-                            ConsulRegisterServiceConfiguration.Meta = new Dictionary<string, string>();
                         ConsulRegisterServiceConfiguration.Meta.Add("X-Weight", ServerSettings.Weight.ToString());
                     }
 
@@ -177,7 +178,7 @@ namespace Uragano.Consul
                     if (!result.Response.Any())
                         return new List<ServiceDiscoveryInfo>();
 
-                    return result.Response.Select(p => new ServiceDiscoveryInfo(p.Service.ID, p.Service.Address, p.Service.Port, int.Parse(p.Service.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0"), p.Service.Meta)).ToList();
+                    return result.Response.Select(p => new ServiceDiscoveryInfo(p.Service.ID, p.Service.Address, p.Service.Port, int.Parse(p.Service.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0"), bool.Parse(p.Service.Meta?.FirstOrDefault(m => m.Key == "X-Tls").Value ?? "false"), p.Service.Meta)).ToList();
                 }
                 catch (Exception ex)
                 {
@@ -201,7 +202,7 @@ namespace Uragano.Consul
             {
                 return new List<ServiceNodeInfo>();
             }
-            var nodes = serviceNodes.Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, p.Weight, p.Meta)).ToList();
+            var nodes = serviceNodes.Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, p.Weight, p.EnableTls, p.Meta)).ToList();
 
             if (ServiceNodes.TryAdd(serviceName, nodes))
                 return nodes;
@@ -239,8 +240,7 @@ namespace Uragano.Consul
 
                         var addedNodes = healthNodes.Where(p =>
                                 service.Value.All(e => e.ServiceId != p.ServiceId)).Select(p =>
-                                new ServiceNodeInfo(p.ServiceId, p.Address, p.Port,
-                                    int.Parse(p.Meta?.FirstOrDefault(m => m.Key == "X-Weight").Value ?? "0"), p.Meta))
+                                new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, p.Weight, p.EnableTls, p.Meta))
                             .ToList();
 
                         if (addedNodes.Any())

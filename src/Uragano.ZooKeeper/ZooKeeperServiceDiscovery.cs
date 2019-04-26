@@ -86,7 +86,8 @@ namespace Uragano.ZooKeeper
                 {
                     Weight = ServerSettings.Weight ?? 0,
                     Address = ServerSettings.Address,
-                    Port = ServerSettings.Port
+                    Port = ServerSettings.Port,
+                    EnableTls = ServerSettings.X509Certificate2 != null
                 });
                 await CreatePath($"{Root}/{ZooKeeperRegisterServiceConfiguration.Name}/{ZooKeeperRegisterServiceConfiguration.Id}", data);
                 return true;
@@ -132,7 +133,7 @@ namespace Uragano.ZooKeeper
                     var serviceData = Codec.Deserialize<ZooKeeperNodeInfo>(data.Data);
                     if (serviceData == null)
                         continue;
-                    result.Add(new ServiceDiscoveryInfo(node, serviceData.Address, serviceData.Port, serviceData.Weight, null));
+                    result.Add(new ServiceDiscoveryInfo(node, serviceData.Address, serviceData.Port, serviceData.Weight, serviceData.EnableTls, null));
                 }
                 return result;
             }
@@ -158,7 +159,7 @@ namespace Uragano.ZooKeeper
             {
                 return new List<ServiceNodeInfo>();
             }
-            var nodes = serviceNodes.Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, p.Weight, p.Meta)).ToList();
+            var nodes = serviceNodes.Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, p.Weight, p.EnableTls, p.Meta)).ToList();
             if (ServiceNodes.TryAdd(serviceName, nodes))
                 return nodes;
 
@@ -172,17 +173,17 @@ namespace Uragano.ZooKeeper
 
         private async Task CreatePath(string path, byte[] data)
         {
-            path = path.TrimStart('/').TrimEnd('/');
+            path = path.Trim('/');
             if (string.IsNullOrWhiteSpace(path))
                 return;
-            var childrens = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            var children = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
             var nodePath = new StringBuilder();
-            for (var i = 0; i < childrens.Length; i++)
+            for (var i = 0; i < children.Length; i++)
             {
-                nodePath.Append("/" + childrens[i]);
+                nodePath.Append("/" + children[i]);
                 if (await ZooKeeper.existsAsync(nodePath.ToString()) == null)
                 {
-                    await ZooKeeper.createAsync(nodePath.ToString(), i == childrens.Length - 1 ? data : null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                    await ZooKeeper.createAsync(nodePath.ToString(), i == children.Length - 1 ? data : null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
                 }
             }
         }
@@ -210,11 +211,12 @@ namespace Uragano.ZooKeeper
             switch (keeperState)
             {
                 case Watcher.Event.KeeperState.Expired:
+                    Logger.LogWarning($"ZooKeeper has been {keeperState},Reconnecting...");
                     ZooKeeperSessionId = 0;
                     CreateZooKeeperClient();
                     break;
                 case Watcher.Event.KeeperState.Disconnected:
-                    Logger.LogWarning($"ZooKeeper client has been {keeperState},Reconnecting...");
+                    Logger.LogWarning($"ZooKeeper has been {keeperState},Reconnecting...");
                     CreateZooKeeperClient();
                     break;
                 case Watcher.Event.KeeperState.SyncConnected:
@@ -239,9 +241,10 @@ namespace Uragano.ZooKeeper
                     else
                     {
                         var nodes = await QueryServiceAsync(serviceName);
-                        RefreshNodes(serviceName, nodes.Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, p.Weight, p.Meta)).ToList());
+                        RefreshNodes(serviceName, nodes.Select(p => new ServiceNodeInfo(p.ServiceId, p.Address, p.Port, p.Weight, p.EnableTls, p.Meta)).ToList());
                     }
                     break;
+
             }
         }
 
@@ -278,7 +281,7 @@ namespace Uragano.ZooKeeper
 
         private static string GetServiceNameFromPath(string path)
         {
-            return path.Replace(Root, "").TrimEnd('/').TrimStart('/');
+            return path.Replace(Root, "").Trim('/');
         }
 
         private class ZooKeeperNodeInfo
@@ -288,6 +291,8 @@ namespace Uragano.ZooKeeper
             public string Address { get; set; }
 
             public int Port { get; set; }
+
+            public bool EnableTls { get; set; }
         }
     }
 }

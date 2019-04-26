@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Sample.Common;
 using Sample.Service.Interfaces;
-using Uragano.Abstractions;
 using Uragano.Core;
 
 namespace Sample.Server.Controllers

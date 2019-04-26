@@ -82,10 +82,22 @@ namespace Uragano.Core
 
         #region Client
 
-        public void AddClient<TLoadBalancing>() where TLoadBalancing : class, ILoadBalancing
+        public void AddClient<TLoadBalancing>(ClientSettings settings) where TLoadBalancing : class, ILoadBalancing
         {
-            AddClient(typeof(TLoadBalancing));
+            AddClient(typeof(TLoadBalancing), settings);
         }
+
+        public void AddClient<TLoadBalancing>(IConfigurationSection configurationSection)
+        {
+            if (configurationSection != null && configurationSection.Exists())
+            {
+                var settings = configurationSection.Get<ClientSettings>();
+                AddClient(typeof(TLoadBalancing), settings);
+            }
+            else
+                AddClient(typeof(TLoadBalancing));
+        }
+
 
         public void AddClient(Type loadBalancing)
         {
@@ -93,10 +105,12 @@ namespace Uragano.Core
             RegisterClientServices();
         }
 
-        public void AddClient()
+        public void AddClient(Type loadBalancing, ClientSettings settings)
         {
-            AddClient<LoadBalancingPolling>();
+            UraganoSettings.ClientSettings = settings;
+            AddClient(loadBalancing);
         }
+
 
         #endregion
 
@@ -184,8 +198,8 @@ namespace Uragano.Core
                     case "threadpool_completionportthreads":
                         UraganoOptions.SetOption(UraganoOptions.ThreadPool_CompletionPortThreads, configuration.GetValue<int>(section.Key));
                         break;
-                    case "client_node_status_refresh_interval":
-                        UraganoOptions.SetOption(UraganoOptions.Client_Node_Status_Refresh_Interval, TimeSpan.FromMilliseconds(configuration.GetValue<int>(section.Key)));
+                    case "consul_node_status_refresh_interval":
+                        UraganoOptions.SetOption(UraganoOptions.Consul_Node_Status_Refresh_Interval, TimeSpan.FromMilliseconds(configuration.GetValue<int>(section.Key)));
                         break;
                     case "server_dotnetty_channel_sobacklog":
                         UraganoOptions.SetOption(UraganoOptions.Server_DotNetty_Channel_SoBacklog, configuration.GetValue<int>(section.Key));
@@ -457,6 +471,18 @@ namespace Uragano.Core
         public void AddServer()
         {
             AddServer(Configuration.GetSection("Uragano:Server"));
+        }
+
+
+        public void AddClient()
+        {
+            AddClient<LoadBalancingPolling>(Configuration.GetSection("Uragano:Client"));
+        }
+
+        public void AddClient<TLoadBalancing>() where TLoadBalancing : class, ILoadBalancing
+        {
+            AddClient<TLoadBalancing>(Configuration.GetSection("Uragano:Client"));
+
         }
 
         public void AddOptions()

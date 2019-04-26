@@ -77,7 +77,7 @@ namespace Uragano.Remoting
                 finally
                 {
                     _resultCallbackTask.TryRemove(transportMessage.Id, out var t);
-                    t.TrySetCanceled();
+                    t?.TrySetCanceled();
                 }
             }
         }

@@ -23,9 +23,9 @@ namespace Uragano.Consul
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            if (UraganoOptions.Client_Node_Status_Refresh_Interval.Value.Ticks > 0)
+            if (UraganoOptions.Consul_Node_Status_Refresh_Interval.Value.Ticks > 0)
             {
-                Timer = new System.Timers.Timer(UraganoOptions.Client_Node_Status_Refresh_Interval.Value.TotalMilliseconds);
+                Timer = new System.Timers.Timer(UraganoOptions.Consul_Node_Status_Refresh_Interval.Value.TotalMilliseconds);
                 Timer.Elapsed += async (sender, args) =>
                 {
                     if (stoppingToken.IsCancellationRequested)
