@@ -101,9 +101,8 @@ namespace Uragano.Remoting
                                         (sender, certificate, chain, errors) =>
                                         {
                                             var success = SslPolicyErrors.None == errors;
-                                            Logger.LogError(
-                                                "The remote certificate is invalid according to the validation procedure:{0}.",
-                                                errors);
+                                            if (!success)
+                                                Logger.LogError("The remote certificate is invalid according to the validation procedure:{0}.", errors);
                                             return success;
                                         });
                                 }, new ClientTlsSettings(targetHost)));
