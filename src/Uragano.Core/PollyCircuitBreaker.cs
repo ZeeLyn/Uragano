@@ -58,7 +58,7 @@ namespace Uragano.Core
                              return null;
                          if (service.ServiceCircuitBreakerOptions.HasInjection)
                              return await ScriptInjection.Run(route);
-                         return returnValueType.IsValueType ? Activator.CreateInstance(returnValueType) : null;
+                         return returnValueType.IsValueType ? Activator.CreateInstance(returnValueType) : default;
                      });
                 if (serviceCircuitBreakerOptions.ExceptionsAllowedBeforeBreaking > 0)
                 {
