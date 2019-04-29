@@ -4,6 +4,7 @@ using Polly.Timeout;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Uragano.Abstractions;
 using Uragano.Abstractions.CircuitBreaker;
 using Uragano.Abstractions.Service;
 
@@ -17,7 +18,7 @@ namespace Uragano.Core
 
         private IServiceFactory ServiceFactory { get; }
 
-        private static readonly ConcurrentDictionary<string, AsyncPolicy<object>> Policies = new ConcurrentDictionary<string, AsyncPolicy<object>>();
+        private static readonly ConcurrentDictionary<string, AsyncPolicy<IServiceResult>> Policies = new ConcurrentDictionary<string, AsyncPolicy<IServiceResult>>();
 
         public PollyCircuitBreaker(IServiceProvider serviceProvider, IScriptInjection scriptInjection, IServiceFactory serviceFactory)
         {
@@ -26,39 +27,30 @@ namespace Uragano.Core
             ServiceFactory = serviceFactory;
         }
 
-        public async Task<object> ExecuteAsync(string route, Func<Task<object>> action, Type returnValueType)
+        public async Task<IServiceResult> ExecuteAsync(string route, Func<Task<IServiceResult>> action, Type returnValueType)
         {
             var policy = GetPolicy(route, returnValueType);
             return await policy.ExecuteAsync(action);
         }
 
-        public async Task ExecuteAsync(string route, Func<Task> action)
-        {
-            var policy = GetPolicy(route, null);
-            await policy.ExecuteAsync(async () =>
-            {
-                await action();
-                return null;
-            });
-        }
-
-        private AsyncPolicy<object> GetPolicy(string route, Type returnValueType)
+        private AsyncPolicy<IServiceResult> GetPolicy(string route, Type returnValueType)
         {
             return Policies.GetOrAdd(route, key =>
             {
                 var service = ServiceFactory.Get(route);
                 var serviceCircuitBreakerOptions = service.ServiceCircuitBreakerOptions;
                 var circuitBreakerEvent = ServiceProvider.GetService<ICircuitBreakerEvent>();
-                AsyncPolicy<object> policy = Policy<object>.Handle<Exception>().FallbackAsync(
+                AsyncPolicy<IServiceResult> policy = Policy<IServiceResult>.Handle<Exception>().FallbackAsync<IServiceResult>(
                      async ct =>
                      {
+                         //TODO 如果多次降级，根据路由排除此node
                          if (circuitBreakerEvent != null)
                              await circuitBreakerEvent.OnFallback(route, service.ClientMethodInfo);
                          if (returnValueType == null)
-                             return null;
+                             return new ServiceResult(null);
                          if (service.ServiceCircuitBreakerOptions.HasInjection)
-                             return await ScriptInjection.Run(route);
-                         return returnValueType.IsValueType ? Activator.CreateInstance(returnValueType) : null;
+                             return new ServiceResult(await ScriptInjection.Run(route));
+                         return new ServiceResult(returnValueType.IsValueType ? Activator.CreateInstance(returnValueType) : default);
                      });
                 if (serviceCircuitBreakerOptions.ExceptionsAllowedBeforeBreaking > 0)
                 {

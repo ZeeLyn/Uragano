@@ -29,33 +29,21 @@ namespace Uragano.DynamicProxy.Interceptor
             //No circuit breaker
             if (UraganoSettings.CircuitBreakerOptions == null)
             {
-                if (ctx.ReturnType != null)
-                    return new ServiceResult(await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta,
-                        ctx.ReturnType));
-                await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, null);
-                return new ServiceResult(null);
+                return await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta);
             }
             //Circuit breaker
-            if (ctx.ReturnType != null)
-                return new ServiceResult(await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute,
-                    async () => await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta,
-                        ctx.ReturnType), ctx.ReturnType));
-
-            await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute,
-                async () => { await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta, null); });
-            return new ServiceResult(null);
+            return await CircuitBreaker.ExecuteAsync(ctx.ServiceRoute,
+                async () => await Exec(ctx.ServiceName, ctx.ServiceRoute, ctx.Args, ctx.Meta), ctx.ReturnType);
         }
 
-        private async Task<object> Exec(string serviceName, string route, object[] args, Dictionary<string, string> meta, Type returnValueType)
+        private async Task<IServiceResult> Exec(string serviceName, string route, object[] args, Dictionary<string, string> meta)
         {
             var node = await LoadBalancing.GetNextNode(serviceName, route, args, meta);
             var client = await ClientFactory.CreateClientAsync(serviceName, node);
             var result = await client.SendAsync(new InvokeMessage(route, args, meta));
             if (result.Status != RemotingStatus.Ok)
                 throw new RemoteInvokeException(route, result.Result?.ToString(), result.Status);
-            if (returnValueType == null)
-                return null;
-            return result.Result;
+            return result;
         }
     }
 }

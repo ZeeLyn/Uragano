@@ -230,27 +230,31 @@ namespace Uragano.Core
 
         #region Circuit breaker
         public void AddCircuitBreaker<TCircuitBreakerEvent>(int timeout = 3000, int retry = 3,
-            int exceptionsAllowedBeforeBreaking = 10, int durationOfBreak = 60000) where TCircuitBreakerEvent : ICircuitBreakerEvent
+            int exceptionsAllowedBeforeBreaking = 10, int durationOfBreak = 60000, int maxParallelization = 0, int maxQueuingActions = 0) where TCircuitBreakerEvent : ICircuitBreakerEvent
         {
             UraganoSettings.CircuitBreakerOptions = new CircuitBreakerOptions
             {
                 Timeout = TimeSpan.FromMilliseconds(timeout),
                 Retry = retry,
                 ExceptionsAllowedBeforeBreaking = exceptionsAllowedBeforeBreaking,
-                DurationOfBreak = TimeSpan.FromMilliseconds(durationOfBreak)
+                DurationOfBreak = TimeSpan.FromMilliseconds(durationOfBreak),
+                MaxParallelization = maxParallelization,
+                MaxQueuingActions = maxQueuingActions
             };
             RegisterSingletonService(typeof(ICircuitBreakerEvent), typeof(TCircuitBreakerEvent));
         }
 
         public void AddCircuitBreaker(int timeout = 3000, int retry = 3, int exceptionsAllowedBeforeBreaking = 10,
-            int durationOfBreak = 60000)
+            int durationOfBreak = 60000, int maxParallelization = 0, int maxQueuingActions = 0)
         {
             UraganoSettings.CircuitBreakerOptions = new CircuitBreakerOptions
             {
                 Timeout = TimeSpan.FromMilliseconds(timeout),
                 Retry = retry,
                 ExceptionsAllowedBeforeBreaking = exceptionsAllowedBeforeBreaking,
-                DurationOfBreak = TimeSpan.FromMilliseconds(durationOfBreak)
+                DurationOfBreak = TimeSpan.FromMilliseconds(durationOfBreak),
+                MaxParallelization = maxParallelization,
+                MaxQueuingActions = maxQueuingActions
             };
         }
 
@@ -261,16 +265,15 @@ namespace Uragano.Core
                 Timeout = TimeSpan.FromMilliseconds(configurationSection.GetValue<int>("timeout")),
                 Retry = configurationSection.GetValue<int>("retry"),
                 ExceptionsAllowedBeforeBreaking = configurationSection.GetValue<int>("ExceptionsAllowedBeforeBreaking"),
-                DurationOfBreak = TimeSpan.FromMilliseconds(configurationSection.GetValue<int>("DurationOfBreak"))
+                DurationOfBreak = TimeSpan.FromMilliseconds(configurationSection.GetValue<int>("DurationOfBreak")),
+                MaxParallelization = configurationSection.GetValue<int>("MaxParallelization"),
+                MaxQueuingActions = configurationSection.GetValue<int>("MaxQueuingActions")
             };
-            var eventTypeName = configurationSection.GetValue<string>("EventHandler");
-            if (!string.IsNullOrWhiteSpace(eventTypeName))
-            {
-                var eventType = ReflectHelper.Find(eventTypeName);
-                if (eventType == null)
-                    throw new TypeLoadException($"Cannot load type of {eventTypeName}.");
-                RegisterSingletonService(typeof(ICircuitBreakerEvent), eventType);
-            }
+        }
+
+        public void AddCircuitBreaker<TCircuitBreakerEvent>(IConfigurationSection configurationSection) where TCircuitBreakerEvent : ICircuitBreakerEvent
+        {
+            AddCircuitBreaker<TCircuitBreakerEvent>(configurationSection.GetValue<int>("timeout"), configurationSection.GetValue<int>("retry"), configurationSection.GetValue<int>("ExceptionsAllowedBeforeBreaking"), configurationSection.GetValue<int>("DurationOfBreak"), configurationSection.GetValue<int>("MaxParallelization"), configurationSection.GetValue<int>("MaxQueuingActions"));
         }
 
         #endregion
@@ -493,6 +496,11 @@ namespace Uragano.Core
         public void AddCircuitBreaker()
         {
             AddCircuitBreaker(Configuration.GetSection("Uragano:CircuitBreaker:Polly"));
+        }
+
+        public void AddCircuitBreaker<TCircuitBreakerEvent>() where TCircuitBreakerEvent : ICircuitBreakerEvent
+        {
+            AddCircuitBreaker<TCircuitBreakerEvent>(Configuration.GetSection("Uragano:CircuitBreaker:Polly"));
         }
     }
 }

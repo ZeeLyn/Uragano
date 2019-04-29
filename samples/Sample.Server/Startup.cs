@@ -44,6 +44,7 @@ namespace Sample.Server
                  //builder.AddRedisPartitionCaching();
                  //builder.AddRedisCaching();
                  //builder.AddMemoryCaching();
+                 builder.AddCircuitBreaker<CircuitBreakerEvent>();
                  builder.AddOption(UraganoOptions.Remoting_Invoke_CancellationTokenSource_Timeout, TimeSpan.FromSeconds(60));
                  builder.AddOptions();
              });

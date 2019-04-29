@@ -58,6 +58,8 @@ namespace Uragano.DynamicProxy
                             breaker.ExceptionsAllowedBeforeBreaking =
                                 globalCircuitBreaker.ExceptionsAllowedBeforeBreaking;
                             breaker.DurationOfBreak = globalCircuitBreaker.DurationOfBreak;
+                            breaker.MaxParallelization = globalCircuitBreaker.MaxParallelization;
+                            breaker.MaxQueuingActions = globalCircuitBreaker.MaxQueuingActions;
                         }
 
                         if (circuitBreakerAttr != null)
