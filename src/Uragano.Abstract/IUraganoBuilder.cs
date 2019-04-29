@@ -54,12 +54,14 @@ namespace Uragano.Abstractions
         void AddOptions(IConfigurationSection configuration);
 
 
-        void AddCircuitBreaker<TCircuitBreakerEvent>(int timeout = 3000, int retry = 3, int exceptionsAllowedBeforeBreaking = 10, int durationOfBreak = 60 * 1000) where TCircuitBreakerEvent : ICircuitBreakerEvent;
+        void AddCircuitBreaker<TCircuitBreakerEvent>(int timeout = 3000, int retry = 3, int exceptionsAllowedBeforeBreaking = 10, int durationOfBreak = 60 * 1000, int maxParallelization = 0, int maxQueuingActions = 0) where TCircuitBreakerEvent : ICircuitBreakerEvent;
 
         void AddCircuitBreaker(int timeout = 3000, int retry = 3, int exceptionsAllowedBeforeBreaking = 10,
-            int durationOfBreak = 60 * 1000);
+            int durationOfBreak = 60 * 1000, int maxParallelization = 0, int maxQueuingActions = 0);
 
         void AddCircuitBreaker(IConfigurationSection configurationSection);
+
+        void AddCircuitBreaker<TCircuitBreakerEvent>(IConfigurationSection configurationSection) where TCircuitBreakerEvent : ICircuitBreakerEvent;
 
         void AddCodec<TCodec>() where TCodec : ICodec;
 
@@ -90,5 +92,7 @@ namespace Uragano.Abstractions
         void AddOptions();
 
         void AddCircuitBreaker();
+
+        void AddCircuitBreaker<TCircuitBreakerEvent>() where TCircuitBreakerEvent : ICircuitBreakerEvent;
     }
 }

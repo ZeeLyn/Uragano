@@ -15,7 +15,7 @@ namespace Sample.Server
         [ServerMethodInterceptor]
         public async Task<ResultModel> SayHello(string name)
         {
-            // await Task.Delay(2000);
+            //await Task.Delay(5000);
             return await Task.FromResult(new ResultModel { Message = name });
         }
 
