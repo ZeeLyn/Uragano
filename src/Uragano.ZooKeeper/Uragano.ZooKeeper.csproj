@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <Version>0.0.3</Version>
+    <Version>0.0.4</Version>
     <Authors>Owen</Authors>
     <Product>Uragano.ZooKeeper</Product>
     <Description>A simple, high performance RPC library.</Description>
